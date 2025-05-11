@@ -10,46 +10,28 @@
 
 namespace KoiPubSub {
 
-class BaseCallable {
+class Callable {
 public:
     uint64_t id;
-    std::function<void(const Data&)> callable;
+    std::function<void(const Data &)> callable;
 
 public:
-    BaseCallable() = default;
-    virtual ~BaseCallable() = default;
-
-    BaseCallable(const BaseCallable& rhs) = default;
-    BaseCallable(BaseCallable&& rhs) = default;
-
-    BaseCallable& operator=(const BaseCallable& rhs) = default;
-    BaseCallable& operator=(BaseCallable&& rhs) = default;
-};
-
-
-template<class T>
-class Callable : public BaseCallable {
-public:
-    Callable(T& instance, void (T::*function)(const Data&)) {
+    template<class T>
+    Callable(T &instance, void (T::*function)(const Data &)) {
         callable = std::bind(function, &instance, std::placeholders::_1);
     }
 
-    ~Callable() override = default;
+    virtual ~Callable() = default;
 
-    Callable(const Callable& rhs) = default;
-    Callable(Callable&& rhs) = default;
+    Callable(const Callable &rhs) = default;
 
-    Callable& operator=(const Callable& rhs) = default;
-    Callable& operator=(Callable&& rhs) = default;
+    Callable(Callable &&rhs) = default;
 
-    void operator()(const Data&);
+    Callable &operator=(const Callable &rhs) = default;
+
+    Callable &operator=(Callable &&rhs) = default;
 };
 
-    template<class T>
-    void Callable<T>::operator()(const Data &data) {
-        callable(data);
-    }
-
-}
+};
 
 #endif //KOI_PUB_SUB_CALLABLE_H

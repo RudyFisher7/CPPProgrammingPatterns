@@ -10,11 +10,11 @@
 
 TEST_CASE("Callable", "[Callable]") {
     MockObject obj;
-    KoiPubSub::Callable<MockObject> callable(obj, &MockObject::on_published);
+    KoiPubSub::Callable callable(obj, &MockObject::on_published);
 
     MockData data;
     data.integer = 8;
-    callable(data);
+    callable.callable(data);
 }
 
 
