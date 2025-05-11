@@ -4,8 +4,10 @@
 
 namespace KoiPubSub {
 
-struct Data {
-
+class Data {
+public:
+    Data() = default;
+    virtual ~Data() = default;
 };
 
 }

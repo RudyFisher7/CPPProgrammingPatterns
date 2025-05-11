@@ -19,9 +19,10 @@ set(KOI_PUB_SUB_TEST KoiPubSubTest)
 
 add_executable(${KOI_PUB_SUB_TEST}
         koi_pub_sub_test.cpp
+        mock_object.cpp
 )
 
-target_link_libraries(${KOI_PUB_SUB_TEST} PRIVATE
+target_link_libraries(${KOI_PUB_SUB_TEST} PUBLIC
         KoiPubSub
         Catch2::Catch2
 )
