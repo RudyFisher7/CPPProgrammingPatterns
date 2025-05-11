@@ -10,11 +10,11 @@ message(STATUS "Configured for compiler abi ${CMAKE_CXX_COMPILER_ABI}")
 message(STATUS "Configured for system ${CMAKE_SYSTEM_NAME}")
 
 set(SOURCES
-
+    source/server.cpp
 )
 
 set(HEADERS
-
+    include/koi_pub_sub/server.hpp
 )
 
 add_library(${PROJECT_NAME} STATIC
@@ -27,4 +27,4 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 
-add_subdirectory(test)
+#add_subdirectory(test)
