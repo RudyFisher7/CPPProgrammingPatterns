@@ -11,12 +11,13 @@ message(STATUS "Configured for system ${CMAKE_SYSTEM_NAME}")
 
 set(SOURCES
         source/server.cpp
-        source/models/callable.cpp
+        source/callable.cpp
 )
 
 set(HEADERS
         include/koi_pub_sub/server.hpp
-        include/koi_pub_sub/models/callable.hpp
+        include/koi_pub_sub/callable.hpp
+        include/koi_pub_sub/serialization/serialization.hpp
         include/koi_pub_sub/models/data.hpp
 )
 

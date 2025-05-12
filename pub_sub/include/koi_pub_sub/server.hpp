@@ -1,7 +1,7 @@
 #ifndef KOI_PUB_SUB_SERVER_H
 #define KOI_PUB_SUB_SERVER_H
 
-#include "koi_pub_sub/models/callable.hpp"
+#include "koi_pub_sub/callable.hpp"
 #include "koi_pub_sub/models/data.hpp"
 
 #include <cstdint>

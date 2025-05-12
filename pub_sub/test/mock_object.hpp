@@ -2,7 +2,7 @@
 #define KOI_PUB_SUB_TEST_MOCK_OBJECT_H
 
 
-#include "koi_pub_sub/models/callable.hpp"
+#include "koi_pub_sub/callable.hpp"
 #include "koi_pub_sub/models/data.hpp"
 
 
