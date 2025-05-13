@@ -155,24 +155,38 @@ namespace KoiPubSub {
 
 
         template<typename T>
-        void from_network_bytes(uint8_t* begin, T& out_value) {
+        void _from_network_bytes_helper(uint8_t* begin, T& out_value) {
             out_value = network_bytes_to_primitive<T>(begin);
+        }
+
+        template<typename T, typename ... TArgs>
+        void _from_network_bytes_helper(uint8_t* begin, T& out_value, TArgs&... args) {
+            out_value = network_bytes_to_primitive<T>(begin);
+            _from_network_bytes_helper<TArgs...>(begin + sizeof(T), args...);
         }
 
 
         /**
-         * Deserializes the arguments from the given array of bytes pointed to by the given pointer.
+         * Deserializes the arguments from the given array of bytes pointed to by the given pointer. This function
+         * Checks to make sure the array of bytes has enough bytes.
          * @note This function populates its type-parameterized arguments directly, so they must not be const.
          * @tparam T The type of the first value to deserialize.
          * @tparam TArgs The types of the rest of the values to deserialize.
          * @param begin A pointer to the beginning of the array.
+         * @param end A pointer to the end of the array, past the last value.
          * @param out_value The first value that was deserialized.
          * @param args The rest of the values to deserialize.
          */
         template<typename T, typename ... TArgs>
-        void from_network_bytes(uint8_t* begin, T& out_value, TArgs&... args) {
+        bool from_network_bytes(uint8_t* begin, uint8_t* end, T& out_value, TArgs&... args) {
+            size_t number_of_bytes = get_number_of_bytes(out_value, args...);
+            if ((end - begin) < number_of_bytes) {
+                return false;
+            }
+
             out_value = network_bytes_to_primitive<T>(begin);
-            from_network_bytes<TArgs...>(begin + sizeof(T), args...);
+            _from_network_bytes_helper<TArgs...>(begin + sizeof(T), args...);
+            return true;
         }
     }
 }

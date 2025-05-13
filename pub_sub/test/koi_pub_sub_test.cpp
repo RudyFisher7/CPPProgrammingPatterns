@@ -56,7 +56,7 @@ TEST_CASE("primitive_to_network_bytes()", "[Serialization]") {
     uint8_t c = 0;
     char d = 'B';
 
-    KoiPubSub::Serialization::from_network_bytes(buffer.data(), a, b, c, d);
+    KoiPubSub::Serialization::from_network_bytes(buffer.data(), buffer.data() + buffer.size(), a, b, c, d);
 
     int v = 0;
 }
