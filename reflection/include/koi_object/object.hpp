@@ -8,48 +8,66 @@
 
 #include "koi_object/string_name.hpp"
 
+#include "koi_object/variant_reference.hpp"
+
 #include <cstdint>
 #include <unordered_map>
-#include <utility>
-#include <typeinfo>
+#include <type_traits>
 
 
 namespace Koi {
 
-template<typename ... TProperties>
-struct ObjectPropertyIndexer {
-    static constexpr auto make() {
-        return std::index_sequence_for<TProperties...>{};
-    }
-};
 
-
-template<typename ... TProperties>
 class Object {
 protected:
-    std::tuple<TProperties&...> _properties;
-//    std::unordered_map<StringName, size_t> _property_map
+    std::unordered_map<const StringName, VarRef, StringNameHash> _property_map;
+
 public:
 
-//    Object() : _proper
+    Object() = default;
+    ~Object() = default;
 
-    explicit Object(TProperties&... properties) : _properties(properties...) {}
+    Object(std::initializer_list<std::pair<const StringName, VarRef>> properties);
 
     template<typename T>
-    const T& get(const StringName& property_name) const {
-
+    std::tuple<T, bool> get(const StringName& property_name) const {
+        static_assert(std::is_default_constructible<T>::value || std::is_trivial<T>::value, "Type T must have a default constructor.");
+        auto it = _property_map.find(property_name);
+        if (it != _property_map.end()) {
+            return {it->second.get<T>(), true};
+        } else {
+            return {T(), false};
+        }
     }
 
+    template<typename T>
+    bool set(const StringName& property_name, const T& value) const {
+        auto it = _property_map.find(property_name);
+        if (it == _property_map.end()) {
+            return false;
+        }
+
+        return it->second.set(value);
+    }
 };
 
 
-class MockObject : public Object<int, float, bool> {
+class MockObject : public Object {
 public:
     int pint = 0;
     float pfloat = 0.0f;
     bool pbool = false;
 
-    MockObject() : pint(0), pfloat(0.0f), pbool(false), Object<int, float, bool>(pint, pfloat, pbool) {
+    MockObject() :
+            pint(0),
+            pfloat(0.0f),
+            pbool(false),
+            Object({
+                {"pint",   pint},
+                {"pfloat", pfloat},
+                {"pbool",  pbool}
+            })
+    {
 
     }
 };

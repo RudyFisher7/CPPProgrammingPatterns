@@ -11,6 +11,11 @@ Koi::StringName::StringName() : _pointer(&_empty) {
 
 }
 
+Koi::StringName::StringName(const char* value) {
+    auto it = _interned_strings.emplace(value);
+    _pointer = &(*it.first);
+}
+
 Koi::StringName::StringName(const std::string &value) {
     auto it = _interned_strings.emplace(value);
     _pointer = &(*it.first);
@@ -30,4 +35,10 @@ bool Koi::StringName::operator==(const Koi::StringName &rhs) const {
 
 bool Koi::StringName::operator!=(const Koi::StringName &rhs) const {
     return !(*this == rhs);
+}
+
+
+std::hash<const void*> Koi::StringNameHash::h{};
+size_t Koi::StringNameHash::operator()(const Koi::StringName& value) const {
+    return h(value._pointer);
 }
