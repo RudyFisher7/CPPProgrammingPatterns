@@ -3,16 +3,15 @@
 bool KoiPubSub::Server::subscribe(uint64_t channel, const KoiPubSub::Callable &callable) {
     bool result = false;
 
-    std::map<uint64_t, Callable> map;
 
     auto it = subscriptions.find(channel);
     if (it == subscriptions.end()) {
-        subscriptions.emplace(channel, map);
-    } else {
-        map = it->second;
+        subscriptions.emplace(channel, std::map<uint64_t, Callable>());
+        it = subscriptions.find(channel);
     }
 
-    if (map.find(callable.id) != map.end()) {
+    std::map<uint64_t, Callable>& map = it->second;
+    if (map.find(callable.id) == map.end()) {
         map.emplace(callable.id, callable);
         result = true;
     }

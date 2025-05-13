@@ -11,17 +11,8 @@
 #include <array>
 #include <iostream>
 
-#if (WIN32 || WIN64)
 
-#endif
-
-
-TEST_CASE("Endianness Check", "[Serialization]") {
-    std::cout << KoiPubSub::Serialization::is_little_endian() << std::endl;
-}
-
-
-TEST_CASE("primitive_to_network_bytes()", "[Serialization]") {
+TEST_CASE("Serialize primitives", "[Serialization]") {
     uint64_t value64 = 100u;
 
     std::array<uint8_t, sizeof(uint64_t)> arr {};
@@ -29,36 +20,32 @@ TEST_CASE("primitive_to_network_bytes()", "[Serialization]") {
 
     CHECK(result == arr.data() + sizeof(uint64_t));
 
-    uint64_t new_value64 = KoiPubSub::Serialization::network_bytes_to_primitive<uint64_t>(arr.data());
+    auto new_value64 = KoiPubSub::Serialization::network_bytes_to_primitive<uint64_t>(arr.data());
 
     CHECK(value64 == new_value64);
+}
 
 
-    for (auto& value: arr) {
-        std::cout << (int)value << std::endl;
-    }
+TEST_CASE("Get number of bytes to serialize", "[Serialization]") {
+    size_t number_of_bytes = KoiPubSub::Serialization::get_number_of_bytes(uint64_t(9), uint64_t(9), uint8_t(9), char('A'));
 
-    size_t number_of_bytes = KoiPubSub::Serialization::get_number_of_bytes(value64, new_value64, uint8_t(9), char('A'));
-    std::cout << "Number of bytes: " << (int)number_of_bytes << std::endl;
+    CHECK(number_of_bytes == 18u);
+}
 
-    std::vector<uint8_t> buffer;
-    KoiPubSub::Serialization::to_network_bytes(buffer, value64, new_value64, uint8_t(255), char('A'));
 
-    std::cout << "Buffer: " << std::endl;
-    for (auto& value: buffer) {
-        std::cout << (int)value << std::endl;
-    }
+TEST_CASE("Data serialization", "[Data]") {
+    MockData data;
+    data.big_integer = 100l;
+    data.boolean = false;
 
-    std::tuple<uint64_t, uint64_t, uint8_t, char> t = KoiPubSub::Serialization::from_network_bytes<uint64_t, uint64_t, uint8_t, char>(buffer.data());
+    MockData data2;
 
-    uint64_t a = 0;
-    uint64_t b = 0;
-    uint8_t c = 0;
-    char d = 'B';
+    std::vector<uint8_t> bytes;
+    data.to_network_bytes(bytes);
 
-    KoiPubSub::Serialization::from_network_bytes(buffer.data(), buffer.data() + buffer.size(), a, b, c, d);
+    data2.from_network_bytes(bytes);
 
-    int v = 0;
+    CHECK(data == data2);
 }
 
 
@@ -72,10 +59,28 @@ TEST_CASE("Callable", "[Callable]") {
 }
 
 
+TEST_CASE("Server", "[Server]") {
+    KoiPubSub::Server server;
+    MockObject obj;
+    KoiPubSub::Callable callable(obj, &MockObject::on_published);
+    MockData data;
+
+    data.integer = 8;
+    data.big_float = 80.0;
+
+    REQUIRE(server.subscribe(0u, callable));
+    REQUIRE((server.publish(0u, data) == 0));
+
+    CHECK(obj.data == data);
+}
+
+
 int main(int argc, char* argv[]) {
+    // Just check the endianness of the system and display it.
+    std::cout << "This system is little endian: " << (KoiPubSub::Serialization::is_little_endian() ? "true" : "false") << std::endl;
     // your setup ...
 
-    int result = Catch::Session().run( argc, argv );
+    int result = Catch::Session().run(argc, argv);
 
     // your clean-up...
 

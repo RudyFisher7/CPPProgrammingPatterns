@@ -64,20 +64,21 @@ namespace KoiPubSub {
          * @return The value that was deserialized from the byte array.
          */
         template<typename T>
-        T network_bytes_to_primitive(uint8_t* bytes) {
+        T network_bytes_to_primitive(const uint8_t* bytes) {
             static_assert(std::is_scalar<T>::value && !std::is_pointer<T>::value, "Type T must be bool, char, int, float, enum, or a derivation of these scalar types. T must not be a pointer or a non-scalar type.");
             T result{};
-            size_t size = sizeof(T);
-            uint8_t result_buffer[size];
 
             if (is_little_endian()) {
+                size_t size = sizeof(T);
+                uint8_t result_buffer[size];
                 for (size_t i = 0; i < size; ++i) {
                     result_buffer[i] = bytes[size - 1u - i];
                 }
 
                 result = *reinterpret_cast<T*>(result_buffer);
             } else {
-                result = *reinterpret_cast<T*>(bytes);
+                const T const_result = *reinterpret_cast<const T*>(bytes);
+                result = const_result;
             }
 
             return result;
@@ -105,11 +106,15 @@ namespace KoiPubSub {
         }
 
 
-        void _to_network_bytes_helper(uint8_t* _begin) {}
+        template<typename T>
+        void _to_network_bytes_helper(uint8_t* begin, const T& value) {
+        uint8_t* end = primitive_to_network_bytes(value, begin);
+    }
 
 
         template<typename T, typename ... TArgs>
-        void _to_network_bytes_helper(uint8_t* begin, const T& value, const TArgs& ... args) {
+        typename std::enable_if<(sizeof ... (TArgs) > 0), void>::type
+        _to_network_bytes_helper(uint8_t* begin, const T& value, const TArgs& ... args) {
             uint8_t* end = primitive_to_network_bytes(value, begin);
             _to_network_bytes_helper(end, args...);
         }
@@ -132,7 +137,7 @@ namespace KoiPubSub {
 
 
         template<typename T>
-        std::tuple<T> from_network_bytes(uint8_t* begin) {
+        std::tuple<T> from_network_bytes(const uint8_t* begin) {
             T value = network_bytes_to_primitive<T>(begin);
             return std::make_tuple(value);
         }
@@ -148,19 +153,20 @@ namespace KoiPubSub {
          */
         template<typename T, typename ... TArgs>
         typename std::enable_if<(sizeof ... (TArgs) > 0), std::tuple<T, TArgs...>>::type
-        from_network_bytes(uint8_t* begin) {
+        from_network_bytes(const uint8_t* begin) {
             T value = network_bytes_to_primitive<T>(begin);
             return std::tuple_cat(std::make_tuple(value), from_network_bytes<TArgs...>(begin + sizeof(T)));
         }
 
 
         template<typename T>
-        void _from_network_bytes_helper(uint8_t* begin, T& out_value) {
+        void _from_network_bytes_helper(const uint8_t* begin, T& out_value) {
             out_value = network_bytes_to_primitive<T>(begin);
         }
 
         template<typename T, typename ... TArgs>
-        void _from_network_bytes_helper(uint8_t* begin, T& out_value, TArgs&... args) {
+        typename std::enable_if<(sizeof ... (TArgs) > 0), void>::type
+        _from_network_bytes_helper(const uint8_t* begin, T& out_value, TArgs&... args) {
             out_value = network_bytes_to_primitive<T>(begin);
             _from_network_bytes_helper<TArgs...>(begin + sizeof(T), args...);
         }
@@ -178,7 +184,7 @@ namespace KoiPubSub {
          * @param args The rest of the values to deserialize.
          */
         template<typename T, typename ... TArgs>
-        bool from_network_bytes(uint8_t* begin, uint8_t* end, T& out_value, TArgs&... args) {
+        bool from_network_bytes(const uint8_t* begin, const uint8_t* end, T& out_value, TArgs&... args) {
             size_t number_of_bytes = get_number_of_bytes(out_value, args...);
             if ((end - begin) < number_of_bytes) {
                 return false;
