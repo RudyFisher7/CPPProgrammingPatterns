@@ -5,6 +5,9 @@
 #include <cstdint>
 #include <format>
 #include <type_traits>
+#include <vector>
+#include <iostream>
+#include <string>
 
 
 namespace KoiPubSub {
@@ -78,6 +81,98 @@ namespace KoiPubSub {
             }
 
             return result;
+        }
+
+
+        /**
+         * Base case for getting the number of bytes needed to serialize a variable number and variable types of
+         * primitive data into a byte array.
+         * @return 0
+         */
+        constexpr size_t get_number_of_bytes() {
+            return 0;
+        }
+
+
+        /**
+         * Gets the number of bytes needed to serialize a variable number and variable types of
+         * primitive data into a byte array.
+         * @return The number of bytes needed to be present in a byte array, as a size type.
+         */
+        template<typename T, typename ... TArgs>
+        constexpr size_t get_number_of_bytes(const T& value, const TArgs& ... args) {
+            return sizeof(T) + get_number_of_bytes(args...);
+        }
+
+
+        void _to_network_bytes_helper(uint8_t* _begin) {}
+
+
+        template<typename T, typename ... TArgs>
+        void _to_network_bytes_helper(uint8_t* begin, const T& value, const TArgs& ... args) {
+            uint8_t* end = primitive_to_network_bytes(value, begin);
+            _to_network_bytes_helper(end, args...);
+        }
+
+
+        /**
+         * Serializes the arguments into the given vector. Resizes the vector as needed.
+         * @tparam T The type of the first value to serialize.
+         * @tparam TArgs The types of the rest of the values to serialize.
+         * @param out_result The vector of bytes that contain the serialized data.
+         * @param value The first value to serialize.
+         * @param args The rest of the values to serialize.
+         */
+        template<typename T, typename ... TArgs>
+        void to_network_bytes(std::vector<uint8_t>& out_result, const T& value, const TArgs& ... args) {
+            size_t number_of_bytes = get_number_of_bytes(value, args...);
+            out_result.resize(number_of_bytes);
+            _to_network_bytes_helper(out_result.data(), value, args...);
+        }
+
+
+        template<typename T>
+        std::tuple<T> from_network_bytes(uint8_t* begin) {
+            T value = network_bytes_to_primitive<T>(begin);
+            return std::make_tuple(value);
+        }
+
+
+        /**
+         * Deserializes the array of bytes pointed to by the given pointer into a tuple of specified types.
+         * @warning The size of the array of bytes is not validated.
+         * @tparam T The type of the first value to deserialize.
+         * @tparam TArgs The types of the rest of the values to deserialize.
+         * @param begin A pointer to the beginning of the array.
+         * @return A tuple with all values deserialized into their parameterized types.
+         */
+        template<typename T, typename ... TArgs>
+        typename std::enable_if<(sizeof ... (TArgs) > 0), std::tuple<T, TArgs...>>::type
+        from_network_bytes(uint8_t* begin) {
+            T value = network_bytes_to_primitive<T>(begin);
+            return std::tuple_cat(std::make_tuple(value), from_network_bytes<TArgs...>(begin + sizeof(T)));
+        }
+
+
+        template<typename T>
+        void from_network_bytes(uint8_t* begin, T& out_value) {
+            out_value = network_bytes_to_primitive<T>(begin);
+        }
+
+
+        /**
+         * Deserializes the arguments from the given array of bytes pointed to by the given pointer.
+         * @note This function populates its type-parameterized arguments directly, so they must not be const.
+         * @tparam T The type of the first value to deserialize.
+         * @tparam TArgs The types of the rest of the values to deserialize.
+         * @param begin A pointer to the beginning of the array.
+         * @param out_value The first value that was deserialized.
+         * @param args The rest of the values to deserialize.
+         */
+        template<typename T, typename ... TArgs>
+        void from_network_bytes(uint8_t* begin, T& out_value, TArgs&... args) {
+            out_value = network_bytes_to_primitive<T>(begin);
+            from_network_bytes<TArgs...>(begin + sizeof(T), args...);
         }
     }
 }

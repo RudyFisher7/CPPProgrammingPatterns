@@ -37,6 +37,28 @@ TEST_CASE("primitive_to_network_bytes()", "[Serialization]") {
     for (auto& value: arr) {
         std::cout << (int)value << std::endl;
     }
+
+    size_t number_of_bytes = KoiPubSub::Serialization::get_number_of_bytes(value64, new_value64, uint8_t(9), char('A'));
+    std::cout << "Number of bytes: " << (int)number_of_bytes << std::endl;
+
+    std::vector<uint8_t> buffer;
+    KoiPubSub::Serialization::to_network_bytes(buffer, value64, new_value64, uint8_t(255), char('A'));
+
+    std::cout << "Buffer: " << std::endl;
+    for (auto& value: buffer) {
+        std::cout << (int)value << std::endl;
+    }
+
+    std::tuple<uint64_t, uint64_t, uint8_t, char> t = KoiPubSub::Serialization::from_network_bytes<uint64_t, uint64_t, uint8_t, char>(buffer.data());
+
+    uint64_t a = 0;
+    uint64_t b = 0;
+    uint8_t c = 0;
+    char d = 'B';
+
+    KoiPubSub::Serialization::from_network_bytes(buffer.data(), a, b, c, d);
+
+    int v = 0;
 }
 
 
