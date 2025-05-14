@@ -2,7 +2,7 @@
 
 namespace Koi {
 
-VarRef::VarRef() : _pointer(nullptr), _type(typeid(nullptr)) {
+VarRef::VarRef() : _pointer(nullptr), _type(typeid(nullptr)), _ptr_type(typeid(nullptr)) {
 
 }
 

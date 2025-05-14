@@ -13,6 +13,7 @@ namespace Koi {
  * A class that stores a reference to another variable and basic type information.
  * @warning This class does not own its variable, so memory management must happen outside of
  * this class.
+ * fixme:: doesn't work with object pointers.
  */
 class VarRef final {
 public:
@@ -40,6 +41,7 @@ private:
     void* _pointer;
 
     const std::type_info& _type;
+    const std::type_info& _ptr_type;
 
 public:
     VarRef();
@@ -57,13 +59,28 @@ public:
 //    VarRef(long long& value);
 //    VarRef(unsigned long long& value);
 
-    template<class T>
-    VarRef(T& value) : _pointer(&value), _type(typeid(T)) {}
+    template<typename T>
+    struct is_pointer_to_pointer {
+        static constexpr bool value = std::is_pointer<T>::value && std::is_pointer<typename std::remove_pointer<T>::type>::value;
+    };
+
+    template<class T, typename = typename std::enable_if<!std::is_pointer<T>::value, VarRef>::type>
+    VarRef(T& value) : _pointer(&value), _type(typeid(value)), _ptr_type(typeid(&value)) {
+        static_assert(std::is_default_constructible<T>::value || std::is_trivial<T>::value, "Type T must have a default constructor.");
+        static_assert(std::is_scalar<T>::value, "Type T must be a scalar type.");
+    }
+
+    template<class T, typename = typename std::enable_if<(std::is_pointer<T>::value && !is_pointer_to_pointer<T>::value), VarRef>::type>
+    VarRef(T value) : _pointer(value), _type(typeid(*value)), _ptr_type(typeid(value)) {
+        static_assert(std::is_default_constructible<typename std::remove_pointer<T>::type>::value || std::is_trivial<typename std::remove_pointer<T>::type>::value, "Type remove_ptr<T> must have a default constructor.");
+        static_assert(std::is_scalar<typename std::remove_pointer<T>::type>::value, "Type remove_ptr<T> must be a scalar type.");
+    }
 
     template<typename T>
-    typename std::enable_if<!std::is_pointer<T>::value, T>::type
+    typename std::enable_if<!std::is_pointer<T>::value, const T&>::type
     get() {
         static_assert(std::is_default_constructible<T>::value || std::is_trivial<T>::value, "Type T must have a default constructor.");
+        static_assert(std::is_scalar<T>::value, "Type T must be a scalar type.");
         if (typeid(T) == _type) {
             return *static_cast<T*>(_pointer);
         } else {
@@ -74,8 +91,8 @@ public:
     template<typename T>
     typename std::enable_if<std::is_pointer<T>::value, T>::type
     get() {
-        if (typeid(T) == _type) {
-            return *static_cast<T*>(_pointer);
+        if (typeid(T) == _ptr_type) {
+            return static_cast<T>(_pointer);
         } else {
             return nullptr;
         }
