@@ -22,23 +22,22 @@
 
 
 cmake_minimum_required(VERSION 3.13)
-project(KoiObjectEditor LANGUAGES CXX VERSION 0.0.1)
+project(KoiObjectEditor LANGUAGES CXX C VERSION 0.0.1)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+message(STATUS "CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
+message(STATUS "CMAKE_C_COMPILER_VERSION: ${CMAKE_C_COMPILER_VERSION}")
 
-message(STATUS "Configured for compiler ${CMAKE_CXX_COMPILER_ID}")
-message(STATUS "Configured for compiler architecture ${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
-message(STATUS "Configured for compiler abi ${CMAKE_CXX_COMPILER_ABI}")
-message(STATUS "Configured for system ${CMAKE_SYSTEM_NAME}")
 
 set(SOURCES
         main.cpp
         source/object_editor.cpp
+        source/editor_demo_object.cpp
 )
 
 set(HEADERS
         include/koi_object_editor/object_editor.hpp
+        include/koi_object_editor/editor_demo_object.hpp
 )
 
 add_executable(${PROJECT_NAME}
@@ -52,5 +51,12 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         raylib
+        clayh
         KoiReflection
 )
+
+#target_compile_options(${PROJECT_NAME}
+#        PRIVATE
+#        -std=c99
+#        -std=c++11
+#)

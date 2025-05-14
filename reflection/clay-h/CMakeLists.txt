@@ -22,41 +22,32 @@
 
 
 cmake_minimum_required(VERSION 3.13)
-project(KoiReflection LANGUAGES CXX C VERSION 0.0.1)
+project(clayh LANGUAGES C VERSION 0.0.1)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-message(STATUS "Configured for compiler ${CMAKE_CXX_COMPILER_ID}")
-message(STATUS "Configured for compiler architecture ${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
-message(STATUS "Configured for compiler abi ${CMAKE_CXX_COMPILER_ABI}")
+message(STATUS "Configured for compiler ${CMAKE_C_COMPILER_ID}")
+message(STATUS "Configured for compiler architecture ${CMAKE_C_COMPILER_ARCHITECTURE_ID}")
+message(STATUS "Configured for compiler abi ${CMAKE_C_COMPILER_ABI}")
 message(STATUS "Configured for system ${CMAKE_SYSTEM_NAME}")
 
-set(SOURCES
-        source/string_name.cpp
-        source/object.cpp
-        source/variant_reference.cpp
-)
 
 set(HEADERS
-        include/koi_object/string_name.hpp
-        include/koi_object/object.hpp
-        include/koi_object/variant_reference.hpp
+        clay.h
+        main.cpp
 )
 
-add_library(${PROJECT_NAME} STATIC
-        ${SOURCES}
+add_executable(${PROJECT_NAME}
         ${HEADERS}
 )
 
+#add_library(${PROJECT_NAME} STATIC
+#        ${HEADERS}
+#)
+
 target_include_directories(${PROJECT_NAME} PUBLIC
-        include
+        .
 )
 
-
-add_subdirectory(test)
-add_subdirectory(raylib-5.5)
-add_subdirectory(clay-h)
-#add_subdirectory(object_editor_gui)
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C COMPILE_FLAGS -std=c99)

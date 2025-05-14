@@ -22,15 +22,31 @@
  * SOFTWARE.
  */
 
-#ifndef KOI_OBJECT_EDITOR_HPP
-#define KOI_OBJECT_EDITOR_HPP
 
-namespace Koi{
+#ifndef KOI_EDITOR_DEMO_OBJECT_HPP
+#define KOI_EDITOR_DEMO_OBJECT_HPP
 
-class ObjectEditor {
 
+#include "koi_object/object.hpp"
+#include "koi_object/string_name.hpp"
+
+
+namespace Koi {
+
+class EditorDemoObject : public Object {
+public:
+    bool my_bool;
+    char my_char;
+    int my_int;
+    float my_float;
+
+    EditorDemoObject();
+
+    EditorDemoObject(bool in_my_bool, char in_my_char, int in_my_int, float in_my_float);
+
+    ~EditorDemoObject() override = default;
 };
 
 } // Koi
 
-#endif //KOI_OBJECT_EDITOR_HPP
+#endif //KOI_EDITOR_DEMO_OBJECT_HPP

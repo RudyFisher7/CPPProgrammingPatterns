@@ -22,15 +22,39 @@
  * SOFTWARE.
  */
 
-#ifndef KOI_OBJECT_EDITOR_HPP
-#define KOI_OBJECT_EDITOR_HPP
 
-namespace Koi{
+#include "koi_object_editor/editor_demo_object.hpp"
 
-class ObjectEditor {
 
-};
+namespace Koi {
+
+EditorDemoObject::EditorDemoObject() :
+        my_bool(false),
+        my_char('A'),
+        my_int(0),
+        my_float(0.0f),
+        Object({
+               {"my_bool", my_bool},
+               {"my_char", my_char},
+               {"my_int", my_int},
+               {"my_float", my_float},
+        }) {}
+
+EditorDemoObject::EditorDemoObject(
+        bool in_my_bool,
+        char in_my_char,
+        int in_my_int,
+        float in_my_float
+) :
+        my_bool(in_my_bool),
+        my_char(in_my_char),
+        my_int(in_my_int),
+        my_float(in_my_float),
+        Object({
+               {"my_bool", my_bool},
+               {"my_char", my_char},
+               {"my_int", my_int},
+               {"my_float", my_float},
+        }) {}
 
 } // Koi
-
-#endif //KOI_OBJECT_EDITOR_HPP

@@ -23,8 +23,96 @@
  */
 
 
+#include "koi_object/object.hpp"
+#include "koi_object/string_name.hpp"
+#include "koi_object_editor/editor_demo_object.hpp"
+
+#include <raylib.h>
+
+#define RAYGUI_IMPLEMENTATION
+#include <raygui.h>
+
+#if defined(__cplusplus)
+#pragma message("cpp defined")
+#endif
+#if defined(__STDC__)
+#pragma message("stdc defined")
+#endif
+#if defined(__STDC_VERSION__)
+#pragma message("stdc version defined")
+#endif
+
+#if (defined(__cplusplus) && __cplusplus >= 202002L)
+#pragma message("cpp 20")
+#endif
+#if (defined(__STDC__) && __STDC__ == 1 && defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
+#pragma message("stdc 1 i guess")
+#endif
+
+extern "C" {
+#define CLAY_IMPLEMENTATION
+#include <clay.h>
+}
+
 
 int main(int argc, char* argv[]) {
+    const Koi::StringName OBJECT{"Object"};
+    const Koi::StringName MY_BOOL{"my_bool"};
+    const Koi::StringName MY_CHAR{"my_char"};
+    const Koi::StringName MY_INT{"my_int"};
+    const Koi::StringName MY_FLOAT{"my_float"};
+    const Koi::StringName EDITOR_DEMO_OBJECT{"EditorDemoObject"};
+
+    Koi::Object::register_object_class<Koi::Object>(OBJECT);
+    Koi::Object::register_factory_method(OBJECT, []() -> Koi::Object* { return new Koi::Object(); });
+    Koi::Object::register_object_class<Koi::EditorDemoObject>(EDITOR_DEMO_OBJECT);
+    Koi::Object::register_factory_method(EDITOR_DEMO_OBJECT, []() -> Koi::Object* { return new Koi::EditorDemoObject(); });
+
+    Koi::EditorDemoObject object;
+
+    InitWindow(800, 600, "Object Editor Demo");
+
+    bool button_clicked = false;
+    bool is_toggle_active = true;
+    bool is_value_box_editable = false;
+    bool is_spinner_editable = false;
+    int value = 0;
+    float fvalue = 0.0f;
+    char str[4u];
+    char* str_str = str;
+    bool for_text_input = true;
+    while (!WindowShouldClose()) {
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        GuiPanel((Rectangle){ 200, 200, 400, 400 }, "Edit");
+        if (GuiButton((Rectangle){ 350, 250, 100, 40 }, "Click Me")) {
+            button_clicked = !button_clicked;
+        }
+
+        GuiToggle((Rectangle){ 350, 290, 100, 40 }, "Toggle Me", &is_toggle_active);
+
+        if (button_clicked) {
+            DrawText("Button clicked!", 360, 300, 20, RED);
+        }
+
+        if (GuiValueBox((Rectangle){ 350, 330, 100, 40 }, "Value Me", &value, -200, 200, is_value_box_editable)) {
+            is_value_box_editable = !is_value_box_editable;
+        }
+
+        if (GuiSpinner((Rectangle){ 350, 370, 100, 40 }, "Spinner Me", &value, -200, 200, is_spinner_editable)) {
+            is_spinner_editable = !is_spinner_editable;
+        }
+
+        if (GuiSlider((Rectangle){ 350, 410, 100, 40 }, "Left", "Right", &fvalue, -200.0f, 200.0f)) {}
+
+        if (GuiTextInputBox((Rectangle){ 350, 450, 160, 110 }, "Input Text", "Message", "Submit", str_str, 4, &for_text_input)) {}
+
+        EndDrawing();
+    }
+
+    CloseWindow();
+
 
     return 0;
 }
