@@ -35,7 +35,7 @@ StringName::StringName() : _pointer(&_empty) {
 
 }
 
-StringName::StringName(char *value) {
+StringName::StringName(const char *value) {
     std::string str(value);
     _pointer = StringNameRegistry::get_singleton().register_name(str);
 }
@@ -44,12 +44,24 @@ StringName::StringName(std::string &value) {
     _pointer = StringNameRegistry::get_singleton().register_name(value);
 }
 
-const std::string &StringName::get_string() const {
-    if (_pointer) {
-        return *_pointer;
+StringName::StringName(StringName&& rhs) noexcept : _pointer(rhs._pointer) {
+
+}
+
+StringName& StringName::operator=(const StringName& rhs) {
+    if (this != &rhs) {
+        _pointer = rhs._pointer;
     }
 
-    return _empty;
+    return *this;
+}
+
+StringName& StringName::operator=(StringName&& rhs) noexcept {
+    if (this != &rhs) {
+        _pointer = rhs._pointer;
+    }
+
+    return *this;
 }
 
 bool StringName::operator==(const StringName &rhs) const {
@@ -58,6 +70,14 @@ bool StringName::operator==(const StringName &rhs) const {
 
 bool StringName::operator!=(const StringName &rhs) const {
     return !(*this == rhs);
+}
+
+const std::string &StringName::get_string() const {
+    if (_pointer) {
+        return *_pointer;
+    }
+
+    return _empty;
 }
 
 

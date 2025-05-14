@@ -8,6 +8,7 @@
       "binaryDir": "${sourceDir}/cmake-release-build",
       "cacheVariables": {
         "CMAKE_CXX_STANDARD": "11",
+        "CMAKE_C_STANDARD": "99",
         "CMAKE_BUILD_TYPE": "Release",
         "ENABLE_TESTS": "OFF"
       }
@@ -18,6 +19,7 @@
       "binaryDir": "${sourceDir}/cmake-debug-build",
       "cacheVariables": {
         "CMAKE_CXX_STANDARD": "11",
+        "CMAKE_C_STANDARD": "99",
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "ENABLE_TESTS": "ON"

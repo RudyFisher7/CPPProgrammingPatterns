@@ -26,6 +26,7 @@
 #include "koi_object/object.hpp"
 
 #include <sstream>
+#include <utility>
 
 
 namespace Koi {
@@ -68,6 +69,31 @@ Object::Object(std::initializer_list<std::pair<const StringName, VarRef>> proper
 }
 
 
+Object::Object(const Object& rhs) : _property_map(rhs._property_map) {
+}
+
+Object::Object(Object&& rhs) : _property_map(std::move(rhs._property_map)) {
+}
+
+Object& Object::operator=(const Object& rhs) {
+    if (this != &rhs) {
+        _property_map.clear();
+        for (auto& it : rhs._property_map) {
+            _property_map.emplace(it.first, it.second);
+        }
+    }
+
+    return *this;
+}
+
+Object& Object::operator=(Object&& rhs) {
+    if (this != &rhs) {
+        _property_map = std::move(rhs._property_map);
+    }
+
+    return *this;
+}
+
 const StringName Object::get_class_name() const {
     auto it = _object_class_names.find(&typeid(*this));
     if (it == _object_class_names.end()) {
@@ -106,17 +132,17 @@ const std::string Object::to_json_string() const {
         json_stream << "\"";
         json_stream << ":";
 
-        if (typeid(bool) == it.second.type) {
+        if (typeid(bool) == it.second.get_type()) {
             json_stream << (it.second.get<bool>().first ? "true" : "false");
-        } else if (typeid(int) == it.second.type) {
+        } else if (typeid(int) == it.second.get_type()) {
             json_stream << it.second.get<int>().first;
-        } else if (typeid(float) == it.second.type) {
+        } else if (typeid(float) == it.second.get_type()) {
             json_stream << it.second.get<float>().first;
-        } else if (typeid(char) == it.second.type) {
+        } else if (typeid(char) == it.second.get_type()) {
             json_stream << "\'";
             json_stream << it.second.get<char>().first;
             json_stream << "\'";
-        } else if (typeid(std::string*) == it.second.type) {
+        } else if (typeid(std::string*) == it.second.get_type()) {
             json_stream << "\"";
             json_stream << *(it.second.get<std::string*>().first);
             json_stream << "\"";

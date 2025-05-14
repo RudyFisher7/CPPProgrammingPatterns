@@ -24,19 +24,6 @@
 cmake_minimum_required(VERSION 3.13)
 project(CPPProgrammingPatterns)
 
-# Detect number of available cores on the system
-if (UNIX)
-    execute_process(COMMAND nproc OUTPUT_VARIABLE NUM_CORES OUTPUT_STRIP_TRAILING_WHITESPACE)
-elseif (WIN32)
-    execute_process(COMMAND cmd /C "echo %NUMBER_OF_PROCESSORS%" OUTPUT_VARIABLE NUM_CORES OUTPUT_STRIP_TRAILING_WHITESPACE)
-elseif (APPLE)
-    execute_process(COMMAND sysctl -n hw.ncpu OUTPUT_VARIABLE NUM_CORES OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif()
-
-math(EXPR JOBS "${NUM_CORES} - 2")
-set(CMAKE_BUILD_PARALLEL_LEVEL ${JOBS})
-message(STATUS "Detected ${NUM_CORES} cores, set ${JOBS} parallel jobs for build.")
-
 
 add_subdirectory(pub_sub)
 add_subdirectory(reflection)

@@ -91,16 +91,16 @@ TEST_CASE("VarRef", "[VarRef]") {
         int two = 8;
         Koi::VarRef one_ref(one);
 
-        CHECK(typeid(two) == one_ref.type);
+        CHECK(typeid(two) == one_ref.get_type());
 
         // Usage example: here is where you would draw the appropriate control to edit the property in a GUI based on
         // the type.
         int three = 0;
-        if (typeid(int) == one_ref.type) {
+        if (typeid(int) == one_ref.get_type()) {
             three = 1;
-        } else if (typeid(float) == one_ref.type) {
+        } else if (typeid(float) == one_ref.get_type()) {
             three = 2;
-        } else if (typeid(char) == one_ref.type) {
+        } else if (typeid(char) == one_ref.get_type()) {
             three = 3;
         }
 
@@ -270,11 +270,11 @@ TEST_CASE("Object", "[Object]") {
         // Usage example: use this list in your GUI to edit the object's properties.
         // Associate the StringNames with the values that should be set and use the set<T>().
         for (const auto& it: list) {
-            if (typeid(int) == it.second.type) {
+            if (typeid(int) == it.second.get_type()) {
                 one.set<int>(it.first, 8);
-            } else if (typeid(float) == it.second.type) {
+            } else if (typeid(float) == it.second.get_type()) {
                 one.set<float>(it.first, 8.88f);
-            } else if (typeid(char) == it.second.type) {
+            } else if (typeid(char) == it.second.get_type()) {
                 one.set<char>(it.first, 'V');
             }
         }

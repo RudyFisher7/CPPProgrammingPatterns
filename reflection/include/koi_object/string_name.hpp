@@ -48,23 +48,28 @@ protected:
 public:
     StringName();
     ~StringName() = default;
-    StringName(char* value);
+    StringName(const char* value);
     StringName(std::string& value);
 
-    const std::string& get_string() const;
+    StringName(const StringName& rhs) = default;
+    StringName(StringName&& rhs) noexcept;
+    StringName& operator=(const StringName& rhs);
+    StringName& operator=(StringName&& rhs) noexcept;
 
     bool operator==(const StringName& rhs) const;
     bool operator!=(const StringName& rhs) const;
 
+    const std::string& get_string() const;
+
     friend struct StringNameHash;
 };
 
-    struct StringNameHash {
-    private:
-        static std::hash<const void*> h;
-    public:
-        size_t operator()(const StringName& value) const;
-    };
+struct StringNameHash {
+private:
+    static std::hash<const void*> h;
+public:
+    size_t operator()(const StringName& value) const;
+};
 
 };
 

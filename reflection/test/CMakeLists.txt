@@ -22,20 +22,27 @@
 
 
 cmake_minimum_required(VERSION 3.13)
-project(KoiPubSubTest)
+project(KoiReflectionTest)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 Include(FetchContent)
 
-FetchContent_Declare(
-        Catch2
-        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG        v3.4.0 # or a later release
-)
+if(NOT Catch2_FOUND)#fixme:: always fetches
+    message(STATUS "${PROJECT_NAME}: fetch Catch2.")
+    FetchContent_Declare(
+            Catch2
+            GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+            GIT_TAG        v3.4.0 # or a later release
+            FIND_PACKAGE_ARGS
+    )
 
-FetchContent_MakeAvailable(Catch2)
+    FetchContent_MakeAvailable(Catch2)
+
+    list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+    message(STATUS "${CMAKE_MODULE_PATH}")
+else()
+    message(STATUS "${PROJECT_NAME}: Catch2 already available.")
+endif()
 
 
 set(KOI_REFLECTION_TEST KoiReflectionTest)
@@ -49,3 +56,7 @@ target_link_libraries(${KOI_REFLECTION_TEST} PUBLIC
         KoiReflection
         Catch2::Catch2
 )
+
+include(CTest)
+include(Catch)
+catch_discover_tests(${PROJECT_NAME})

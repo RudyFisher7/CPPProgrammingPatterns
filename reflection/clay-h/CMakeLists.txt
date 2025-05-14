@@ -28,13 +28,12 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 
-set(HEADERS
+set(SOURCES
         clay.h
-        main.cpp
 )
 
-add_executable(${PROJECT_NAME}
-        ${HEADERS}
+add_library(${PROJECT_NAME}
+        ${SOURCES}
 )
 
 #add_library(${PROJECT_NAME} STATIC
@@ -45,4 +44,4 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         .
 )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C COMPILE_FLAGS -std=c99)
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)

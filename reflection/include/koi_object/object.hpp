@@ -65,6 +65,12 @@ public:
 
     Object(std::initializer_list<std::pair<const StringName, VarRef>> properties);
 
+    Object(const Object& rhs);
+    Object(Object&& rhs);
+
+    Object& operator=(const Object& rhs);
+    Object& operator=(Object&& rhs);
+
     const StringName get_class_name() const;
 
     template<typename T>
