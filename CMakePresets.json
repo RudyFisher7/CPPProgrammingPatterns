@@ -1,0 +1,45 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 13 },
+  "configurePresets": [
+    {
+      "name": "release",
+      "description": "Release build with C++11",
+      "binaryDir": "${sourceDir}/cmake-release-build",
+      "cacheVariables": {
+        "CMAKE_CXX_STANDARD": "11",
+        "CMAKE_BUILD_TYPE": "Release",
+        "ENABLE_TESTS": "OFF"
+      }
+    },
+    {
+      "name": "debug",
+      "description": "Debug build with C++11",
+      "binaryDir": "${sourceDir}/cmake-debug-build",
+      "cacheVariables": {
+        "CMAKE_CXX_STANDARD": "11",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "ENABLE_TESTS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "jobs": 12
+    },
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "jobs": 12
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "run_tests",
+      "configurePreset": "debug"
+    }
+  ]
+}
