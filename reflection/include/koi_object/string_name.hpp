@@ -23,26 +23,52 @@
  */
 
 
-#ifndef KOI_PUB_SUB_DATA_H
-#define KOI_PUB_SUB_DATA_H
+#ifndef KOI_STRING_NAME_H
+#define KOI_STRING_NAME_H
 
 
-#include <cstdint>
-#include <vector>
+#include <cmath>
+#include <unordered_set>
+#include <string>
 
 
-namespace KoiPubSub {
+namespace Koi {
 
-class Data {
+/**
+ * A string type that provides 0(1) equality/hash operations.
+ * @note For performance gain to be seen, the application's source code should reuse StringName instances as much as
+ * possible, as constructing new instances is expensive 0(2N).
+ */
+class StringName {
+protected:
+    static std::string _empty;
+    static std::unordered_set<std::string> _interned_strings;
+
+    const std::string* _pointer;
+
 public:
-    Data() = default;
-    virtual ~Data() = default;
+    static const StringName& EMPTY;
+    StringName();
+    ~StringName() = default;
+    StringName(const char* value);
+    StringName(const std::string& value);
 
-    virtual void to_network_bytes(std::vector<uint8_t>& out_bytes) = 0;
-    virtual bool from_network_bytes(const std::vector<uint8_t>& in_bytes) = 0;
+    const std::string& get() const;
+
+    bool operator==(const StringName& rhs) const;
+    bool operator!=(const StringName& rhs) const;
+
+    friend class StringNameHash;
 };
 
-}
+    struct StringNameHash {
+    private:
+        static std::hash<const void*> h;
+    public:
+        size_t operator()(const StringName& value) const;
+    };
+
+};
 
 
-#endif //KOI_PUB_SUB_DATA_H
+#endif //KOI_STRING_NAME_H
