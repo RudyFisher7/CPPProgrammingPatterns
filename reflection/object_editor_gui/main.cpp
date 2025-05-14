@@ -27,10 +27,10 @@
 #include "koi_object/string_name.hpp"
 #include "koi_object_editor/editor_demo_object.hpp"
 
-#include <raylib.h>
-
-#define RAYGUI_IMPLEMENTATION
-#include <raygui.h>
+//#include <raylib.h>
+//
+//#define RAYGUI_IMPLEMENTATION
+//#include <raygui.h>
 
 #if defined(__cplusplus)
 #pragma message("cpp defined")
@@ -49,9 +49,35 @@
 #pragma message("stdc 1 i guess")
 #endif
 
-extern "C" {
 #define CLAY_IMPLEMENTATION
 #include <clay.h>
+#include <../../clay-h/include/clay_renderer_raylib.c>
+
+
+void HandleClayErrors(Clay_ErrorData errorData) {
+    // See the Clay_ErrorData struct for more information
+    printf("%s", errorData.errorText.chars);
+    switch(errorData.errorType) {
+        // etc
+        case CLAY_ERROR_TYPE_TEXT_MEASUREMENT_FUNCTION_NOT_PROVIDED:
+            break;
+        case CLAY_ERROR_TYPE_ARENA_CAPACITY_EXCEEDED:
+            break;
+        case CLAY_ERROR_TYPE_ELEMENTS_CAPACITY_EXCEEDED:
+            break;
+        case CLAY_ERROR_TYPE_TEXT_MEASUREMENT_CAPACITY_EXCEEDED:
+            break;
+        case CLAY_ERROR_TYPE_DUPLICATE_ID:
+            break;
+        case CLAY_ERROR_TYPE_FLOATING_CONTAINER_PARENT_NOT_FOUND:
+            break;
+        case CLAY_ERROR_TYPE_PERCENTAGE_OVER_1:
+            break;
+        case CLAY_ERROR_TYPE_INTERNAL_ERROR:
+            break;
+        default:
+            break;
+    }
 }
 
 
@@ -70,7 +96,7 @@ int main(int argc, char* argv[]) {
 
     Koi::EditorDemoObject object;
 
-    InitWindow(800, 600, "Object Editor Demo");
+    Clay_Raylib_Initialize(1024, 768, "Introducing Clay Demo", FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
 
     bool button_clicked = false;
     bool is_toggle_active = true;
@@ -85,28 +111,28 @@ int main(int argc, char* argv[]) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        GuiPanel({ 200, 200, 400, 400 }, "Edit");
-        if (GuiButton({ 350, 250, 100, 40 }, "Click Me")) {
-            button_clicked = !button_clicked;
-        }
-
-        GuiToggle({ 350, 290, 100, 40 }, "Toggle Me", &is_toggle_active);
-
-        if (button_clicked) {
-            DrawText("Button clicked!", 360, 300, 20, RED);
-        }
-
-        if (GuiValueBox({ 350, 330, 100, 40 }, "Value Me", &value, -200, 200, is_value_box_editable)) {
-            is_value_box_editable = !is_value_box_editable;
-        }
-
-        if (GuiSpinner({ 350, 370, 100, 40 }, "Spinner Me", &value, -200, 200, is_spinner_editable)) {
-            is_spinner_editable = !is_spinner_editable;
-        }
-
-        if (GuiSlider({ 350, 410, 100, 40 }, "Left", "Right", &fvalue, -200.0f, 200.0f)) {}
-
-        if (GuiTextInputBox({ 350, 450, 160, 110 }, "Input Text", "Message", "Submit", str_str, 4, &for_text_input)) {}
+//        GuiPanel({ 200, 200, 400, 400 }, "Edit");
+//        if (GuiButton({ 350, 250, 100, 40 }, "Click Me")) {
+//            button_clicked = !button_clicked;
+//        }
+//
+//        GuiToggle({ 350, 290, 100, 40 }, "Toggle Me", &is_toggle_active);
+//
+//        if (button_clicked) {
+//            DrawText("Button clicked!", 360, 300, 20, RED);
+//        }
+//
+//        if (GuiValueBox({ 350, 330, 100, 40 }, "Value Me", &value, -200, 200, is_value_box_editable)) {
+//            is_value_box_editable = !is_value_box_editable;
+//        }
+//
+//        if (GuiSpinner({ 350, 370, 100, 40 }, "Spinner Me", &value, -200, 200, is_spinner_editable)) {
+//            is_spinner_editable = !is_spinner_editable;
+//        }
+//
+//        if (GuiSlider({ 350, 410, 100, 40 }, "Left", "Right", &fvalue, -200.0f, 200.0f)) {}
+//
+//        if (GuiTextInputBox({ 350, 450, 160, 110 }, "Input Text", "Message", "Submit", str_str, 4, &for_text_input)) {}
 
         EndDrawing();
     }

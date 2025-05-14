@@ -29,19 +29,22 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 
 set(SOURCES
-        clay.h
+        include/clay.h
+        include/clay_renderer_raylib.c
 )
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} STATIC
         ${SOURCES}
 )
 
-#add_library(${PROJECT_NAME} STATIC
-#        ${HEADERS}
-#)
+target_link_libraries(${PROJECT_NAME} PUBLIC
+        raylib
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-        .
+        include
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
+set_source_files_properties(include/clay_renderer_raylib.c PROPERTIES HEADER_FILE_ONLY ON)
+
