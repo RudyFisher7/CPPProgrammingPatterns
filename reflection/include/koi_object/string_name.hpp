@@ -53,7 +53,7 @@ public:
     StringName(const char* value);
     StringName(const std::string& value);
 
-    const std::string& get() const;
+    const std::string& get_string() const;
 
     bool operator==(const StringName& rhs) const;
     bool operator!=(const StringName& rhs) const;

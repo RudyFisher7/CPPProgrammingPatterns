@@ -47,7 +47,7 @@ StringName::StringName(const std::string &value) {
     _pointer = &(*it.first);
 }
 
-const std::string &StringName::get() const {
+const std::string &StringName::get_string() const {
     if (_pointer) {
         return *_pointer;
     }

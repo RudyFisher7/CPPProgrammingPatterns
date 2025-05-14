@@ -35,6 +35,7 @@
 #include <array>
 #include <cmath>
 #include <limits>
+#include <iostream>
 
 
 // Common StringNames for reuse.
@@ -66,10 +67,10 @@ TEST_CASE("StringName", "[StringName]") {
         CHECK_FALSE(name1 == name4);
         CHECK_FALSE(name2 == name3);
 
-        CHECK(name1.get() == name2.get());
-        CHECK_FALSE(name1.get() == name3.get());
-        CHECK_FALSE(name1.get() == name4.get());
-        CHECK_FALSE(name2.get() == name3.get());
+        CHECK(name1.get_string() == name2.get_string());
+        CHECK_FALSE(name1.get_string() == name3.get_string());
+        CHECK_FALSE(name1.get_string() == name4.get_string());
+        CHECK_FALSE(name2.get_string() == name3.get_string());
     }
 
     SECTION("Inequality") {
@@ -83,10 +84,10 @@ TEST_CASE("StringName", "[StringName]") {
         CHECK(name1 != name4);
         CHECK(name2 != name3);
 
-        CHECK_FALSE(name1.get() != name2.get());
-        CHECK(name1.get() != name3.get());
-        CHECK(name1.get() != name4.get());
-        CHECK(name2.get() != name3.get());
+        CHECK_FALSE(name1.get_string() != name2.get_string());
+        CHECK(name1.get_string() != name3.get_string());
+        CHECK(name1.get_string() != name4.get_string());
+        CHECK(name2.get_string() != name3.get_string());
     }
 }
 
@@ -301,6 +302,10 @@ int main(int argc, char* argv[]) {
     Koi::Object::register_factory_method(OBJECT, []() -> Koi::Object* { return new Koi::Object(); });
     Koi::Object::register_object_class<MockObject>(MOCK_OBJECT);
     Koi::Object::register_factory_method(MOCK_OBJECT, []() -> Koi::Object* { return new MockObject(); });
+
+    MockObject mockObject;
+    mockObject.pint = 90;
+    std::cout << mockObject.to_json_string() << std::endl;
 
     int result = Catch::Session().run(argc, argv);
 

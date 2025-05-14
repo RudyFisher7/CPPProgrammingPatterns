@@ -81,6 +81,10 @@ public:
     bool has_property(const StringName& property_name) const;
 
     const std::unordered_map<const StringName, VarRef, StringNameHash>& get_property_list() const;
+
+    //todo:: implement more types
+    virtual const std::string to_json_string() const;
+
 };
 
 

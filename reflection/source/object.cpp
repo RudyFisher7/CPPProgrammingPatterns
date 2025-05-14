@@ -25,6 +25,9 @@
 
 #include "koi_object/object.hpp"
 
+#include <sstream>
+
+
 namespace Koi {
 
 std::unordered_map<const StringName, std::function<Object*()>, StringNameHash> Object::_object_factory_methods {};
@@ -82,6 +85,54 @@ bool Object::has_property(const StringName& property_name) const {
 
 const std::unordered_map<const StringName, VarRef, StringNameHash>& Object::get_property_list() const {
     return _property_map;
+}
+
+const std::string Object::to_json_string() const {
+    std::ostringstream json_stream;
+
+    json_stream << "{";
+
+    json_stream << "\"";
+    json_stream << "class_name";
+    json_stream << "\"";
+    json_stream << ":";
+    json_stream << "\"";
+    json_stream << get_class_name().get_string();
+    json_stream << "\",";
+
+    for (const auto& it : _property_map) {
+        json_stream << "\"";
+        json_stream << it.first.get_string();
+        json_stream << "\"";
+        json_stream << ":";
+
+        if (typeid(bool) == it.second.type) {
+            json_stream << (it.second.get<bool>().first ? "true" : "false");
+        } else if (typeid(int) == it.second.type) {
+            json_stream << it.second.get<int>().first;
+        } else if (typeid(float) == it.second.type) {
+            json_stream << it.second.get<float>().first;
+        } else if (typeid(char) == it.second.type) {
+            json_stream << "\'";
+            json_stream << it.second.get<char>().first;
+            json_stream << "\'";
+        } else if (typeid(std::string*) == it.second.type) {
+            json_stream << "\"";
+            json_stream << *(it.second.get<std::string*>().first);
+            json_stream << "\"";
+        }
+
+
+        json_stream << ",";
+    }
+
+    if (json_stream.tellp() > 0) {
+        json_stream.seekp(-1, std::ios_base::end);
+    }
+
+    json_stream << "}";
+
+    return json_stream.str();
 }
 
 } // Koi
