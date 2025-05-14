@@ -1,7 +1,3 @@
-//
-// Created by rfish on 5/13/2025.
-//
-
 #include "koi_object/variant_reference.hpp"
 
 namespace Koi {

@@ -1,7 +1,3 @@
-//
-// Created by rfish on 5/13/2025.
-//
-
 #ifndef KOI_VARIANT_REFERENCE_HPP
 #define KOI_VARIANT_REFERENCE_HPP
 
@@ -65,7 +61,8 @@ public:
     VarRef(T& value) : _pointer(&value), _type(typeid(T)) {}
 
     template<typename T>
-    T get() {
+    typename std::enable_if<!std::is_pointer<T>::value, T>::type
+    get() {
         static_assert(std::is_default_constructible<T>::value || std::is_trivial<T>::value, "Type T must have a default constructor.");
         if (typeid(T) == _type) {
             return *static_cast<T*>(_pointer);
@@ -74,17 +71,27 @@ public:
         }
     }
 
-        template<typename T>
-        bool set(const T& value) {
-            if (typeid(T) != _type) {
-                return false;
-            }
-
-            T& ref = *static_cast<T*>(_pointer);
-            ref = value;
-
-            return true;
+    template<typename T>
+    typename std::enable_if<std::is_pointer<T>::value, T>::type
+    get() {
+        if (typeid(T) == _type) {
+            return *static_cast<T*>(_pointer);
+        } else {
+            return nullptr;
         }
+    }
+
+    template<typename T>
+    bool set(const T& value) {
+        if (typeid(T) != _type) {
+            return false;
+        }
+
+        T& ref = *static_cast<T*>(_pointer);
+        ref = value;
+
+        return true;
+    }
 };
 
 } // Koi

@@ -1,7 +1,3 @@
-//
-// Created by rfish on 5/13/2025.
-//
-
 #ifndef KOI_STRING_NAME_H
 #define KOI_STRING_NAME_H
 
@@ -21,6 +17,7 @@ protected:
     const std::string* _pointer;
 
 public:
+    static const StringName& EMPTY;
     StringName();
     ~StringName() = default;
     StringName(const char* value);
