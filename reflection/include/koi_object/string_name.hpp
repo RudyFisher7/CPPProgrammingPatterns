@@ -26,9 +26,9 @@
 #ifndef KOI_STRING_NAME_HPP
 #define KOI_STRING_NAME_HPP
 
+#include "koi_object/string_name_registry.hpp"
 
 #include <cmath>
-#include <unordered_set>
 #include <string>
 
 
@@ -42,23 +42,21 @@ namespace Koi {
 class StringName {
 protected:
     static std::string _empty;
-    static std::unordered_set<std::string> _interned_strings;
 
     const std::string* _pointer;
 
 public:
-    static const StringName& EMPTY;
     StringName();
     ~StringName() = default;
-    StringName(const char* value);
-    StringName(const std::string& value);
+    StringName(char* value);
+    StringName(std::string& value);
 
     const std::string& get_string() const;
 
     bool operator==(const StringName& rhs) const;
     bool operator!=(const StringName& rhs) const;
 
-    friend class StringNameHash;
+    friend struct StringNameHash;
 };
 
     struct StringNameHash {

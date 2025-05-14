@@ -27,11 +27,6 @@ project(clayh LANGUAGES C VERSION 0.0.1)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-message(STATUS "Configured for compiler ${CMAKE_C_COMPILER_ID}")
-message(STATUS "Configured for compiler architecture ${CMAKE_C_COMPILER_ARCHITECTURE_ID}")
-message(STATUS "Configured for compiler abi ${CMAKE_C_COMPILER_ABI}")
-message(STATUS "Configured for system ${CMAKE_SYSTEM_NAME}")
-
 
 set(HEADERS
         clay.h

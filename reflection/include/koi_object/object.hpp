@@ -65,7 +65,7 @@ public:
 
     Object(std::initializer_list<std::pair<const StringName, VarRef>> properties);
 
-    const StringName& get_class_name() const;
+    const StringName get_class_name() const;
 
     template<typename T>
     typename std::enable_if<!std::is_pointer<T>::value, std::pair<T, bool>>::type

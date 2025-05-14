@@ -68,10 +68,10 @@ Object::Object(std::initializer_list<std::pair<const StringName, VarRef>> proper
 }
 
 
-const StringName& Object::get_class_name() const {
+const StringName Object::get_class_name() const {
     auto it = _object_class_names.find(&typeid(*this));
     if (it == _object_class_names.end()) {
-        return StringName::EMPTY;
+        return StringName();
     }
 
     return it->second;

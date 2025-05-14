@@ -29,22 +29,19 @@
 namespace Koi {
 
 std::string StringName::_empty;
-std::unordered_set<std::string> StringName::_interned_strings{_empty};
 
-const StringName &StringName::EMPTY{};
 
 StringName::StringName() : _pointer(&_empty) {
 
 }
 
-StringName::StringName(const char *value) {
-    auto it = _interned_strings.emplace(value);
-    _pointer = &(*it.first);
+StringName::StringName(char *value) {
+    std::string str(value);
+    _pointer = StringNameRegistry::get_singleton().register_name(str);
 }
 
-StringName::StringName(const std::string &value) {
-    auto it = _interned_strings.emplace(value);
-    _pointer = &(*it.first);
+StringName::StringName(std::string &value) {
+    _pointer = StringNameRegistry::get_singleton().register_name(value);
 }
 
 const std::string &StringName::get_string() const {

@@ -61,12 +61,12 @@ public:
     ~VarRef() = default;
 
     template<class T, typename = typename std::enable_if<!std::is_pointer<T>::value, VarRef>::type>
-    VarRef(T& value) : _pointer(&value), type(typeid(value)) {
+    VarRef(T& value) : type(typeid(value)), _pointer(&value) {
         static_assert(std::is_scalar<T>::value, "Type T must be a scalar type.");
     }
 
     template<class T, typename = typename std::enable_if<(std::is_pointer<T>::value && !is_pointer_to_pointer<T>::value), VarRef>::type>
-    VarRef(T value) : _pointer(value), type(typeid(value)) {
+    VarRef(T value) : type(typeid(value)), _pointer(value) {
         static_assert(!std::is_scalar<std::remove_pointer<T>>::value, "Type T must be a pointer to a non-scalar type.");
     }
 

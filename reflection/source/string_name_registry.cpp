@@ -22,13 +22,27 @@
  * SOFTWARE.
  */
 
-
-#include "koi_object/variant_reference.hpp"
+#include "koi_object/string_name_registry.hpp"
 
 namespace Koi {
 
-VarRef::VarRef() : type(typeid(nullptr)), _pointer(nullptr) {
+std::unordered_set<std::string> StringNameRegistry::_interned_strings{};
+std::mutex StringNameRegistry::_interned_strings_mutex;
 
+
+StringNameRegistry& StringNameRegistry::get_singleton() {
+    static StringNameRegistry _instance;
+    return _instance;
+}
+
+
+const std::string* StringNameRegistry::register_name(std::string& value) {
+    _interned_strings_mutex.lock();
+    auto it = _interned_strings.emplace(value);
+    const std::string* result = &(*it.first);
+    _interned_strings_mutex.unlock();
+
+    return result;
 }
 
 } // Koi

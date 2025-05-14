@@ -23,12 +23,36 @@
  */
 
 
-#include "koi_object/variant_reference.hpp"
+#ifndef KOI_STRING_NAME_REGISTRY_HPP
+#define KOI_STRING_NAME_REGISTRY_HPP
+
+
+#include <unordered_set>
+#include <string>
+#include <mutex>
+
 
 namespace Koi {
 
-VarRef::VarRef() : type(typeid(nullptr)), _pointer(nullptr) {
+class StringNameRegistry final {
+private:
+    static std::unordered_set<std::string> _interned_strings;
+    static std::mutex _interned_strings_mutex;
+public:
+    static StringNameRegistry& get_singleton();
 
-}
+    StringNameRegistry(const StringNameRegistry& rhs) = delete;
+    StringNameRegistry(StringNameRegistry&& rhs) = delete;
+    StringNameRegistry& operator=(const StringNameRegistry& rhs) = delete;
+    StringNameRegistry& operator=(StringNameRegistry&& rhs) = delete;
+
+    const std::string* register_name(std::string& value);
+
+private:
+    StringNameRegistry() = default;
+    ~StringNameRegistry() = default;
+};
 
 } // Koi
+
+#endif //KOI_STRING_NAME_REGISTRY_HPP
