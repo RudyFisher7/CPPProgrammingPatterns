@@ -23,8 +23,8 @@
  */
 
 
-#ifndef KOI_PUB_SUB_TEST_MOCK_OBJECT_H
-#define KOI_PUB_SUB_TEST_MOCK_OBJECT_H
+#ifndef KOI_PUB_SUB_TEST_MOCK_OBJECT_HPP
+#define KOI_PUB_SUB_TEST_MOCK_OBJECT_HPP
 
 
 #include <ostream>
@@ -77,4 +77,4 @@ public:
 };
 
 
-#endif //KOI_PUB_SUB_TEST_MOCK_OBJECT_H
+#endif //KOI_PUB_SUB_TEST_MOCK_OBJECT_HPP

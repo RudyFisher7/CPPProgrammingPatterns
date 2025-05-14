@@ -23,8 +23,8 @@
  */
 
 
-#ifndef KOI_PUB_SUB_SERIALIZATION_H
-#define KOI_PUB_SUB_SERIALIZATION_H
+#ifndef KOI_PUB_SUB_SERIALIZATION_HPP
+#define KOI_PUB_SUB_SERIALIZATION_HPP
 
 
 #include <cstdint>
@@ -223,4 +223,4 @@ namespace KoiPubSub {
 }
 
 
-#endif //KOI_PUB_SUB_SERIALIZATION_H
+#endif //KOI_PUB_SUB_SERIALIZATION_HPP

@@ -22,7 +22,7 @@
 
 
 cmake_minimum_required(VERSION 3.13)
-project(KoiReflection LANGUAGES CXX VERSION 0.0.1)
+project(KoiObjectEditor LANGUAGES CXX VERSION 0.0.1)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -33,18 +33,15 @@ message(STATUS "Configured for compiler abi ${CMAKE_CXX_COMPILER_ABI}")
 message(STATUS "Configured for system ${CMAKE_SYSTEM_NAME}")
 
 set(SOURCES
-        source/string_name.cpp
-        source/object.cpp
-        source/variant_reference.cpp
+        main.cpp
+        source/object_editor.cpp
 )
 
 set(HEADERS
-        include/koi_object/string_name.hpp
-        include/koi_object/object.hpp
-        include/koi_object/variant_reference.hpp
+        include/koi_object_editor/object_editor.hpp
 )
 
-add_library(${PROJECT_NAME} STATIC
+add_executable(${PROJECT_NAME}
         ${SOURCES}
         ${HEADERS}
 )
@@ -53,7 +50,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         include
 )
 
-
-add_subdirectory(test)
-add_subdirectory(raylib-5.5)
-add_subdirectory(object_editor_gui)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+        raylib
+        KoiReflection
+)

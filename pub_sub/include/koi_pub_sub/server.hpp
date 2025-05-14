@@ -23,8 +23,8 @@
  */
 
 
-#ifndef KOI_PUB_SUB_SERVER_H
-#define KOI_PUB_SUB_SERVER_H
+#ifndef KOI_PUB_SUB_SERVER_HPP
+#define KOI_PUB_SUB_SERVER_HPP
 
 #include "koi_pub_sub/callable.hpp"
 #include "koi_pub_sub/models/data.hpp"
@@ -54,4 +54,4 @@ public:
 };
 
 
-#endif //KOI_PUB_SUB_SERVER_H
+#endif //KOI_PUB_SUB_SERVER_HPP

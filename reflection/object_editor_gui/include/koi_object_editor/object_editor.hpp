@@ -22,53 +22,15 @@
  * SOFTWARE.
  */
 
+#ifndef KOI_OBJECT_EDITOR_HPP
+#define KOI_OBJECT_EDITOR_HPP
 
-#ifndef KOI_STRING_NAME_HPP
-#define KOI_STRING_NAME_HPP
+namespace Koi{
 
+        class object_editor {
 
-#include <cmath>
-#include <unordered_set>
-#include <string>
+        };
 
+} // Koi
 
-namespace Koi {
-
-/**
- * A string type that provides 0(1) equality/hash operations.
- * @note For performance gain to be seen, the application's source code should reuse StringName instances as much as
- * possible, as constructing new instances is expensive 0(2N).
- */
-class StringName {
-protected:
-    static std::string _empty;
-    static std::unordered_set<std::string> _interned_strings;
-
-    const std::string* _pointer;
-
-public:
-    static const StringName& EMPTY;
-    StringName();
-    ~StringName() = default;
-    StringName(const char* value);
-    StringName(const std::string& value);
-
-    const std::string& get_string() const;
-
-    bool operator==(const StringName& rhs) const;
-    bool operator!=(const StringName& rhs) const;
-
-    friend class StringNameHash;
-};
-
-    struct StringNameHash {
-    private:
-        static std::hash<const void*> h;
-    public:
-        size_t operator()(const StringName& value) const;
-    };
-
-};
-
-
-#endif //KOI_STRING_NAME_HPP
+#endif //KOI_OBJECT_EDITOR_HPP

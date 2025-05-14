@@ -23,8 +23,8 @@
  */
 
 
-#ifndef KOI_OBJECT_H
-#define KOI_OBJECT_H
+#ifndef KOI_OBJECT_HPP
+#define KOI_OBJECT_HPP
 
 
 #include "koi_object/string_name.hpp"
@@ -133,4 +133,4 @@ public:
 
 } // Koi
 
-#endif //KOI_OBJECT_H
+#endif //KOI_OBJECT_HPP
