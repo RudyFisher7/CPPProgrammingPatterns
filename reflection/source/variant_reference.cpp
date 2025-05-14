@@ -1,53 +1,34 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 Rudy Fisher (kiyasui-hito)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+
 #include "koi_object/variant_reference.hpp"
 
 namespace Koi {
 
-VarRef::VarRef() : _pointer(nullptr), _type(typeid(nullptr)) {
+VarRef::VarRef() : _pointer(nullptr), type(typeid(nullptr)) {
 
 }
-
-//VarRef::VarRef(bool &value) : _pointer(&value), _type(TYPE_BOOL) {
-//
-//}
-//
-//VarRef::VarRef(char &value) : _pointer(&value), _type(TYPE_CHAR) {
-//
-//}
-//
-//VarRef::VarRef(unsigned char &value) : _pointer(&value), _type(TYPE_UCHAR) {
-//
-//}
-//
-//VarRef::VarRef(short &value) : _pointer(&value), _type(TYPE_SHORT) {
-//
-//}
-//
-//VarRef::VarRef(unsigned short &value) : _pointer(&value), _type(TYPE_USHORT) {
-//
-//}
-//
-//VarRef::VarRef(int &value) : _pointer(&value), _type(TYPE_INT) {
-//
-//}
-//
-//VarRef::VarRef(unsigned int &value) : _pointer(&value), _type(TYPE_UINT) {
-//
-//}
-//
-//VarRef::VarRef(long &value) : _pointer(&value), _type(TYPE_LONG) {
-//
-//}
-//
-//VarRef::VarRef(unsigned long &value) : _pointer(&value), _type(TYPE_ULONG) {
-//
-//}
-//
-//VarRef::VarRef(long long int &value) : _pointer(&value), _type(TYPE_LONG_LONG) {
-//
-//}
-//
-//VarRef::VarRef(unsigned long long int &value) : _pointer(&value), _type(TYPE_ULONG_LONG) {
-//
-//}
 
 } // Koi

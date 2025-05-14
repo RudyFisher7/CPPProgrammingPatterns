@@ -23,26 +23,29 @@
  */
 
 
-#ifndef KOI_PUB_SUB_DATA_H
-#define KOI_PUB_SUB_DATA_H
+#ifndef KOI_OBJECT_TEST_MOCK_OBJECT_H
+#define KOI_OBJECT_TEST_MOCK_OBJECT_H
 
 
-#include <cstdint>
-#include <vector>
+#include "koi_object/object.hpp"
 
 
-namespace KoiPubSub {
-
-class Data {
+class MockObject : public Koi::Object {
 public:
-    Data() = default;
-    virtual ~Data() = default;
+    int pint = 0;
+    float pfloat = 0.0f;
+    bool pbool = false;
 
-    virtual void to_network_bytes(std::vector<uint8_t>& out_bytes) = 0;
-    virtual bool from_network_bytes(const std::vector<uint8_t>& in_bytes) = 0;
+    MockObject() :
+            pint(0),
+            pfloat(0.0f),
+            pbool(false),
+            Koi::Object({
+                           {"pint",   pint},
+                           {"pfloat", pfloat},
+                           {"pbool",  pbool}
+                   }){}
 };
 
-}
 
-
-#endif //KOI_PUB_SUB_DATA_H
+#endif //KOI_OBJECT_TEST_MOCK_OBJECT_H
