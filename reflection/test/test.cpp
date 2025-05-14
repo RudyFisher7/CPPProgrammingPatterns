@@ -51,14 +51,9 @@ TEST_CASE("VarRef", "[VarRef]") {
         int one = 11;
         int* one_raw = &one;
         Koi::VarRef one_ref(one);
-        Koi::VarRef one_ptr_ref(&one);
 
         CHECK(one == one_ref.get<int>());
-        CHECK(one == one_ref.get<int>());
-        CHECK(one == one_ptr_ref.get<int>());
-        CHECK(one_raw == one_ref.get<int*>());
-        CHECK(one_raw == one_ptr_ref.get<int*>());
-        CHECK(one == one_ptr_ref.get<int>());
+        CHECK(*one_raw == one_ref.get<int>());
     }
 
     SECTION("Mutation", "[int]") {
@@ -66,50 +61,28 @@ TEST_CASE("VarRef", "[VarRef]") {
         int one = 11;
         int* one_raw = &one;
         Koi::VarRef one_ref(one);
-        Koi::VarRef one_ptr_ref(&one);
 
         one = two;
 
         CHECK(two == one_ref.get<int>());
-        CHECK(two == one_ref.get<int>());
-        CHECK(two == one_ptr_ref.get<int>());
-        CHECK(one_raw == one_ref.get<int*>());
-        CHECK(one_raw == one_ptr_ref.get<int*>());
-        CHECK(two == one_ptr_ref.get<int>());
 
         bool one_ref_set_result = one_ref.set(two);
 
         REQUIRE(one_ref_set_result);
         CHECK(two == one_ref.get<int>());
-        CHECK(two == one_ref.get<int>());
-        CHECK(two == one_ptr_ref.get<int>());
-        CHECK(one_raw == one_ref.get<int*>());
-        CHECK(one_raw == one_ptr_ref.get<int*>());
-        CHECK(two == one_ptr_ref.get<int>());
 
         one_ref_set_result = one_ref.set(9.0f);
 
         REQUIRE_FALSE(one_ref_set_result);
         CHECK(two == one_ref.get<int>());
-        CHECK(two == one_ref.get<int>());
-        CHECK(two == one_ptr_ref.get<int>());
-        CHECK(one_raw == one_ref.get<int*>());
-        CHECK(one_raw == one_ptr_ref.get<int*>());
-        CHECK(two == one_ptr_ref.get<int>());
     }
 
     SECTION("Equality", "[double]") {
         double one = 11;
         double* one_raw = &one;
         Koi::VarRef one_ref(one);
-        Koi::VarRef one_ptr_ref(&one);
 
         CHECK(one == one_ref.get<double>());
-        CHECK(one == one_ref.get<double>());
-        CHECK(one == one_ptr_ref.get<double>());
-        CHECK(one_raw == one_ref.get<double*>());
-        CHECK(one_raw == one_ptr_ref.get<double*>());
-        CHECK(one == one_ptr_ref.get<double>());
     }
 
     SECTION("Mutation", "[double]") {
@@ -117,36 +90,29 @@ TEST_CASE("VarRef", "[VarRef]") {
         double one = 11;
         double* one_raw = &one;
         Koi::VarRef one_ref(one);
-        Koi::VarRef one_ptr_ref(&one);
 
         one = two;
 
         CHECK(two == one_ref.get<double>());
-        CHECK(two == one_ref.get<double>());
-        CHECK(two == one_ptr_ref.get<double>());
-        CHECK(one_raw == one_ref.get<double*>());
-        CHECK(one_raw == one_ptr_ref.get<double*>());
-        CHECK(two == one_ptr_ref.get<double>());
 
         bool one_ref_set_result = one_ref.set(two);
 
         REQUIRE(one_ref_set_result);
         CHECK(two == one_ref.get<double>());
-        CHECK(two == one_ref.get<double>());
-        CHECK(two == one_ptr_ref.get<double>());
-        CHECK(one_raw == one_ref.get<double*>());
-        CHECK(one_raw == one_ptr_ref.get<double*>());
-        CHECK(two == one_ptr_ref.get<double>());
 
         one_ref_set_result = one_ref.set(9.0f);
 
         REQUIRE_FALSE(one_ref_set_result);
         CHECK(two == one_ref.get<double>());
-        CHECK(two == one_ref.get<double>());
-        CHECK(two == one_ptr_ref.get<double>());
-        CHECK(one_raw == one_ref.get<double*>());
-        CHECK(one_raw == one_ptr_ref.get<double*>());
-        CHECK(two == one_ptr_ref.get<double>());
+    }
+
+    SECTION("Equality", "[std::array]") {
+        std::array<float, 4> one {1.1, 2.2, 3.3, 4.4};
+        std::array<float, 4>* one_raw = &one;
+        Koi::VarRef one_ptr_ref(&one);
+
+        CHECK(one == *one_ptr_ref.get<std::array<float, 4>*>());
+        CHECK(one_raw == one_ptr_ref.get<std::array<float, 4>*>());
     }
 }
 

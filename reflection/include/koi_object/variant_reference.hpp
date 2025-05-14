@@ -41,7 +41,6 @@ private:
     void* _pointer;
 
     const std::type_info& _type;
-    const std::type_info& _ptr_type;
 
 public:
     VarRef();
@@ -65,15 +64,13 @@ public:
     };
 
     template<class T, typename = typename std::enable_if<!std::is_pointer<T>::value, VarRef>::type>
-    VarRef(T& value) : _pointer(&value), _type(typeid(value)), _ptr_type(typeid(&value)) {
-        static_assert(std::is_default_constructible<T>::value || std::is_trivial<T>::value, "Type T must have a default constructor.");
+    VarRef(T& value) : _pointer(&value), _type(typeid(value)) {
         static_assert(std::is_scalar<T>::value, "Type T must be a scalar type.");
     }
 
     template<class T, typename = typename std::enable_if<(std::is_pointer<T>::value && !is_pointer_to_pointer<T>::value), VarRef>::type>
-    VarRef(T value) : _pointer(value), _type(typeid(*value)), _ptr_type(typeid(value)) {
-        static_assert(std::is_default_constructible<typename std::remove_pointer<T>::type>::value || std::is_trivial<typename std::remove_pointer<T>::type>::value, "Type remove_ptr<T> must have a default constructor.");
-        static_assert(std::is_scalar<typename std::remove_pointer<T>::type>::value, "Type remove_ptr<T> must be a scalar type.");
+    VarRef(T value) : _pointer(value), _type(typeid(value)) {
+        static_assert(!std::is_scalar<std::remove_pointer<T>>::value, "Type T must be a pointer to a non-scalar type.");
     }
 
     template<typename T>
@@ -84,14 +81,16 @@ public:
         if (typeid(T) == _type) {
             return *static_cast<T*>(_pointer);
         } else {
-            return T();
+            return {};
         }
     }
 
     template<typename T>
     typename std::enable_if<std::is_pointer<T>::value, T>::type
     get() {
-        if (typeid(T) == _ptr_type) {
+        static_assert(!is_pointer_to_pointer<T>::value, "Type T must be a pointer type that doesn't point to another pointer.");
+        static_assert(!std::is_scalar<std::remove_pointer<T>>::value, "Type T must be a pointer to a non-scalar type.");
+        if (typeid(T) == _type) {
             return static_cast<T>(_pointer);
         } else {
             return nullptr;
