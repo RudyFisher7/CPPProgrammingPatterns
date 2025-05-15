@@ -35,48 +35,60 @@
 
 template<typename T>
 struct is_pointer_to_pointer {
-    static constexpr bool value = std::is_pointer<T>::value && std::is_pointer<typename std::remove_pointer<T>::type>::value;
+    static constexpr bool value = std::is_pointer<typename std::remove_pointer<T>::type>::value;
 };
 
 namespace Koi {
 
 /**
- * A class that stores a reference to another variable and basic type information.
- * The variable may be a pointer to a non-scalar type, or a scalar/fundamental type.
+ * A class that stores a reference to another variable and basic _type information.
+ * The variable may be a pointer to a non-scalar _type, or a scalar/fundamental _type.
  * @warning This class does not own its variable, so memory management must happen outside of
  * this class.
  * @note This class is not designed to store data directly, just a reference to data stored elsewhere and information
- * about that data's type.
+ * about that data's _type.
  */
 class VarRef final {
-public:
-    const std::type_info& type;
-
 private:
+    const std::type_info& _type;
     void* _pointer;
-
 
 public:
     VarRef();
     ~VarRef() = default;
 
-    template<class T, typename = typename std::enable_if<!std::is_pointer<T>::value, VarRef>::type>
-    VarRef(T& value) : _pointer(&value), type(typeid(value)) {
-        static_assert(std::is_scalar<T>::value, "Type T must be a scalar type.");
+//    VarRef(const VarRef& rhs) = default;
+//    VarRef(VarRef&& rhs) noexcept;
+//
+//    VarRef& operator=(const VarRef& rhs);
+//    VarRef& operator=(VarRef&& rhs) noexcept;
+
+//    VarRef(int& value) : _type(typeid(value)), _pointer(&value) {
+//    }
+
+    template<typename T, typename = typename std::enable_if<!std::is_pointer<T>::value, VarRef>::type>
+    VarRef(T& value) : _type(typeid(value)), _pointer(&value) {
+        static_assert(std::is_scalar<T>::value, "Type T must be a scalar _type.");
     }
 
-    template<class T, typename = typename std::enable_if<(std::is_pointer<T>::value && !is_pointer_to_pointer<T>::value), VarRef>::type>
-    VarRef(T value) : _pointer(value), type(typeid(value)) {
-        static_assert(!std::is_scalar<std::remove_pointer<T>>::value, "Type T must be a pointer to a non-scalar type.");
+    template<typename T, typename = typename std::enable_if<(std::is_pointer<T>::value && !is_pointer_to_pointer<T>::value), VarRef>::type>
+    VarRef(T value) : _type(typeid(value)), _pointer(value) {
+        static_assert(!std::is_scalar<std::remove_pointer<T>>::value, "Type T must be a pointer to a non-scalar _type.");
     }
+
+    const std::type_info& get_type() const;
 
     template<typename T>
     typename std::enable_if<!std::is_pointer<T>::value, std::pair<T, bool>>::type
     get() const {
         static_assert(std::is_default_constructible<T>::value || std::is_trivial<T>::value, "Type T must have a default constructor.");
-        static_assert(std::is_scalar<T>::value, "Type T must be a scalar type.");
-        if (typeid(T) == type) {
-            return {*static_cast<T *>(_pointer), true};
+        static_assert(std::is_scalar<T>::value, "Type T must be a scalar _type.");
+        if (typeid(T) == _type) {
+            if (std::is_same<T, bool>::value) {
+                return {static_cast<bool>(*reinterpret_cast<uint8_t *>(_pointer)), true};
+            } else {
+                return {*reinterpret_cast<T *>(_pointer), true};
+            }
         } else {
             return {static_cast<T>(0), false};
         }
@@ -85,10 +97,10 @@ public:
     template<typename T>
     typename std::enable_if<std::is_pointer<T>::value, std::pair<T, bool>>::type
     get() const {
-        static_assert(!is_pointer_to_pointer<T>::value, "Type T must be a pointer type that doesn't point to another pointer.");
-        static_assert(!std::is_scalar<std::remove_pointer<T>>::value, "Type T must be a pointer to a non-scalar type.");
-        if (typeid(T) == type) {
-            return {static_cast<T>(_pointer), true};
+        static_assert(!is_pointer_to_pointer<T>::value, "Type T must be a pointer _type that doesn't point to another pointer.");
+        static_assert(!std::is_scalar<std::remove_pointer<T>>::value, "Type T must be a pointer to a non-scalar _type.");
+        if (typeid(T) == _type) {
+            return {reinterpret_cast<T>(_pointer), true};
         } else {
             return {nullptr, false};
         }
@@ -96,7 +108,7 @@ public:
 
     template<typename T>
     bool set(const T& value) {
-        if (typeid(T) != type) {
+        if (typeid(T) != _type) {
             return false;
         }
 

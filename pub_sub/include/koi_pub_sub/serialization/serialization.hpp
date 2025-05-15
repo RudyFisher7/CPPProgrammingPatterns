@@ -23,12 +23,11 @@
  */
 
 
-#ifndef KOI_PUB_SUB_SERIALIZATION_H
-#define KOI_PUB_SUB_SERIALIZATION_H
+#ifndef KOI_PUB_SUB_SERIALIZATION_HPP
+#define KOI_PUB_SUB_SERIALIZATION_HPP
 
 
 #include <cstdint>
-#include <format>
 #include <type_traits>
 #include <vector>
 #include <iostream>
@@ -43,12 +42,14 @@ namespace KoiPubSub {
          * @return True if the system is little endian, else false.
          */
         constexpr bool is_little_endian() {
-            union {
+            union Word {
                 const uint16_t WORD {0x01};
                 uint8_t BYTES[2u];
             };
 
-            return BYTES[0] == 0x01;
+            const Word word {};
+
+            return word.BYTES[0] == 0x01;
         }
 
 
@@ -91,11 +92,12 @@ namespace KoiPubSub {
         template<typename T>
         T network_bytes_to_primitive(const uint8_t* bytes) {
             static_assert(std::is_scalar<T>::value && !std::is_pointer<T>::value, "Type T must be bool, char, int, float, enum, or a derivation of these scalar types. T must not be a pointer or a non-scalar type.");
+            static_assert(sizeof(T) <= 8u, "Type T must be bool, char, int, float, enum, or a derivation of these scalar types. T must not be a pointer or a non-scalar type.");
             T result{};
 
             if (is_little_endian()) {
                 size_t size = sizeof(T);
-                uint8_t result_buffer[size];
+                uint8_t result_buffer[8u];
                 for (size_t i = 0; i < size; ++i) {
                     result_buffer[i] = bytes[size - 1u - i];
                 }
@@ -211,7 +213,7 @@ namespace KoiPubSub {
         template<typename T, typename ... TArgs>
         bool from_network_bytes(const uint8_t* begin, const uint8_t* end, T& out_value, TArgs&... args) {
             size_t number_of_bytes = get_number_of_bytes(out_value, args...);
-            if ((end - begin) < number_of_bytes) {
+            if ((size_t)(end - begin) < number_of_bytes) {
                 return false;
             }
 
@@ -223,4 +225,4 @@ namespace KoiPubSub {
 }
 
 
-#endif //KOI_PUB_SUB_SERIALIZATION_H
+#endif //KOI_PUB_SUB_SERIALIZATION_HPP

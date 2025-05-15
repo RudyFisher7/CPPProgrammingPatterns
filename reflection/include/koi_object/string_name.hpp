@@ -23,12 +23,12 @@
  */
 
 
-#ifndef KOI_STRING_NAME_H
-#define KOI_STRING_NAME_H
+#ifndef KOI_STRING_NAME_HPP
+#define KOI_STRING_NAME_HPP
 
+#include "koi_object/string_name_registry.hpp"
 
 #include <cmath>
-#include <unordered_set>
 #include <string>
 
 
@@ -42,33 +42,36 @@ namespace Koi {
 class StringName {
 protected:
     static std::string _empty;
-    static std::unordered_set<std::string> _interned_strings;
 
     const std::string* _pointer;
 
 public:
-    static const StringName& EMPTY;
     StringName();
     ~StringName() = default;
     StringName(const char* value);
-    StringName(const std::string& value);
+    StringName(std::string& value);
 
-    const std::string& get() const;
+    StringName(const StringName& rhs) = default;
+    StringName(StringName&& rhs) noexcept;
+    StringName& operator=(const StringName& rhs);
+    StringName& operator=(StringName&& rhs) noexcept;
 
     bool operator==(const StringName& rhs) const;
     bool operator!=(const StringName& rhs) const;
 
-    friend class StringNameHash;
+    const std::string& get_string() const;
+
+    friend struct StringNameHash;
 };
 
-    struct StringNameHash {
-    private:
-        static std::hash<const void*> h;
-    public:
-        size_t operator()(const StringName& value) const;
-    };
+struct StringNameHash {
+private:
+    static std::hash<const void*> h;
+public:
+    size_t operator()(const StringName& value) const;
+};
 
 };
 
 
-#endif //KOI_STRING_NAME_H
+#endif //KOI_STRING_NAME_HPP

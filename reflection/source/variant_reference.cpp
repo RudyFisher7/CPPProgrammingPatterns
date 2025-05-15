@@ -25,10 +25,37 @@
 
 #include "koi_object/variant_reference.hpp"
 
+
 namespace Koi {
 
-VarRef::VarRef() : _pointer(nullptr), type(typeid(nullptr)) {
+VarRef::VarRef() : _type(typeid(nullptr)), _pointer(nullptr) {
 
+}
+
+//VarRef::VarRef(VarRef&& rhs) noexcept : _type(rhs._type), _pointer(rhs._pointer) {
+//
+//}
+//
+//VarRef& VarRef::operator=(const VarRef& rhs) {
+//    if (this != &rhs) {
+//        _type = rhs._type;
+//        _pointer = rhs._pointer;
+//    }
+//
+//    return *this;
+//}
+//
+//VarRef& VarRef::operator=(VarRef&& rhs) noexcept {
+//    if (this != &rhs) {
+//        _type = rhs._type;
+//        _pointer = rhs._pointer;
+//    }
+//
+//    return *this;
+//}
+
+const std::type_info& VarRef::get_type() const {
+    return _type;
 }
 
 } // Koi

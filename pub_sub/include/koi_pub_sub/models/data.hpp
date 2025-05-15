@@ -23,8 +23,8 @@
  */
 
 
-#ifndef KOI_PUB_SUB_DATA_H
-#define KOI_PUB_SUB_DATA_H
+#ifndef KOI_PUB_SUB_DATA_HPP
+#define KOI_PUB_SUB_DATA_HPP
 
 
 #include <cstdint>
@@ -45,4 +45,4 @@ public:
 }
 
 
-#endif //KOI_PUB_SUB_DATA_H
+#endif //KOI_PUB_SUB_DATA_HPP

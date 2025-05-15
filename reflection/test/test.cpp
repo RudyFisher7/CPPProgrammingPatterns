@@ -24,6 +24,7 @@
 
 
 #include "koi_object/string_name.hpp"
+#include "koi_object/string_names.hpp"
 #include "koi_object/variant_reference.hpp"
 #include "koi_object/object.hpp"
 #include "mock_object.hpp"
@@ -35,14 +36,7 @@
 #include <array>
 #include <cmath>
 #include <limits>
-
-
-// Common StringNames for reuse.
-const Koi::StringName OBJECT{"Object"};
-const Koi::StringName MOCK_OBJECT{"MockObject"};
-const Koi::StringName PINT{"pint"};
-const Koi::StringName PFLOAT{"pfloat"};
-const Koi::StringName PBOOL{"pbool"};
+#include <iostream>
 
 
 bool are_equal_approx(double a, double b) {
@@ -66,10 +60,10 @@ TEST_CASE("StringName", "[StringName]") {
         CHECK_FALSE(name1 == name4);
         CHECK_FALSE(name2 == name3);
 
-        CHECK(name1.get() == name2.get());
-        CHECK_FALSE(name1.get() == name3.get());
-        CHECK_FALSE(name1.get() == name4.get());
-        CHECK_FALSE(name2.get() == name3.get());
+        CHECK(name1.get_string() == name2.get_string());
+        CHECK_FALSE(name1.get_string() == name3.get_string());
+        CHECK_FALSE(name1.get_string() == name4.get_string());
+        CHECK_FALSE(name2.get_string() == name3.get_string());
     }
 
     SECTION("Inequality") {
@@ -83,10 +77,10 @@ TEST_CASE("StringName", "[StringName]") {
         CHECK(name1 != name4);
         CHECK(name2 != name3);
 
-        CHECK_FALSE(name1.get() != name2.get());
-        CHECK(name1.get() != name3.get());
-        CHECK(name1.get() != name4.get());
-        CHECK(name2.get() != name3.get());
+        CHECK_FALSE(name1.get_string() != name2.get_string());
+        CHECK(name1.get_string() != name3.get_string());
+        CHECK(name1.get_string() != name4.get_string());
+        CHECK(name2.get_string() != name3.get_string());
     }
 }
 
@@ -97,16 +91,16 @@ TEST_CASE("VarRef", "[VarRef]") {
         int two = 8;
         Koi::VarRef one_ref(one);
 
-        CHECK(typeid(two) == one_ref.type);
+        CHECK(typeid(two) == one_ref.get_type());
 
         // Usage example: here is where you would draw the appropriate control to edit the property in a GUI based on
         // the type.
         int three = 0;
-        if (typeid(int) == one_ref.type) {
+        if (typeid(int) == one_ref.get_type()) {
             three = 1;
-        } else if (typeid(float) == one_ref.type) {
+        } else if (typeid(float) == one_ref.get_type()) {
             three = 2;
-        } else if (typeid(char) == one_ref.type) {
+        } else if (typeid(char) == one_ref.get_type()) {
             three = 3;
         }
 
@@ -185,7 +179,7 @@ TEST_CASE("VarRef", "[VarRef]") {
     }
 
     SECTION("Equality", "[std::array]") {
-        std::array<float, 4> one {1.1, 2.2, 3.3, 4.4};
+        std::array<float, 4> one {1.1f, 2.2f, 3.3f, 4.4f};
         std::array<float, 4>* one_raw = &one;
         Koi::VarRef one_ptr_ref(&one);
 
@@ -233,20 +227,20 @@ TEST_CASE("Object", "[Object]") {
     SECTION("Has property") {
         MockObject one;
 
-        CHECK(one.has_property(PINT));
-        CHECK(one.has_property(PFLOAT));
-        CHECK(one.has_property(PBOOL));
+        CHECK(one.has_property("pint"));
+        CHECK(one.has_property("pfloat"));
+        CHECK(one.has_property("pbool"));
         CHECK_FALSE(one.has_property("lint"));
     }
 
     SECTION("Get property") {
         MockObject one;
 
-        int pint = one.get<int>(PINT).first;
+        int pint = one.get<int>("pint").first;
 
         CHECK(pint == one.pint);
 
-        std::pair<int, bool> pfloat = one.get<int>(PFLOAT);
+        std::pair<int, bool> pfloat = one.get<int>("pfloat");
 
         CHECK_FALSE(pfloat.second);
         CHECK(pfloat.first == 0);
@@ -257,14 +251,14 @@ TEST_CASE("Object", "[Object]") {
 
         int pint = 80;
 
-        REQUIRE(one.set(PINT, pint));
+        REQUIRE(one.set("pint", pint));
         CHECK(pint == one.pint);
-        CHECK(pint == one.get<int>(PINT).first);
+        CHECK(pint == one.get<int>("pint").first);
 
         float pfloat = 99.8f;
 
-        REQUIRE_FALSE(one.set(PINT, pfloat));
-        CHECK_FALSE(are_equal_approx(pfloat, one.get<float>(PFLOAT).first));
+        REQUIRE_FALSE(one.set("pint", pfloat));
+        CHECK_FALSE(are_equal_approx(pfloat, one.get<float>("pfloat").first));
         CHECK_FALSE(are_equal_approx(pfloat, one.pfloat));
     }
 
@@ -276,18 +270,18 @@ TEST_CASE("Object", "[Object]") {
         // Usage example: use this list in your GUI to edit the object's properties.
         // Associate the StringNames with the values that should be set and use the set<T>().
         for (const auto& it: list) {
-            if (typeid(int) == it.second.type) {
+            if (typeid(int) == it.second.get_type()) {
                 one.set<int>(it.first, 8);
-            } else if (typeid(float) == it.second.type) {
-                one.set<float>(it.first, 8.88);
-            } else if (typeid(char) == it.second.type) {
+            } else if (typeid(float) == it.second.get_type()) {
+                one.set<float>(it.first, 8.88f);
+            } else if (typeid(char) == it.second.get_type()) {
                 one.set<char>(it.first, 'V');
             }
         }
 
-        CHECK(one.pint == list.find(PINT)->second.get<int>().first);
-        CHECK(one.pbool == list.find(PBOOL)->second.get<bool>().first);
-        CHECK(are_equal_approx(one.pfloat, list.find(PFLOAT)->second.get<float>().first));
+        CHECK(one.pint == list.find("pint")->second.get<int>().first);
+        CHECK(one.pbool == list.find("pbool")->second.get<bool>().first);
+        CHECK(are_equal_approx(one.pfloat, list.find("pfloat")->second.get<float>().first));
         CHECK(list.size() == 3u);
     }
 }
@@ -297,10 +291,14 @@ int main(int argc, char* argv[]) {
     // your setup ...
 
     // Register classes and factory methods at the beginning of the application.
-    Koi::Object::register_object_class<Koi::Object>(OBJECT);
-    Koi::Object::register_factory_method(OBJECT, []() -> Koi::Object* { return new Koi::Object(); });
-    Koi::Object::register_object_class<MockObject>(MOCK_OBJECT);
-    Koi::Object::register_factory_method(MOCK_OBJECT, []() -> Koi::Object* { return new MockObject(); });
+    Koi::Object::register_object_class<Koi::Object>(Koi::StringNames::get_singleton().OBJECT);
+    Koi::Object::register_factory_method(Koi::StringNames::get_singleton().OBJECT, []() -> Koi::Object* { return new Koi::Object(); });
+    Koi::Object::register_object_class<MockObject>("MockObject");
+    Koi::Object::register_factory_method("MockObject", []() -> Koi::Object* { return new MockObject(); });
+
+    MockObject mockObject;
+    mockObject.pint = 90;
+    std::cout << mockObject.to_json_string() << std::endl;
 
     int result = Catch::Session().run(argc, argv);
 

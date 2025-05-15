@@ -23,8 +23,8 @@
  */
 
 
-#ifndef KOI_OBJECT_H
-#define KOI_OBJECT_H
+#ifndef KOI_OBJECT_HPP
+#define KOI_OBJECT_HPP
 
 
 #include "koi_object/string_name.hpp"
@@ -65,7 +65,13 @@ public:
 
     Object(std::initializer_list<std::pair<const StringName, VarRef>> properties);
 
-    const StringName& get_class_name() const;
+    Object(const Object& rhs);
+    Object(Object&& rhs);
+
+    Object& operator=(const Object& rhs);
+    Object& operator=(Object&& rhs);
+
+    const StringName get_class_name() const;
 
     template<typename T>
     typename std::enable_if<!std::is_pointer<T>::value, std::pair<T, bool>>::type
@@ -81,6 +87,10 @@ public:
     bool has_property(const StringName& property_name) const;
 
     const std::unordered_map<const StringName, VarRef, StringNameHash>& get_property_list() const;
+
+    //todo:: implement more types
+    virtual const std::string to_json_string() const;
+
 };
 
 
@@ -129,4 +139,4 @@ public:
 
 } // Koi
 
-#endif //KOI_OBJECT_H
+#endif //KOI_OBJECT_HPP

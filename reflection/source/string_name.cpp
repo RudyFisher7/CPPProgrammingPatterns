@@ -29,30 +29,39 @@
 namespace Koi {
 
 std::string StringName::_empty;
-std::unordered_set<std::string> StringName::_interned_strings{_empty};
 
-const StringName &StringName::EMPTY{};
 
 StringName::StringName() : _pointer(&_empty) {
 
 }
 
 StringName::StringName(const char *value) {
-    auto it = _interned_strings.emplace(value);
-    _pointer = &(*it.first);
+    std::string str(value);
+    _pointer = StringNameRegistry::get_singleton().register_name(str);
 }
 
-StringName::StringName(const std::string &value) {
-    auto it = _interned_strings.emplace(value);
-    _pointer = &(*it.first);
+StringName::StringName(std::string &value) {
+    _pointer = StringNameRegistry::get_singleton().register_name(value);
 }
 
-const std::string &StringName::get() const {
-    if (_pointer) {
-        return *_pointer;
+StringName::StringName(StringName&& rhs) noexcept : _pointer(rhs._pointer) {
+
+}
+
+StringName& StringName::operator=(const StringName& rhs) {
+    if (this != &rhs) {
+        _pointer = rhs._pointer;
     }
 
-    return _empty;
+    return *this;
+}
+
+StringName& StringName::operator=(StringName&& rhs) noexcept {
+    if (this != &rhs) {
+        _pointer = rhs._pointer;
+    }
+
+    return *this;
 }
 
 bool StringName::operator==(const StringName &rhs) const {
@@ -61,6 +70,14 @@ bool StringName::operator==(const StringName &rhs) const {
 
 bool StringName::operator!=(const StringName &rhs) const {
     return !(*this == rhs);
+}
+
+const std::string &StringName::get_string() const {
+    if (_pointer) {
+        return *_pointer;
+    }
+
+    return _empty;
 }
 
 
