@@ -22,45 +22,41 @@
 
 
 cmake_minimum_required(VERSION 3.26)
-project(KoiReflectionTest)
+project(AutoRayGui LANGUAGES CXX VERSION 0.0.1)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-Include(FetchContent)
+message(STATUS "Project: ${PROJECT_NAME}")
+message(STATUS "Configured for compiler id: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "Configured for compiler architecture: ${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
+message(STATUS "Configured for compiler abi: ${CMAKE_CXX_COMPILER_ABI}")
+message(STATUS "Configured for system: ${CMAKE_SYSTEM_NAME}")
 
-if(NOT Catch2_POPULATED)
-    message(STATUS "${PROJECT_NAME}: fetch Catch2.")
-    FetchContent_Declare(
-            Catch2
-            GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-            GIT_TAG        v3.4.0 # or a later release
-            GIT_PROGRESS TRUE
-            GIT_SHALLOW TRUE
-    )
+set(SOURCES
+)
 
-    FetchContent_MakeAvailable(Catch2)
+set(HEADERS
+)
 
-    FetchContent_GetProperties(Catch2)
-    if(NOT Catch2_POPULATED)
-        FetchContent_Populate(Catch2)
-    endif()
+add_library(${PROJECT_NAME} STATIC
+        ${SOURCES}
+        ${HEADERS}
+)
 
-    list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
-    message(STATUS "${CMAKE_MODULE_PATH}")
+target_include_directories(${PROJECT_NAME} PUBLIC
+        include
+)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
 else()
-    message(STATUS "${PROJECT_NAME}: Catch2 already available.")
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 
 
-add_executable(${PROJECT_NAME}
-        test.cpp
-        mock_object.hpp
-)
+option(ENABLE_TESTS "Enable unit tests" ON)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
-        KoiReflection
-        Catch2::Catch2
-)
-
-include(CTest)
-include(Catch)
-catch_discover_tests(${PROJECT_NAME})
+if (ENABLE_TESTS)
+    add_subdirectory(test)
+endif()

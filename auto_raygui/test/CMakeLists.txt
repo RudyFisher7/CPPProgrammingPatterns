@@ -22,7 +22,7 @@
 
 
 cmake_minimum_required(VERSION 3.26)
-project(KoiReflectionTest)
+project(AutoRayGuiTest)
 
 
 Include(FetchContent)
@@ -53,11 +53,10 @@ endif()
 
 add_executable(${PROJECT_NAME}
         test.cpp
-        mock_object.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-        KoiReflection
+        AutoRayGui
         Catch2::Catch2
 )
 

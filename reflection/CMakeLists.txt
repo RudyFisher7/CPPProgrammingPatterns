@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.26)
 project(KoiReflection LANGUAGES CXX VERSION 0.0.1)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -70,7 +70,3 @@ option(ENABLE_TESTS "Enable unit tests" ON)
 if (ENABLE_TESTS)
     add_subdirectory(test)
 endif()
-
-add_subdirectory(raylib-5.5)
-add_subdirectory(clay-h)
-add_subdirectory(object_editor_gui)
