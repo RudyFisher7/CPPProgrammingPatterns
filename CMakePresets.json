@@ -3,7 +3,7 @@
   "cmakeMinimumRequired": { "major": 3, "minor": 13 },
   "configurePresets": [
     {
-      "name": "release-preset",
+      "name": "release",
       "description": "Release build with C++11",
       "binaryDir": "${sourceDir}/cmake-release-preset-build",
       "cacheVariables": {
@@ -14,7 +14,7 @@
       }
     },
     {
-      "name": "debug-preset",
+      "name": "debug",
       "description": "Debug build with C++11",
       "binaryDir": "${sourceDir}/cmake-debug-preset-build",
       "cacheVariables": {
