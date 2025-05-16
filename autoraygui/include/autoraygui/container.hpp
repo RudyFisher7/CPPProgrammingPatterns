@@ -28,10 +28,12 @@
 
 #include <raylib.h>
 
+#include <array>
 #include <cstdint>
 #include <functional>
 #include <type_traits>
 #include <tuple>
+#include <utility>
 
 
 namespace AutoRayGui {
@@ -53,166 +55,277 @@ enum SizeFlags : uint16_t {
     SIZE_FLAGS_EXPAND = SIZE_FLAGS_HORIZONTAL_EXPAND | SIZE_FLAGS_VERTICAL_EXPAND,
 };
 
-struct ContainerLayout {
+enum ContainerType : uint8_t {
+    CONTAINER_TYPE_MIN = 0,
+    CONTAINER_TYPE_NONE = CONTAINER_TYPE_MIN,
+    CONTAINER_TYPE_CHILD = CONTAINER_TYPE_NONE,
+    CONTAINER_TYPE_HBOX,
+    CONTAINER_TYPE_VBOX,
+    CONTAINER_TYPE_GRID,
+    CONTAINER_TYPE_CENTER,
+    CONTAINER_TYPE_MARGIN,
+    CONTAINER_TYPE_PANEL,
+    CONTAINER_TYPE_SCROLL,
+    CONTAINER_TYPE_TAB,
+    CONTAINER_TYPE_SUBVIEWPORT,
+    CONTAINER_TYPE_SIZE,
+};
+
+struct Layout {
+    ContainerType type;
     Rectangle bounds;
+    Vector2 minimum_size;
+    SizeFlags size_flags;
+    size_t row_count;
+    size_t column_count;
+    bool has_h_scroll;
+    bool has_v_scroll;
+    Vector4 margins;
     size_t child_count;
-    size_t index;
+    size_t child_index;
     Vector2 next_child_position;
 };
 
-struct ContainerChildLayout {
-    Vector2 minimum_size;
-    SizeFlags size_flags;
+
+enum IndexingMode : uint8_t {
+    INDEXING_MODE_SAFE = 0,
+    INDEXING_MODE_UNCHECKED,
 };
 
-template<typename TElement, typename ... TArgs>
-int CenterContainer(TElement element, float width, float height, TArgs... args) {
-    static_assert(std::is_pointer<TElement>::value, "TElement must be a function pointer.");
-    return element({ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f, width, height }, args...);
-};
-
-
-template<typename TElement, typename ... TArgs>
-int ExpandContainer(TElement element, float x, float y, TArgs... args) {
-    static_assert(std::is_pointer<TElement>::value, "TElement must be a function pointer.");
-    return element({ x, y, GetScreenWidth(), GetScreenHeight() }, args...);
-};
-
-
-template<SizeFlags size_flags>
-typename std::enable_if<(size_flags == SIZE_FLAGS_VERTICAL_EXPAND), Rectangle>::type
-get_vbox_child_bounds(const ContainerLayout& layout, const ContainerChildLayout& child_layout) {
-    return {
-            layout.next_child_position.x,
-            layout.next_child_position.y,
-            child_layout.minimum_size.x,
-            layout.bounds.height / layout.child_count,
-    };
-}
-
-
-template<SizeFlags size_flags>
-typename std::enable_if<(size_flags == SIZE_FLAGS_HORIZONTAL_EXPAND), Rectangle>::type
-get_vbox_child_bounds(const ContainerLayout& layout, const ContainerChildLayout& child_layout) {
-    return {
-            layout.next_child_position.x,
-            layout.next_child_position.y,
-            layout.bounds.width,
-            child_layout.minimum_size.y,
-    };
-}
-
-
-template<SizeFlags size_flags>
-typename std::enable_if<(size_flags == SIZE_FLAGS_EXPAND), Rectangle>::type
-get_vbox_child_bounds(const ContainerLayout& layout, const ContainerChildLayout& child_layout) {
-    std::ignore = child_layout.size_flags;
-    return {
-            layout.next_child_position.x,
-            layout.next_child_position.y,
-            layout.bounds.width,
-            layout.bounds.height / layout.child_count,
-    };
-}
-
-
-template<SizeFlags size_flags>
-typename std::enable_if<(size_flags & SIZE_FLAGS_HORIZONTAL_SHRINK_BEGIN) != 0, Rectangle>::type
-get_vbox_child_bounds(const ContainerLayout& layout, const ContainerChildLayout& child_layout) {
-    return {
-            layout.next_child_position.x,
-            layout.next_child_position.y,
-            child_layout.minimum_size.x,
-            child_layout.minimum_size.y,
-    };
-}
-
-
-template<SizeFlags size_flags>
-typename std::enable_if<(size_flags & SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER) != 0, Rectangle>::type
-get_vbox_child_bounds(const ContainerLayout& layout, const ContainerChildLayout& child_layout) {
-    return {
-            layout.next_child_position.x + ((layout.bounds.width / 2.0f) - (child_layout.minimum_size.x / 2.0f)),
-            layout.next_child_position.y,
-            child_layout.minimum_size.x,
-            child_layout.minimum_size.y,
-    };
-}
-
-
-template<SizeFlags size_flags>
-typename std::enable_if<(size_flags & SIZE_FLAGS_HORIZONTAL_SHRINK_END) != 0, Rectangle>::type
-get_vbox_child_bounds(const ContainerLayout& layout, const ContainerChildLayout& child_layout) {
-    return {
-            layout.bounds.x + layout.bounds.width - child_layout.minimum_size.x,
-            layout.next_child_position.y,
-            child_layout.minimum_size.x,
-            child_layout.minimum_size.y,
-    };
-}
-
-
-Rectangle get_vbox_child_bounds(const ContainerLayout& layout, const ContainerChildLayout& child_layout) {
-    switch (child_layout.size_flags) {
-        case SIZE_FLAGS_HORIZONTAL_SHRINK_BEGIN:
-            return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_SHRINK_BEGIN>(layout, child_layout);
-        case SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER:
-            return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER>(layout, child_layout);
-        case SIZE_FLAGS_HORIZONTAL_SHRINK_END:
-            return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_SHRINK_END>(layout, child_layout);
-        case SIZE_FLAGS_HORIZONTAL_EXPAND:
-            return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_EXPAND>(layout, child_layout);
-        case SIZE_FLAGS_VERTICAL_EXPAND:
-            return get_vbox_child_bounds<SIZE_FLAGS_VERTICAL_EXPAND>(layout, child_layout);
-        case SIZE_FLAGS_SHRINK_BEGIN:
-            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
-        case SIZE_FLAGS_SHRINK_CENTER:
-            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_CENTER>(layout, child_layout);
-        case SIZE_FLAGS_SHRINK_END:
-            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_END>(layout, child_layout);
-        case SIZE_FLAGS_EXPAND:
-            return get_vbox_child_bounds<SIZE_FLAGS_EXPAND>(layout, child_layout);
-        case SIZE_FLAGS_VERTICAL_SHRINK_BEGIN:
-        case SIZE_FLAGS_VERTICAL_SHRINK_CENTER:
-        case SIZE_FLAGS_VERTICAL_SHRINK_END:
-        default:
-            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
-    }
-}
-
-
-template<typename TElement, typename ... TArgs>
-int VBoxChild(ContainerLayout& layout, const ContainerChildLayout& child_layout, TElement element, TArgs... args) {
-    static_assert(std::is_pointer<TElement>::value, "TElement must be a function pointer.");
-    Rectangle child_bounds = get_vbox_child_bounds(layout, child_layout);
-
-    layout.index++;
-    if (layout.index < layout.child_count) {
-        layout.next_child_position.y = child_bounds.y + child_bounds.height;
-    } else {
-        layout.index = 0;
-        layout.next_child_position.y = 0.0f;
+template<size_t size, IndexingMode indexing_mode>
+class GUI {
+private:
+    int next_id = 0;
+    std::array<Layout, size> _arena {};
+public:
+    static GUI& get_singleton() {
+        static GUI<size, indexing_mode> _instance;
+        return _instance;
     }
 
-    return element(child_bounds, args...);
+    inline int BeginDrawing() {
+        return next_id;
+    }
+
+    inline void EndDrawing() {
+        next_id = 0;
+    }
+
+    template<ContainerType type>
+    typename std::enable_if<type == CONTAINER_TYPE_CENTER, int>::type
+    Begin(int id, float width, float height) {
+        int next_id = _register_next_id();
+
+        _get<indexing_mode>(id) = {
+                type,
+                {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f, width, height},
+        };
+
+        return next_id;
+    }
+
+    void End(int id) {
+        std::ignore = id;
+    }
+
+    template<ContainerType type>
+    int Begin(int id, Rectangle bounds) {
+        int next_id = _register_next_id();
+
+        _get<indexing_mode>(id) = {};
+
+        return next_id;
+    }
+
+    template<ContainerType parent_type, typename TGuiFunction, typename ... TArgs>
+    typename std::enable_if<parent_type == CONTAINER_TYPE_CENTER, std::pair<int, int>>::type
+    Child(int id, int parent_id, TGuiFunction gui_function, TArgs... args) {
+        int next_id = _register_next_id();
+
+        Layout& parent_layout = _get<indexing_mode>(parent_id);
+
+        _get<indexing_mode>(id) = {
+                CONTAINER_TYPE_NONE,
+                {
+                    parent_layout.bounds.x - (parent_layout.bounds.width / 2.0f),
+                    parent_layout.bounds.y - (parent_layout.bounds.height / 2.0f),
+                    parent_layout.bounds.width,
+                    parent_layout.bounds.height,
+                },
+        };
+
+        int result = gui_function(_get<indexing_mode>(id).bounds, std::forward<TArgs...>(args...));
+
+        return {next_id, result};
+    }
+
+private:
+    inline int _register_next_id() {
+        return ++next_id;
+    }
+
+    template<IndexingMode in_indexing_mode>
+    inline typename std::enable_if<in_indexing_mode == INDEXING_MODE_SAFE, Layout&>::type
+    _get(int index) {
+        return _arena.at(index);
+    }
+
+    template<IndexingMode in_indexing_mode>
+    inline typename std::enable_if<in_indexing_mode == INDEXING_MODE_UNCHECKED, Layout&>::type
+    _get(int index) {
+        return _arena[index];
+    }
 };
 
 
-    template<SizeFlags size_flags, typename TElement, typename ... TArgs>
-    int VBoxChild(ContainerLayout& layout, const ContainerChildLayout& child_layout, TElement element, TArgs... args) {
-        static_assert(std::is_pointer<TElement>::value, "TElement must be a function pointer.");
-        Rectangle child_bounds = get_vbox_child_bounds<size_flags>(layout, child_layout);
+//template<typename TElement, typename ... TArgs>
+//int CenterContainer(TElement element, float width, float height, TArgs... args) {
+//    static_assert(std::is_pointer<TElement>::value, "TElement must be a function pointer.");
+//    return element({ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f, width, height }, args...);
+//};
+//
+//
+//template<typename TElement, typename ... TArgs>
+//int ExpandContainer(TElement element, float x, float y, TArgs... args) {
+//    static_assert(std::is_pointer<TElement>::value, "TElement must be a function pointer.");
+//    return element({ x, y, GetScreenWidth(), GetScreenHeight() }, args...);
+//};
+//
+//
+//template<SizeFlags size_flags>
+//typename std::enable_if<(size_flags == SIZE_FLAGS_VERTICAL_EXPAND), Rectangle>::type
+//get_vbox_child_bounds(const Layout& layout, const ChildLayout& child_layout) {
+//    return {
+//            layout.next_child_position.x,
+//            layout.next_child_position.y,
+//            child_layout.minimum_size.x,
+//            layout.bounds.height / layout.child_count,
+//    };
+//}
+//
+//
+//template<SizeFlags size_flags>
+//typename std::enable_if<(size_flags == SIZE_FLAGS_HORIZONTAL_EXPAND), Rectangle>::type
+//get_vbox_child_bounds(const Layout& layout, const ChildLayout& child_layout) {
+//    return {
+//            layout.next_child_position.x,
+//            layout.next_child_position.y,
+//            layout.bounds.width,
+//            child_layout.minimum_size.y,
+//    };
+//}
+//
+//
+//template<SizeFlags size_flags>
+//typename std::enable_if<(size_flags == SIZE_FLAGS_EXPAND), Rectangle>::type
+//get_vbox_child_bounds(const Layout& layout, const ChildLayout& child_layout) {
+//    std::ignore = child_layout.size_flags;
+//    return {
+//            layout.next_child_position.x,
+//            layout.next_child_position.y,
+//            layout.bounds.width,
+//            layout.bounds.height / layout.child_count,
+//    };
+//}
+//
+//
+//template<SizeFlags size_flags>
+//typename std::enable_if<(size_flags & SIZE_FLAGS_HORIZONTAL_SHRINK_BEGIN) != 0, Rectangle>::type
+//get_vbox_child_bounds(const Layout& layout, const ChildLayout& child_layout) {
+//    return {
+//            layout.next_child_position.x,
+//            layout.next_child_position.y,
+//            child_layout.minimum_size.x,
+//            child_layout.minimum_size.y,
+//    };
+//}
+//
+//
+//template<SizeFlags size_flags>
+//typename std::enable_if<(size_flags & SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER) != 0, Rectangle>::type
+//get_vbox_child_bounds(const Layout& layout, const ChildLayout& child_layout) {
+//    return {
+//            layout.next_child_position.x + ((layout.bounds.width / 2.0f) - (child_layout.minimum_size.x / 2.0f)),
+//            layout.next_child_position.y,
+//            child_layout.minimum_size.x,
+//            child_layout.minimum_size.y,
+//    };
+//}
+//
+//
+//template<SizeFlags size_flags>
+//typename std::enable_if<(size_flags & SIZE_FLAGS_HORIZONTAL_SHRINK_END) != 0, Rectangle>::type
+//get_vbox_child_bounds(const Layout& layout, const ChildLayout& child_layout) {
+//    return {
+//            layout.bounds.x + layout.bounds.width - child_layout.minimum_size.x,
+//            layout.next_child_position.y,
+//            child_layout.minimum_size.x,
+//            child_layout.minimum_size.y,
+//    };
+//}
+//
+//
+//Rectangle get_vbox_child_bounds(const Layout& layout, const ChildLayout& child_layout) {
+//    switch (child_layout.size_flags) {
+//        case SIZE_FLAGS_HORIZONTAL_SHRINK_BEGIN:
+//            return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_SHRINK_BEGIN>(layout, child_layout);
+//        case SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER:
+//            return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER>(layout, child_layout);
+//        case SIZE_FLAGS_HORIZONTAL_SHRINK_END:
+//            return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_SHRINK_END>(layout, child_layout);
+//        case SIZE_FLAGS_HORIZONTAL_EXPAND:
+//            return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_EXPAND>(layout, child_layout);
+//        case SIZE_FLAGS_VERTICAL_EXPAND:
+//            return get_vbox_child_bounds<SIZE_FLAGS_VERTICAL_EXPAND>(layout, child_layout);
+//        case SIZE_FLAGS_SHRINK_BEGIN:
+//            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
+//        case SIZE_FLAGS_SHRINK_CENTER:
+//            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_CENTER>(layout, child_layout);
+//        case SIZE_FLAGS_SHRINK_END:
+//            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_END>(layout, child_layout);
+//        case SIZE_FLAGS_EXPAND:
+//            return get_vbox_child_bounds<SIZE_FLAGS_EXPAND>(layout, child_layout);
+//        case SIZE_FLAGS_VERTICAL_SHRINK_BEGIN:
+//        case SIZE_FLAGS_VERTICAL_SHRINK_CENTER:
+//        case SIZE_FLAGS_VERTICAL_SHRINK_END:
+//        default:
+//            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
+//    }
+//}
 
-        layout.index++;
-        if (layout.index < layout.child_count) {
-            layout.next_child_position.y = child_bounds.y + child_bounds.height;
-        } else {
-            layout.index = 0;
-            layout.next_child_position.y = 0.0f;
-        }
 
-        return element(child_bounds, args...);
-    };
+//template<typename TElement, typename ... TArgs>
+//int VBoxChild(ContainerLayout& layout, const ContainerChildLayout& child_layout, TElement element, TArgs... args) {
+//    static_assert(std::is_pointer<TElement>::value, "TElement must be a function pointer.");
+//    Rectangle child_bounds = get_vbox_child_bounds(layout, child_layout);
+//
+//    layout.index++;
+//    if (layout.index < layout.child_count) {
+//        layout.next_child_position.y = child_bounds.y + child_bounds.height;
+//    } else {
+//        layout.index = 0;
+//        layout.next_child_position.y = 0.0f;
+//    }
+//
+//    return element(child_bounds, args...);
+//};
+//
+//
+//    template<SizeFlags size_flags, typename TElement, typename ... TArgs>
+//    int VBoxChild(ContainerLayout& layout, const ContainerChildLayout& child_layout, TElement element, TArgs... args) {
+//        static_assert(std::is_pointer<TElement>::value, "TElement must be a function pointer.");
+//        Rectangle child_bounds = get_vbox_child_bounds<size_flags>(layout, child_layout);
+//
+//        layout.index++;
+//        if (layout.index < layout.child_count) {
+//            layout.next_child_position.y = child_bounds.y + child_bounds.height;
+//        } else {
+//            layout.index = 0;
+//            layout.next_child_position.y = 0.0f;
+//        }
+//
+//        return element(child_bounds, args...);
+//    };
 
 
 //template<typename TElement, typename ... TArgs>

@@ -38,6 +38,7 @@
 
 int main() {
 
+    AutoRayGui::GUI<8u, AutoRayGui::INDEXING_MODE_SAFE>& gui = AutoRayGui::GUI<8u, AutoRayGui::INDEXING_MODE_SAFE>::get_singleton();
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(800, 600, "Raylib + RayGUI Example");
 
@@ -48,56 +49,20 @@ int main() {
     while (!WindowShouldClose()) // Main loop
     {
         // Update logic (if needed)
-
         BeginDrawing();
+        int current_id = gui.BeginDrawing();
         ClearBackground(BLACK);
 
-        // Draw GUI elements
-        if (AutoRayGui::ExpandContainer(&GuiPanel, 0.0f, 0.0f, "An expanded panel!"))
-        {
-            // Button was clicked - handle event
-        }
+        Vector2 m = MeasureTextEx(GuiGetFont(), "Hello Free Child!", GetFontDefault().baseSize, 2.0f);
+        int current_child_id = gui.Begin<AutoRayGui::CONTAINER_TYPE_CENTER>(current_id, m.x, m.y);
+        std::pair<int, int> result {current_child_id, 0};
+        result = gui.Child<AutoRayGui::CONTAINER_TYPE_CENTER>(result.first, current_id, &GuiButton, "Hello Btn  Child!");
+        result = gui.Child<AutoRayGui::CONTAINER_TYPE_CENTER>(result.first, current_id, &GuiLabel, "Hello Free Child!");
+        current_child_id = result.first;
+        gui.End(current_id);
+        current_id = current_child_id;
 
-        if (AutoRayGui::CenterContainer(&GuiCheckBox, width, height, "Check Me!", &is_checked))
-        {
-            // Button was clicked - handle event
-        }
-
-
-        AutoRayGui::ContainerLayout vbox_layout{{0.0f, 0.0f, 160.0f, 200.0f}, 5u, 0u, {0.0f, 0.0f}};
-
-        AutoRayGui::ContainerChildLayout vbox_child_layout {
-                {80.0f, 20.0f},
-                AutoRayGui::SIZE_FLAGS_EXPAND,
-        };
-
-        std::string message = "Hello from vbox! Child: ";
-//        for (size_t i = 0u; i < vbox_layout.child_count; ++i) {
-//            if (AutoRayGui::VBoxChild<AutoRayGui::SIZE_FLAGS_EXPAND>(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(i)).c_str())) {
-//                //
-//            }
-//        }
-
-        if (AutoRayGui::VBoxChild<AutoRayGui::SIZE_FLAGS_EXPAND>(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(0)).c_str())) {
-            //
-        }
-
-        if (AutoRayGui::VBoxChild<AutoRayGui::SIZE_FLAGS_VERTICAL_EXPAND>(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(1)).c_str())) {
-            //
-        }
-
-        if (AutoRayGui::VBoxChild<AutoRayGui::SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER>(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(2)).c_str())) {
-            //
-        }
-
-        if (AutoRayGui::VBoxChild<AutoRayGui::SIZE_FLAGS_HORIZONTAL_SHRINK_END>(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(3)).c_str())) {
-            //
-        }
-
-        if (AutoRayGui::VBoxChild(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(4)).c_str())) {
-            //
-        }
-
+        gui.EndDrawing();
         EndDrawing();
     }
 
