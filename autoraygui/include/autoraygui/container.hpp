@@ -162,12 +162,6 @@ Rectangle get_vbox_child_bounds(const ContainerLayout& layout, const ContainerCh
             return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_SHRINK_END>(layout, child_layout);
         case SIZE_FLAGS_HORIZONTAL_EXPAND:
             return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_EXPAND>(layout, child_layout);
-        case SIZE_FLAGS_VERTICAL_SHRINK_BEGIN:
-            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
-        case SIZE_FLAGS_VERTICAL_SHRINK_CENTER:
-            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
-        case SIZE_FLAGS_VERTICAL_SHRINK_END:
-            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
         case SIZE_FLAGS_VERTICAL_EXPAND:
             return get_vbox_child_bounds<SIZE_FLAGS_VERTICAL_EXPAND>(layout, child_layout);
         case SIZE_FLAGS_SHRINK_BEGIN:
@@ -178,6 +172,9 @@ Rectangle get_vbox_child_bounds(const ContainerLayout& layout, const ContainerCh
             return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_END>(layout, child_layout);
         case SIZE_FLAGS_EXPAND:
             return get_vbox_child_bounds<SIZE_FLAGS_EXPAND>(layout, child_layout);
+        case SIZE_FLAGS_VERTICAL_SHRINK_BEGIN:
+        case SIZE_FLAGS_VERTICAL_SHRINK_CENTER:
+        case SIZE_FLAGS_VERTICAL_SHRINK_END:
         default:
             return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
     }
