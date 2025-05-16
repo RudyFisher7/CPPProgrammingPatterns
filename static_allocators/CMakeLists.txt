@@ -33,12 +33,13 @@ message(STATUS "Configured for compiler architecture: ${CMAKE_CXX_COMPILER_ARCHI
 message(STATUS "Configured for compiler abi: ${CMAKE_CXX_COMPILER_ABI}")
 message(STATUS "Configured for system: ${CMAKE_SYSTEM_NAME}")
 
+#todo:: define options to allow compiling with different allocator implementations.
 set(SOURCES
         source/free_list_allocator.c
 )
 
 set(HEADERS
-        include/static_allocators/free_list_allocator.h
+        include/static_allocators/allocator.h
 )
 
 add_library(${PROJECT_NAME} STATIC

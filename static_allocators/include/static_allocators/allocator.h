@@ -29,5 +29,24 @@
 
 
 
+#ifdef __cplusplus
+#include <cstdlib>
+extern "C" {
+#else
+#include <stdlib.h>
+#endif
+
+#ifndef KOI_HEAP_SIZE
+#define KOI_HEAP_SIZE 16u
+#endif
+
+extern void koi_static_init(void);
+extern void* koi_static_alloc(size_t size);
+extern void koi_static_free(void* ptr);
+
+#ifdef __cplusplus
+};
+#endif
+
 
 #endif //STATIC_ALLOCATORS_FREE_LIST_ALLOCATOR_H
