@@ -27,3 +27,4 @@ project(CPPProgrammingPatterns)
 
 add_subdirectory(pub_sub)
 add_subdirectory(reflection)
+add_subdirectory(autoraygui)

@@ -27,7 +27,7 @@ project(KoiPubSubTest)
 
 Include(FetchContent)
 
-if(NOT Catch2_POPULATED)
+if(NOT catch2_POPULATED)#fixme:: still fetches in each sibling test project
     message(STATUS "${PROJECT_NAME}: fetch Catch2.")
     FetchContent_Declare(
             Catch2
@@ -40,19 +40,21 @@ if(NOT Catch2_POPULATED)
     FetchContent_MakeAvailable(Catch2)
 
     FetchContent_GetProperties(Catch2)
-    if(NOT Catch2_POPULATED)
-        FetchContent_Populate(Catch2)
-    endif()
-
+#    FetchContent_Populate(Catch2)
     list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
     message(STATUS "${CMAKE_MODULE_PATH}")
 else()
     message(STATUS "${PROJECT_NAME}: Catch2 already available.")
 endif()
 
+if(catch2_POPULATED)
+    set(catch2_POPULATED TRUE PARENT_SCOPE)
+    message(STATUS "Catch2 populated: ${catch2_POPULATED}")
+endif()
+
 
 add_executable(${PROJECT_NAME}
-        koi_pub_sub_test.cpp
+        test.cpp
         mock_object.cpp
 )
 

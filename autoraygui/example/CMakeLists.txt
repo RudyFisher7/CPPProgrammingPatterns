@@ -22,41 +22,17 @@
 
 
 cmake_minimum_required(VERSION 3.26)
-project(AutoRayGui LANGUAGES CXX VERSION 0.0.1)
+project(AutoRayGuiExample)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-message(STATUS "Project: ${PROJECT_NAME}")
-message(STATUS "Configured for compiler id: ${CMAKE_CXX_COMPILER_ID}")
-message(STATUS "Configured for compiler architecture: ${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
-message(STATUS "Configured for compiler abi: ${CMAKE_CXX_COMPILER_ABI}")
-message(STATUS "Configured for system: ${CMAKE_SYSTEM_NAME}")
+set(COMPLETE_EXAMPLE AutoRayGuiCompleteExample)
 
-set(SOURCES
+add_executable(${COMPLETE_EXAMPLE}
+        complete_example.cpp
 )
 
-set(HEADERS
+target_link_libraries(${COMPLETE_EXAMPLE} PUBLIC
+        AutoRayGui
+        raylib
+        raygui
 )
-
-add_library(${PROJECT_NAME} STATIC
-        ${SOURCES}
-        ${HEADERS}
-)
-
-target_include_directories(${PROJECT_NAME} PUBLIC
-        include
-)
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
-else()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
-endif()
-
-
-option(ENABLE_TESTS "Enable unit tests" ON)
-
-if (ENABLE_TESTS)
-    add_subdirectory(test)
-endif()

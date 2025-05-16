@@ -1,0 +1,6 @@
+[submodule "autoraygui/third_party/raylib"]
+	path = autoraygui/third_party/raylib
+	url = https://github.com/raysan5/raylib.git
+[submodule "autoraygui/third_party/raygui"]
+	path = autoraygui/third_party/raygui
+	url = https://github.com/raysan5/raygui.git

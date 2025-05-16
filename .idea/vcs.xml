@@ -2,5 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/autoraygui/third_party/raygui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/autoraygui/third_party/raylib" vcs="Git" />
   </component>
 </project>

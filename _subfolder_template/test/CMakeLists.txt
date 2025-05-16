@@ -27,7 +27,7 @@ project(LibNameTest)
 
 Include(FetchContent)
 
-if(NOT Catch2_POPULATED)
+if(NOT catch2_POPULATED)#fixme:: still fetches in each sibling test project
     message(STATUS "${PROJECT_NAME}: fetch Catch2.")
     FetchContent_Declare(
             Catch2
@@ -38,12 +38,7 @@ if(NOT Catch2_POPULATED)
     )
 
     FetchContent_MakeAvailable(Catch2)
-
     FetchContent_GetProperties(Catch2)
-    if(NOT Catch2_POPULATED)
-        FetchContent_Populate(Catch2)
-    endif()
-
     list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
     message(STATUS "${CMAKE_MODULE_PATH}")
 else()
