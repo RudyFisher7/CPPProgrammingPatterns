@@ -2,6 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_out/cmake-build-debug/_deps/catch2-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/autoraygui/third_party/raygui" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/autoraygui/third_party/raylib" vcs="Git" />
   </component>
