@@ -22,9 +22,39 @@
 
 
 cmake_minimum_required(VERSION 3.26)
-project(CPPProgrammingPatterns)
+project(AutoRayGuiTest)
 
 
-add_subdirectory(pub_sub)
-add_subdirectory(reflection)
-add_subdirectory(autoraygui)
+Include(FetchContent)
+
+if(NOT catch2_POPULATED)#fixme:: still fetches in each sibling test project
+    message(STATUS "${PROJECT_NAME}: fetch Catch2.")
+    FetchContent_Declare(
+            Catch2
+            GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+            GIT_TAG        v3.4.0 # or a later release
+            GIT_PROGRESS TRUE
+            GIT_SHALLOW TRUE
+    )
+
+    FetchContent_MakeAvailable(Catch2)
+    FetchContent_GetProperties(Catch2)
+    list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+    message(STATUS "${CMAKE_MODULE_PATH}")
+else()
+    message(STATUS "${PROJECT_NAME}: Catch2 already available.")
+endif()
+
+
+add_executable(${PROJECT_NAME}
+        test.cpp
+)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC
+        AutoRayGui
+        Catch2::Catch2
+)
+
+include(CTest)
+include(Catch)
+catch_discover_tests(${PROJECT_NAME})

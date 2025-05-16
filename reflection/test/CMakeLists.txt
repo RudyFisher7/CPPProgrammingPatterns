@@ -21,23 +21,24 @@
 # SOFTWARE.
 
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.26)
 project(KoiReflectionTest)
 
 
 Include(FetchContent)
 
-if(NOT Catch2_FOUND)#fixme:: always fetches
+if(NOT catch2_POPULATED)#fixme:: still fetches in each sibling test project
     message(STATUS "${PROJECT_NAME}: fetch Catch2.")
     FetchContent_Declare(
             Catch2
             GIT_REPOSITORY https://github.com/catchorg/Catch2.git
             GIT_TAG        v3.4.0 # or a later release
-            FIND_PACKAGE_ARGS
+            GIT_PROGRESS TRUE
+            GIT_SHALLOW TRUE
     )
 
     FetchContent_MakeAvailable(Catch2)
-
+    FetchContent_GetProperties(Catch2)
     list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
     message(STATUS "${CMAKE_MODULE_PATH}")
 else()
@@ -45,14 +46,12 @@ else()
 endif()
 
 
-set(KOI_REFLECTION_TEST KoiReflectionTest)
-
-add_executable(${KOI_REFLECTION_TEST}
+add_executable(${PROJECT_NAME}
         test.cpp
         mock_object.hpp
 )
 
-target_link_libraries(${KOI_REFLECTION_TEST} PUBLIC
+target_link_libraries(${PROJECT_NAME} PUBLIC
         KoiReflection
         Catch2::Catch2
 )

@@ -22,7 +22,10 @@
 
 
 cmake_minimum_required(VERSION 3.26)
-project(KoiReflection LANGUAGES CXX VERSION 0.0.1)
+project(AutoRayGui LANGUAGES CXX VERSION 0.0.1)
+
+option(ENABLE_TESTS "Enable unit tests" ON)
+option(ENABLE_EXAMPLES "Enable examples" ON)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -34,19 +37,16 @@ message(STATUS "Configured for compiler abi: ${CMAKE_CXX_COMPILER_ABI}")
 message(STATUS "Configured for system: ${CMAKE_SYSTEM_NAME}")
 
 
+add_subdirectory(third_party/raylib)
+add_subdirectory(third_party/raygui/projects/CMake)
+
+
 set(SOURCES
-        source/string_name.cpp
-        source/object.cpp
-        source/variant_reference.cpp
-        source/string_name_registry.cpp
+        source/container.cpp
 )
 
 set(HEADERS
-        include/koi_object/string_name.hpp
-        include/koi_object/object.hpp
-        include/koi_object/variant_reference.hpp
-        include/koi_object/string_name_registry.hpp
-        include/koi_object/string_names.hpp
+        include/autoraygui/container.hpp
 )
 
 add_library(${PROJECT_NAME} STATIC
@@ -64,9 +64,15 @@ else()
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 
-
-option(ENABLE_TESTS "Enable unit tests" ON)
+target_link_libraries(${PROJECT_NAME} PUBLIC
+        raylib
+#        raygui
+)
 
 if (ENABLE_TESTS)
     add_subdirectory(test)
+endif()
+
+if (ENABLE_EXAMPLES)
+    add_subdirectory(example)
 endif()

@@ -3,9 +3,9 @@
   "cmakeMinimumRequired": { "major": 3, "minor": 13 },
   "configurePresets": [
     {
-      "name": "release",
+      "name": "release_preset",
       "description": "Release build with C++11",
-      "binaryDir": "${sourceDir}/cmake-release-preset-build",
+      "binaryDir": "${sourceDir}/_out/cmake-preset-build-release",
       "cacheVariables": {
         "CMAKE_CXX_STANDARD": "11",
         "CMAKE_C_STANDARD": "99",
@@ -14,9 +14,9 @@
       }
     },
     {
-      "name": "debug",
+      "name": "debug_preset",
       "description": "Debug build with C++11",
-      "binaryDir": "${sourceDir}/cmake-debug-preset-build",
+      "binaryDir": "${sourceDir}/_out/cmake-preset-build-debug",
       "cacheVariables": {
         "CMAKE_CXX_STANDARD": "11",
         "CMAKE_C_STANDARD": "99",
@@ -28,20 +28,20 @@
   ],
   "buildPresets": [
     {
-      "name": "release",
-      "configurePreset": "release",
+      "name": "release_preset_build",
+      "configurePreset": "release_preset",
       "jobs": 12
     },
     {
-      "name": "debug",
-      "configurePreset": "debug",
+      "name": "debug_preset_build",
+      "configurePreset": "debug_preset",
       "jobs": 12
     }
   ],
   "testPresets": [
     {
       "name": "run_tests",
-      "configurePreset": "debug"
+      "configurePreset": "debug_preset"
     }
   ]
 }

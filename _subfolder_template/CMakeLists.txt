@@ -22,7 +22,7 @@
 
 
 cmake_minimum_required(VERSION 3.26)
-project(KoiReflection LANGUAGES CXX VERSION 0.0.1)
+project(LibName LANGUAGES CXX VERSION 0.0.1)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -33,20 +33,10 @@ message(STATUS "Configured for compiler architecture: ${CMAKE_CXX_COMPILER_ARCHI
 message(STATUS "Configured for compiler abi: ${CMAKE_CXX_COMPILER_ABI}")
 message(STATUS "Configured for system: ${CMAKE_SYSTEM_NAME}")
 
-
 set(SOURCES
-        source/string_name.cpp
-        source/object.cpp
-        source/variant_reference.cpp
-        source/string_name_registry.cpp
 )
 
 set(HEADERS
-        include/koi_object/string_name.hpp
-        include/koi_object/object.hpp
-        include/koi_object/variant_reference.hpp
-        include/koi_object/string_name_registry.hpp
-        include/koi_object/string_names.hpp
 )
 
 add_library(${PROJECT_NAME} STATIC

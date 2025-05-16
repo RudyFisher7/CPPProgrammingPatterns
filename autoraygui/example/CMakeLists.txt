@@ -22,9 +22,17 @@
 
 
 cmake_minimum_required(VERSION 3.26)
-project(CPPProgrammingPatterns)
+project(AutoRayGuiExample)
 
 
-add_subdirectory(pub_sub)
-add_subdirectory(reflection)
-add_subdirectory(autoraygui)
+set(COMPLETE_EXAMPLE AutoRayGuiCompleteExample)
+
+add_executable(${COMPLETE_EXAMPLE}
+        complete_example.cpp
+)
+
+target_link_libraries(${COMPLETE_EXAMPLE} PUBLIC
+        AutoRayGui
+        raylib
+        raygui
+)

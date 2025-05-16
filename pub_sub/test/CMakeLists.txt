@@ -21,38 +21,44 @@
 # SOFTWARE.
 
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.26)
 project(KoiPubSubTest)
 
 
 Include(FetchContent)
 
-if(NOT Catch2_FOUND)#fixme:: always fetches
+if(NOT catch2_POPULATED)#fixme:: still fetches in each sibling test project
     message(STATUS "${PROJECT_NAME}: fetch Catch2.")
     FetchContent_Declare(
             Catch2
             GIT_REPOSITORY https://github.com/catchorg/Catch2.git
             GIT_TAG        v3.4.0 # or a later release
-            FIND_PACKAGE_ARGS
+            GIT_PROGRESS TRUE
+            GIT_SHALLOW TRUE
     )
 
     FetchContent_MakeAvailable(Catch2)
 
+    FetchContent_GetProperties(Catch2)
+#    FetchContent_Populate(Catch2)
     list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
     message(STATUS "${CMAKE_MODULE_PATH}")
 else()
     message(STATUS "${PROJECT_NAME}: Catch2 already available.")
 endif()
 
+if(catch2_POPULATED)
+    set(catch2_POPULATED TRUE PARENT_SCOPE)
+    message(STATUS "Catch2 populated: ${catch2_POPULATED}")
+endif()
 
-set(KOI_PUB_SUB_TEST KoiPubSubTest)
 
-add_executable(${KOI_PUB_SUB_TEST}
-        koi_pub_sub_test.cpp
+add_executable(${PROJECT_NAME}
+        test.cpp
         mock_object.cpp
 )
 
-target_link_libraries(${KOI_PUB_SUB_TEST} PUBLIC
+target_link_libraries(${PROJECT_NAME} PUBLIC
         KoiPubSub
         Catch2::Catch2
 )
