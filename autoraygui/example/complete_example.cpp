@@ -64,11 +64,11 @@ int main() {
         }
 
 
-        AutoRayGui::ContainerLayout vbox_layout{{0.0f, 0.0f, 160.0f, 200.0f}, 4u, 0u, {0.0f, 0.0f}};
+        AutoRayGui::ContainerLayout vbox_layout{{0.0f, 0.0f, 160.0f, 200.0f}, 5u, 0u, {0.0f, 0.0f}};
 
         AutoRayGui::ContainerChildLayout vbox_child_layout {
                 {80.0f, 20.0f},
-                AutoRayGui::SIZE_FLAGS_SHRINK_BEGIN,
+                AutoRayGui::SIZE_FLAGS_EXPAND,
         };
 
         std::string message = "Hello from vbox! Child: ";
@@ -82,18 +82,21 @@ int main() {
             //
         }
 
-        if (AutoRayGui::VBoxChild<AutoRayGui::SIZE_FLAGS_VERTICAL_EXPAND>(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(0)).c_str())) {
+        if (AutoRayGui::VBoxChild<AutoRayGui::SIZE_FLAGS_VERTICAL_EXPAND>(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(1)).c_str())) {
             //
         }
 
-        if (AutoRayGui::VBoxChild<AutoRayGui::SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER>(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(0)).c_str())) {
+        if (AutoRayGui::VBoxChild<AutoRayGui::SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER>(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(2)).c_str())) {
             //
         }
 
-        if (AutoRayGui::VBoxChild<AutoRayGui::SIZE_FLAGS_HORIZONTAL_SHRINK_END>(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(0)).c_str())) {
+        if (AutoRayGui::VBoxChild<AutoRayGui::SIZE_FLAGS_HORIZONTAL_SHRINK_END>(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(3)).c_str())) {
             //
         }
 
+        if (AutoRayGui::VBoxChild(vbox_layout, vbox_child_layout, &GuiLabel, (message + std::to_string(4)).c_str())) {
+            //
+        }
 
         EndDrawing();
     }

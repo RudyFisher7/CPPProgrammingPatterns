@@ -31,6 +31,7 @@
 #include <cstdint>
 #include <functional>
 #include <type_traits>
+#include <tuple>
 
 
 namespace AutoRayGui {
@@ -105,6 +106,7 @@ get_vbox_child_bounds(const ContainerLayout& layout, const ContainerChildLayout&
 template<SizeFlags size_flags>
 typename std::enable_if<(size_flags == SIZE_FLAGS_EXPAND), Rectangle>::type
 get_vbox_child_bounds(const ContainerLayout& layout, const ContainerChildLayout& child_layout) {
+    std::ignore = child_layout.size_flags;
     return {
             layout.next_child_position.x,
             layout.next_child_position.y,
@@ -150,10 +152,42 @@ get_vbox_child_bounds(const ContainerLayout& layout, const ContainerChildLayout&
 }
 
 
-template<SizeFlags size_flags, typename TElement, typename ... TArgs>
+Rectangle get_vbox_child_bounds(const ContainerLayout& layout, const ContainerChildLayout& child_layout) {
+    switch (child_layout.size_flags) {
+        case SIZE_FLAGS_HORIZONTAL_SHRINK_BEGIN:
+            return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_SHRINK_BEGIN>(layout, child_layout);
+        case SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER:
+            return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER>(layout, child_layout);
+        case SIZE_FLAGS_HORIZONTAL_SHRINK_END:
+            return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_SHRINK_END>(layout, child_layout);
+        case SIZE_FLAGS_HORIZONTAL_EXPAND:
+            return get_vbox_child_bounds<SIZE_FLAGS_HORIZONTAL_EXPAND>(layout, child_layout);
+        case SIZE_FLAGS_VERTICAL_SHRINK_BEGIN:
+            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
+        case SIZE_FLAGS_VERTICAL_SHRINK_CENTER:
+            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
+        case SIZE_FLAGS_VERTICAL_SHRINK_END:
+            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
+        case SIZE_FLAGS_VERTICAL_EXPAND:
+            return get_vbox_child_bounds<SIZE_FLAGS_VERTICAL_EXPAND>(layout, child_layout);
+        case SIZE_FLAGS_SHRINK_BEGIN:
+            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
+        case SIZE_FLAGS_SHRINK_CENTER:
+            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_CENTER>(layout, child_layout);
+        case SIZE_FLAGS_SHRINK_END:
+            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_END>(layout, child_layout);
+        case SIZE_FLAGS_EXPAND:
+            return get_vbox_child_bounds<SIZE_FLAGS_EXPAND>(layout, child_layout);
+        default:
+            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_BEGIN>(layout, child_layout);
+    }
+}
+
+
+template<typename TElement, typename ... TArgs>
 int VBoxChild(ContainerLayout& layout, const ContainerChildLayout& child_layout, TElement element, TArgs... args) {
     static_assert(std::is_pointer<TElement>::value, "TElement must be a function pointer.");
-    Rectangle child_bounds = get_vbox_child_bounds<size_flags>(layout, child_layout);
+    Rectangle child_bounds = get_vbox_child_bounds(layout, child_layout);
 
     layout.index++;
     if (layout.index < layout.child_count) {
@@ -165,6 +199,23 @@ int VBoxChild(ContainerLayout& layout, const ContainerChildLayout& child_layout,
 
     return element(child_bounds, args...);
 };
+
+
+    template<SizeFlags size_flags, typename TElement, typename ... TArgs>
+    int VBoxChild(ContainerLayout& layout, const ContainerChildLayout& child_layout, TElement element, TArgs... args) {
+        static_assert(std::is_pointer<TElement>::value, "TElement must be a function pointer.");
+        Rectangle child_bounds = get_vbox_child_bounds<size_flags>(layout, child_layout);
+
+        layout.index++;
+        if (layout.index < layout.child_count) {
+            layout.next_child_position.y = child_bounds.y + child_bounds.height;
+        } else {
+            layout.index = 0;
+            layout.next_child_position.y = 0.0f;
+        }
+
+        return element(child_bounds, args...);
+    };
 
 
 //template<typename TElement, typename ... TArgs>
