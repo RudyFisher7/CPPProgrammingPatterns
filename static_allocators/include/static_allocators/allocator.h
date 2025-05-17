@@ -41,11 +41,9 @@ extern "C" {
 #endif
 
 /**
- * Must be updated if internal Block struct is changed.
+ * Gets the size of the data block structure used in the static heap.
  */
-#ifndef KOI_HEAP_BLOCK_SIZE
-#define KOI_HEAP_BLOCK_SIZE 64u
-#endif
+extern size_t koi_static_get_block_size(void);
 
 /**
  * Initializes the static memory pool for use.
@@ -62,8 +60,9 @@ extern void* koi_static_alloc(size_t size);
 /**
  * Frees the memory allocated starting at the given pointer.
  * @param ptr The pointer at the first byte of allocated memory that needs to be freed. If NULL, does nothing.
+ * @return NULL.
  */
-extern void koi_static_free(void* ptr);
+extern void* koi_static_free(void* ptr);
 
 #ifdef __cplusplus
 };

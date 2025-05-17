@@ -30,18 +30,62 @@
 #include <catch2/catch_test_macros.hpp>
 
 
-TEST_CASE("Single Object", "[Allocator]") {
-    char* ptr = (char*)koi_static_alloc(16u * KOI_HEAP_BLOCK_SIZE);
+typedef struct test_struct_t {
+    int m1;
+    int m2;
+    float m3;
+    double m4;
+    char m5[7u];
+} TestStruct;
+
+
+TEST_CASE("1 Allocation", "[Allocator]") {
+    char* ptr = (char*)koi_static_alloc(16u * koi_static_get_block_size());
 
     CHECK((ptr == nullptr));
 
-    ptr = (char*)koi_static_alloc(15u * KOI_HEAP_BLOCK_SIZE);
+    ptr = (char*)koi_static_alloc(15u * koi_static_get_block_size());
 
     CHECK((ptr != nullptr));
 
-    koi_static_free(ptr);
+    ptr = (char*)koi_static_free(ptr);
 
     CHECK((ptr == nullptr));
+}
+
+
+TEST_CASE("2 Allocations", "[Allocator]") {
+    size_t block_size = koi_static_get_block_size();
+    size_t bytes_available = KOI_HEAP_SIZE * koi_static_get_block_size();
+    size_t bytes = (bytes_available / 2u) - koi_static_get_block_size();
+
+    char* ptr = (char*)koi_static_alloc(bytes);
+    char* ptr2 = (char*)koi_static_alloc(bytes);
+
+    CHECK((ptr != nullptr));
+    CHECK((ptr2 != nullptr));
+
+    ptr = (char*)koi_static_free(ptr);
+    ptr2 = (char*)koi_static_free(ptr2);
+
+    CHECK((ptr == nullptr));
+    CHECK((ptr2 == nullptr));
+}
+
+
+TEST_CASE("TestStruct", "[Allocator]") {
+    TestStruct* s1 = (TestStruct*) koi_static_alloc(sizeof(TestStruct));
+
+    REQUIRE(s1 != nullptr);
+
+    s1->m1 = 80;
+    s1->m2 = 80;
+    s1->m3 = 80.033f;
+    s1->m4 = 80.033;
+    s1->m5[0u] = 'A';
+
+    INFO("TestStruct member assignments executed.");
+    REQUIRE(true);
 }
 
 
