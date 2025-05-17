@@ -40,8 +40,22 @@ extern "C" {
 #define KOI_HEAP_SIZE 16u
 #endif
 
+/**
+ * Initializes the static memory pool for use.
+ */
 extern void koi_static_init(void);
+
+/**
+ * Allocates the number of bytes to the memory pool, if enough exists.
+ * @param size The number of bytes to allocate. If 0, does nothing.
+ * @return A pointer to the first byte in memory if successful, or NULL if couldn't allocate.
+ */
 extern void* koi_static_alloc(size_t size);
+
+/**
+ * Frees the memory allocated starting at the given pointer.
+ * @param ptr The pointer at the first byte of allocated memory that needs to be freed. If NULL, does nothing.
+ */
 extern void koi_static_free(void* ptr);
 
 #ifdef __cplusplus
