@@ -41,6 +41,13 @@ extern "C" {
 #endif
 
 /**
+ * Must be updated if internal Block struct is changed.
+ */
+#ifndef KOI_HEAP_BLOCK_SIZE
+#define KOI_HEAP_BLOCK_SIZE 64u
+#endif
+
+/**
  * Initializes the static memory pool for use.
  */
 extern void koi_static_init(void);

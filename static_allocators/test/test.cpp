@@ -23,11 +23,35 @@
  */
 
 
+#define KOI_HEAP_SIZE 16u
+#include "static_allocators/allocator.h"
+
 #include <catch2/catch_session.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 
-TEST_CASE("REPLACE", "[REPLACE]") {
-    bool is_replaced = false;
-    CHECK(is_replaced);
+TEST_CASE("Single Object", "[Allocator]") {
+    char* ptr = (char*)koi_static_alloc(16u * KOI_HEAP_BLOCK_SIZE);
+
+    CHECK((ptr == nullptr));
+
+    ptr = (char*)koi_static_alloc(15u * KOI_HEAP_BLOCK_SIZE);
+
+    CHECK((ptr != nullptr));
+
+    koi_static_free(ptr);
+
+    CHECK((ptr == nullptr));
+}
+
+
+int main(int argc, char* argv[]) {
+    // your setup ...
+    koi_static_init();
+
+    int result = Catch::Session().run(argc, argv);
+
+    // your clean-up...
+
+    return result;
 }
