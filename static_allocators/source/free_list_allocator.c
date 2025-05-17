@@ -155,7 +155,7 @@ void koi_static_free(void* ptr) {
     }
 
     // clean the block
-    block->capacity = block->next->capacity + block->size;
+    block->capacity = block->next->capacity + block->next->index - block->index - 1u;
     block->size = 0u;
     block->data = NULL;
 
