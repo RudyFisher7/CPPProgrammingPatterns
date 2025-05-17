@@ -31,7 +31,14 @@
 
 #include "static_allocators/allocator.h"
 
+#ifdef __cplusplus
+#include <cstddef>
+#include <cstring>
+#else
 #include <stddef.h>
+#include <string.h>
+#endif
+
 
 /**
  * Contains pointer to allocated memory if any.
@@ -48,6 +55,7 @@ typedef struct block_t {
     size_t index;
     size_t size;
     char* data;
+    char padding[16u];
 } Block;
 
 
@@ -65,7 +73,7 @@ void koi_static_init(void) {
     for (size_t i = 1u; i < KOI_HEAP_SIZE - 1u; ++i) {
         heap[i].next = NULL;
         heap[i].previous = NULL;
-        heap[i].capacity = (KOI_HEAP_SIZE - i + 1) * sizeof(Block);
+        heap[i].capacity = KOI_HEAP_SIZE - i + 1u;
         heap[i].index = i;
         heap[i].size = 0u;
     }
@@ -81,81 +89,83 @@ void koi_static_init(void) {
 
 
 void* koi_static_alloc(size_t size) {
-    if (free_list == NULL) {
+    // if the heap is full, fail
+    if (free_list == NULL || size == 0u) {
         return NULL;
     }
 
-    size_t blocks_needed = (size + sizeof(Block) - 1u) / sizeof(Block);
+    // get the number of blocks needed, rounding the bytes needed up to the nearest division of sizeof(Block)
+    size_t bytes_needed = size + sizeof(Block) - 1u;
+    size_t blocks_needed = bytes_needed / sizeof(Block);
 
-    // there might be space later in the array, so use it if needed
+    // if there aren't enough blocks in this section of the heap, search for a section later in the heap to use
     Block* result = free_list;
     while (result != NULL && result->capacity < blocks_needed) {
         result = result->next;
     }
 
+    // if there wasn't enough space later in the heap, fail
     if (result == NULL) {
         return NULL;
     }
 
     result->size = blocks_needed;
     result->data = (char*)&heap[result->index + 1u];
-    free_list = &heap[result->index + blocks_needed + 1u];
-    result->next = free_list;
-    free_list->previous = result;
+    result->next = &heap[result->index + result->size + 1u];
+    result->next->previous = result;
+    result->capacity = 0u;
+    memset(result->data, '\0', bytes_needed);
+
+    if (result == free_list) {
+        free_list = &heap[result->index + blocks_needed + 1u];
+    }
 
     return result->data;
 }
 
 
 void koi_static_free(void* ptr) {
+    if (ptr == NULL) {
+        return;
+    }
+
     Block* block = (Block*)((char*)ptr - offsetof(Block, data));
 
-    // if block is before the free list
+    // if block is just before the free list
     if (block->next == free_list) {
-        for (size_t i = block->index; i < free_list->index; ++i) {
-            heap[i].next = &heap[i + 1u];
-            heap[i].previous = &heap[i - 1u];
-            heap[i].capacity = free_list->capacity + free_list->index - i;
-            heap[i].index = i;
-            heap[i].size = 0u;
-        }
-
-        free_list->previous = NULL;
-        block->next = free_list->next;
-        free_list->next = NULL;
         free_list = block;
+    }
 
-        // if block is after free list
-    } else { //todo:: implement this case
-        Block* current = block;
+    // if the next block has free space, merge this block with it for a contiguous section
+    if (block->next->capacity > 0u) {
+        block->next = block->next->next;
+    }
 
-        // if there are free blocks before this block,
-        // use the
-        if (current->previous != NULL && current->previous->size == 0u) {
-            Block *previous = block->previous;
-            while (previous->previous->size == 0u) {
-                previous = previous->previous;
-            }
+    // if there are free blocks before this block
+    if (block->previous != NULL && block->previous->capacity > 0u) {
+        Block *current = block->previous;
 
-            current = previous;
+        // get the earliest free block in the contiguous section of the heap
+        while (current->previous != NULL && current->previous->capacity > 0u) {
+            current = current->previous;
         }
 
-        size_t end_index = block->index + block->size;
-        if (current->next == NULL) {
-            --end_index;
-            heap[KOI_HEAP_SIZE - 1u].next = NULL;
-            heap[KOI_HEAP_SIZE - 1u].previous = &heap[KOI_HEAP_SIZE - 2u];
-            heap[KOI_HEAP_SIZE - 1u].capacity = 0u;
-            heap[KOI_HEAP_SIZE - 1u].index = KOI_HEAP_SIZE - 1u;
-            heap[KOI_HEAP_SIZE - 1u].size = 0u;
-        }
+        current->next = block->next;
+        block = current;
+    }
 
-        for (size_t i = current->index; i < end_index; ++i) {
-            heap[i].next = &heap[i + 1u];
-            heap[i].previous = &heap[i - 1u];
-            heap[i].capacity = (KOI_HEAP_SIZE - i + 1) * sizeof(Block);
-            heap[i].index = i;
-            heap[i].size = 0u;
-        }
+    // clean the block
+    block->capacity = block->next->capacity + block->size;
+    block->size = 0u;
+    block->data = NULL;
+
+    // finally, clean up the blocks in this section
+    for (size_t i = block->index + 1u; i < block->next->index; ++i) {
+        heap[i].next = NULL;
+        heap[i].previous = NULL;
+        heap[i].capacity = block->next->capacity + block->capacity - i;
+        heap[i].index = i;
+        heap[i].size = 0u;
+        block->data = NULL;
     }
 }
