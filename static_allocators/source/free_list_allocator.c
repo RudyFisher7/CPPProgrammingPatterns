@@ -166,6 +166,5 @@ void koi_static_free(void* ptr) {
         heap[i].capacity = block->next->capacity + block->capacity - i;
         heap[i].index = i;
         heap[i].size = 0u;
-        block->data = NULL;
     }
 }
