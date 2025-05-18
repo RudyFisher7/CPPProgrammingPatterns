@@ -30,28 +30,43 @@
 
 #include <array>
 #include <cstdint>
+#include <cmath>
 #include <functional>
 #include <type_traits>
 #include <tuple>
 #include <utility>
 
 
+namespace std {
+    template<typename _Tp>
+    constexpr bool has_reference_type() {
+        return is_reference<_Tp>::value;
+    }
+
+    template<typename _Tp, typename ... _Tps>
+    constexpr typename enable_if<(sizeof ... (_Tps) > 0), bool>::type
+    has_reference_type() {
+        return (is_reference<_Tp>::value || has_reference_type<_Tps...>());
+    }
+}
+
+
 namespace AutoRayGui {
 
 enum SizeFlags : uint16_t {
-    SIZE_FLAGS_HORIZONTAL_SHRINK_BEGIN = 0x01 << 0,
-    SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER = 0x01 << 1,
-    SIZE_FLAGS_HORIZONTAL_SHRINK_END = 0x01 << 2,
+    SIZE_FLAGS_HORIZONTAL_FIT = 0x01 << 0,
+    SIZE_FLAGS_HORIZONTAL_FIXED = 0x01 << 1,
+    SIZE_FLAGS_HORIZONTAL_SHRINK = 0x01 << 2,
     SIZE_FLAGS_HORIZONTAL_EXPAND = 0x01 << 3,
 
-    SIZE_FLAGS_VERTICAL_SHRINK_BEGIN = 0x01 << 4,
-    SIZE_FLAGS_VERTICAL_SHRINK_CENTER = 0x01 << 5,
-    SIZE_FLAGS_VERTICAL_SHRINK_END = 0x01 << 6,
+    SIZE_FLAGS_VERTICAL_FIT = 0x01 << 4,
+    SIZE_FLAGS_VERTICAL_FIXED = 0x01 << 5,
+    SIZE_FLAGS_VERTICAL_SHRINK = 0x01 << 6,
     SIZE_FLAGS_VERTICAL_EXPAND = 0x01 << 7,
 
-    SIZE_FLAGS_SHRINK_BEGIN = SIZE_FLAGS_HORIZONTAL_SHRINK_BEGIN | SIZE_FLAGS_VERTICAL_SHRINK_BEGIN,
-    SIZE_FLAGS_SHRINK_CENTER = SIZE_FLAGS_HORIZONTAL_SHRINK_CENTER | SIZE_FLAGS_VERTICAL_SHRINK_CENTER,
-    SIZE_FLAGS_SHRINK_END = SIZE_FLAGS_HORIZONTAL_SHRINK_END | SIZE_FLAGS_VERTICAL_SHRINK_END,
+    SIZE_FLAGS_FIT = SIZE_FLAGS_HORIZONTAL_FIT | SIZE_FLAGS_VERTICAL_FIT,
+    SIZE_FLAGS_FIXED = SIZE_FLAGS_HORIZONTAL_FIXED | SIZE_FLAGS_VERTICAL_FIXED,
+    SIZE_FLAGS_SHRINK = SIZE_FLAGS_HORIZONTAL_SHRINK | SIZE_FLAGS_VERTICAL_SHRINK,
     SIZE_FLAGS_EXPAND = SIZE_FLAGS_HORIZONTAL_EXPAND | SIZE_FLAGS_VERTICAL_EXPAND,
 };
 
@@ -59,32 +74,29 @@ enum ContainerType : uint8_t {
     CONTAINER_TYPE_MIN = 0,
     CONTAINER_TYPE_NONE = CONTAINER_TYPE_MIN,
     CONTAINER_TYPE_CHILD = CONTAINER_TYPE_NONE,
+    CONTAINER_TYPE_ROOT,
     CONTAINER_TYPE_HBOX,
     CONTAINER_TYPE_VBOX,
     CONTAINER_TYPE_GRID,
     CONTAINER_TYPE_CENTER,
     CONTAINER_TYPE_MARGIN,
     CONTAINER_TYPE_PANEL,
+    CONTAINER_TYPE_BORDER,
     CONTAINER_TYPE_SCROLL,
     CONTAINER_TYPE_TAB,
     CONTAINER_TYPE_SUBVIEWPORT,
     CONTAINER_TYPE_SIZE,
 };
 
-struct Layout {
+typedef struct layout_t {
     ContainerType type;
     Rectangle bounds;
-    Vector2 minimum_size;
+    Vector2 min_size;
+    Vector2 max_size;
     SizeFlags size_flags;
-    size_t row_count;
-    size_t column_count;
-    bool has_h_scroll;
-    bool has_v_scroll;
-    Vector4 margins;
-    size_t child_count;
-    size_t child_index;
-    Vector2 next_child_position;
-};
+    std::function<void()> draw_command;
+    struct layout_t* children;
+} Layout;
 
 
 enum IndexingMode : uint8_t {
@@ -95,6 +107,7 @@ enum IndexingMode : uint8_t {
 template<size_t size, IndexingMode indexing_mode>
 class GUI {
 private:
+    static void _passthrough_draw_command(){}
     int next_id = 0;
     std::array<Layout, size> _arena {};
 public:
@@ -103,13 +116,57 @@ public:
         return _instance;
     }
 
-    inline int BeginDrawing() {
-        return next_id;
+    Layout* Begin() {
+        _arena.at(next_id) = {
+                CONTAINER_TYPE_ROOT,
+                {0.0f, 0.0f, GetScreenWidth(), GetScreenHeight()},
+                {0.0f, 0.0f},
+                {GetMonitorWidth(0), GetMonitorHeight(0)},
+                SIZE_FLAGS_FIT,
+                _passthrough_draw_command,
+                nullptr,
+        };
+
+        return &_arena.at(next_id++);
     }
 
-    inline void EndDrawing() {
+    void End() {
         next_id = 0;
     }
+
+    template<typename TDrawCommand, typename ... TArgs>
+    static typename std::enable_if<!std::has_reference_type<TArgs...>(), void>::type
+    Call(int* out_return, TDrawCommand draw_command, TArgs... args) {
+        *out_return = draw_command(std::forward<TArgs>(args) ...);
+    }
+
+    template<typename TDrawCommand, typename ... TArgs>
+    std::function<void()> DrawCommand(int* out_return, TDrawCommand draw_command, TArgs... args) {
+        std::function<void()> result = std::bind(&Call<TDrawCommand, TArgs...>, out_return, draw_command, args...);
+
+        return result;
+    }
+
+//    template<typename TDrawCommand, typename ... TArgs>
+//    typename std::enable_if<std::has_reference_type<TArgs...>(), std::function<void()>>::type
+//    DrawCommand(int& out_return, TDrawCommand draw_command, TArgs... args) {
+//        std::function<void()> result = [&out_return, &draw_command, &args...] () -> void {
+//            out_return = draw_command(args...);
+//        };
+//
+//        return result;
+//    }
+
+    template<ContainerType type, typename TDrawCommand, typename ... TArgs>
+    typename std::enable_if<type == CONTAINER_TYPE_NONE, Layout*>::type
+    Begin(Layout* parent, const Layout& layout, TDrawCommand draw_command, TArgs... args) {
+        Layout* next_parent = nullptr;
+
+        _get<indexing_mode>(next_id++) = layout;
+
+        return next_parent;
+    }
+
 
     template<ContainerType type>
     typename std::enable_if<type == CONTAINER_TYPE_CENTER, int>::type
@@ -124,9 +181,16 @@ public:
         return next_id;
     }
 
-    void End(int id) {
-        std::ignore = id;
+    void UpdateLayout() {
+        _update_fit_widths();
+        _update_grow_and_shrink_widths();
+        _update_text_wrapping();
+        _update_fit_heights();
+        _update_grow_and_shrink_heights();
+        _update_positions_and_anchors();
     }
+
+    void Draw(){}
 
     template<ContainerType type>
     int Begin(int id, Rectangle bounds) {
@@ -160,6 +224,13 @@ public:
     }
 
 private:
+    void _update_fit_widths(){}
+    void _update_grow_and_shrink_widths(){}
+    void _update_text_wrapping(){}
+    void _update_fit_heights(){}
+    void _update_grow_and_shrink_heights(){}
+    void _update_positions_and_anchors(){}
+
     inline int _register_next_id() {
         return ++next_id;
     }

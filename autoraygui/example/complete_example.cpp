@@ -33,12 +33,12 @@
 #endif
 #include <raygui.h>
 
-#include <string>
+#include <iostream>
 
 
 int main() {
 
-    AutoRayGui::GUI<8u, AutoRayGui::INDEXING_MODE_SAFE>& gui = AutoRayGui::GUI<8u, AutoRayGui::INDEXING_MODE_SAFE>::get_singleton();
+    AutoRayGui::GUI<128u, AutoRayGui::INDEXING_MODE_SAFE>& gui = AutoRayGui::GUI<128u, AutoRayGui::INDEXING_MODE_SAFE>::get_singleton();
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(800, 600, "Raylib + RayGUI Example");
 
@@ -46,23 +46,35 @@ int main() {
     float height = 40;
 
     bool is_checked = false;
+
+    AutoRayGui::Layout* parent = gui.Begin();
+
+    int ret = 0;
+    std::function<void()> draw_command = gui.DrawCommand(&ret, &GuiButton, (Rectangle){0.0f, 0.0f, 100.0f, 40.0f}, "Hello Draw Command!");
+//
+//        Vector2 m = MeasureTextEx(GuiGetFont(), "Hello Free Child!", GetFontDefault().baseSize, 2.0f);
+//        int current_child_id = gui.Begin<AutoRayGui::CONTAINER_TYPE_CENTER>(current_id, m.x, m.y);
+//        std::pair<int, int> result {current_child_id, 0};
+//        result = gui.Child<AutoRayGui::CONTAINER_TYPE_CENTER>(result.first, current_id, &GuiButton, "Hello Btn  Child!");
+//        result = gui.Child<AutoRayGui::CONTAINER_TYPE_CENTER>(result.first, current_id, &GuiLabel, "Hello Free Child!");
+//        current_child_id = result.first;
+//        gui.End(current_id);
+//        current_id = current_child_id;
+
+    gui.End();
     while (!WindowShouldClose()) // Main loop
     {
-        // Update logic (if needed)
+        gui.UpdateLayout();
         BeginDrawing();
-        int current_id = gui.BeginDrawing();
         ClearBackground(BLACK);
+        draw_command();
+        GuiButton((Rectangle){120.0f, 0.0f, 100.0f, 40.0f}, "Hello Draw Command!");
+//        gui.Call(ret, &GuiButton, (Rectangle){240.0f, 0.0f, 100.0f, 40.0f}, "Hello Draw Command!");
 
-        Vector2 m = MeasureTextEx(GuiGetFont(), "Hello Free Child!", GetFontDefault().baseSize, 2.0f);
-        int current_child_id = gui.Begin<AutoRayGui::CONTAINER_TYPE_CENTER>(current_id, m.x, m.y);
-        std::pair<int, int> result {current_child_id, 0};
-        result = gui.Child<AutoRayGui::CONTAINER_TYPE_CENTER>(result.first, current_id, &GuiButton, "Hello Btn  Child!");
-        result = gui.Child<AutoRayGui::CONTAINER_TYPE_CENTER>(result.first, current_id, &GuiLabel, "Hello Free Child!");
-        current_child_id = result.first;
-        gui.End(current_id);
-        current_id = current_child_id;
+        if (ret)
+            std::cout << "ret: " << ret << std::endl;
 
-        gui.EndDrawing();
+        gui.Draw();
         EndDrawing();
     }
 
