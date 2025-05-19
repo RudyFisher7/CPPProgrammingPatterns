@@ -36,8 +36,8 @@ extern "C" {
 #include <stdlib.h>
 #endif
 
-#ifndef KOI_HEAP_SIZE
-#define KOI_HEAP_SIZE 16u
+#ifndef KOI_MEMORY_POOL_SIZE
+#define KOI_MEMORY_POOL_SIZE 16u
 #endif
 
 /**

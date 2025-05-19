@@ -25,7 +25,7 @@
 
 /**
  * A static allocator that uses a doubly-linked free list and other metadata to manage its memory allocations.
- * It uses an array of Block structs that each store a pointer to the allocated data and its metadata.
+ * It uses an array of Block structs that each store a pointer to the allocated data and its own metadata.
  */
 
 
@@ -34,21 +34,17 @@
 #ifdef __cplusplus
 #include <cstddef>
 #include <cstring>
-#include <cstdio>
 #else
 #include <stddef.h>
 #include <string.h>
-#include <stdio.h>
-#include <math.h>
 #endif
 
 
 /**
- * Contains pointer to allocated memory if any.
- * Contains metadata for managing its memory allocations.
- * next: a pointer to the next memory block in the static heap. Should be either the next Block that has memory
+ * Contains a pointer to allocated memory, if any, and metadata necessary for managing (de)allocations.
+ * next: a pointer to the next memory block in the static memory pool. Should be either the next Block that has memory
  * allocated, or the next free Block.
- * previous: a pointer to the previous memory block in the static heap. Should be either the previous Block that has
+ * previous: a pointer to the previous memory block in the static memory pool. Should be either the previous Block that has
  * memory allocated, or the previous free Block.
  */
 typedef struct block_t {
@@ -62,51 +58,9 @@ typedef struct block_t {
 
 
 
-static Block heap[KOI_HEAP_SIZE];
+static Block memory_pool[KOI_MEMORY_POOL_SIZE];
 static Block* free_list = NULL;
-
-static Block* map[KOI_HEAP_SIZE];
-static size_t next_map_available_index = 0u;
-
-
-static void koi_push_block_to_map(Block* block) {
-    map[next_map_available_index++] = block;
-}
-
-
-static Block* koi_pull_block_from_map(const char* block_data) {
-    Block* result = NULL;
-
-    size_t tmp_end = next_map_available_index;
-    (void)tmp_end;
-    for (size_t i = 0; i < KOI_HEAP_SIZE; ++i) {
-        Block* tmp = map[i];
-        printf("%llu: %p\n", i, (void*)tmp);
-    }
-
-    size_t i = 0u;
-    while (result == NULL && i < next_map_available_index) {
-        if (map[i]->data == block_data) {
-            result = map[i];
-        }
-
-        ++i;
-    }
-
-    size_t end = next_map_available_index < KOI_HEAP_SIZE ? next_map_available_index : KOI_HEAP_SIZE;
-    --i;
-    while (result != NULL && i < end - 1u) {
-        map[i]->data = map[i + 1]->data;
-
-        ++i;
-    }
-
-    if (result != NULL) {
-        --next_map_available_index;
-    }
-
-    return result;
-}
+static Block* start = NULL;
 
 
 size_t koi_static_get_block_size(void) {
@@ -115,41 +69,19 @@ size_t koi_static_get_block_size(void) {
 
 
 void koi_static_init(void) {
-    printf("%s: %llu\n", "next", offsetof(Block, next));
-    printf("%s: %llu\n", "previous", offsetof(Block, previous));
-    printf("%s: %llu\n", "index", offsetof(Block, index));
-    printf("%s: %llu\n", "capacity", offsetof(Block, capacity));
-    printf("%s: %llu\n", "size", offsetof(Block, size));
-    printf("%s: %llu\n", "data", offsetof(Block, data));
+    memory_pool[0u].next = NULL;
+    memory_pool[0u].previous = NULL;
+    memory_pool[0u].capacity = KOI_MEMORY_POOL_SIZE - 1u;
+    memory_pool[0u].index = 0u;
+    memory_pool[0u].size = 0u;
 
-    heap[0u].next = NULL;
-    heap[0u].previous = NULL;
-    heap[0u].capacity = KOI_HEAP_SIZE - 1u;
-    heap[0u].index = 0u;
-    heap[0u].size = 0u;
-
-//    for (size_t i = 1u; i < KOI_HEAP_SIZE - 1u; ++i) {
-//        heap[i].next = NULL;
-//        heap[i].previous = NULL;
-//        heap[i].capacity = KOI_HEAP_SIZE - i + 1u;
-//        heap[i].index = i;
-//        heap[i].size = 0u;
-//    }
-
-//    heap[KOI_HEAP_SIZE - 1u].next = NULL;
-//    heap[KOI_HEAP_SIZE - 1u].previous = &heap[0u];
-//    heap[KOI_HEAP_SIZE - 1u].capacity = 0u;
-//    heap[KOI_HEAP_SIZE - 1u].index = KOI_HEAP_SIZE - 1u;
-//    heap[KOI_HEAP_SIZE - 1u].size = 0u;
-
-    free_list = &heap[0u];
-
-    memset(map, 0, sizeof(Block*) * KOI_HEAP_SIZE);
+    free_list = &memory_pool[0u];
+    start = &memory_pool[0u];
 }
 
 
 void* koi_static_alloc(size_t size) {
-    // if the heap is full, fail
+    // if the memory pool is full, fail
     if (free_list == NULL || size == 0u) {
         return NULL;
     }
@@ -157,23 +89,23 @@ void* koi_static_alloc(size_t size) {
     // get the number of blocks needed, rounding the bytes needed up to the nearest division of sizeof(Block)
     size_t blocks_needed = (size + sizeof(Block) - 1u) / sizeof(Block);
 
-    // if there aren't enough blocks in this section of the heap, search for a section later in the heap to use
+    // if there aren't enough blocks in this section of the memory pool, search for a section later in the memory pool to use
     Block* result = free_list;
     while (result != NULL && result->capacity < blocks_needed) {
         result = result->next;
     }
 
-    // if there wasn't enough space later in the heap, fail
+    // if there wasn't enough space later in the memory pool, fail
     if (result == NULL) {
         return NULL;
     }
 
     size_t next_index = result->index + blocks_needed + 1u;
-    if (next_index < KOI_HEAP_SIZE) {
+    if (next_index < KOI_MEMORY_POOL_SIZE) {
         Block *old_next = result->next;
-        Block *new_next = &heap[next_index];
+        Block *new_next = &memory_pool[next_index];
 
-        // if there is some space after this allocation and before the next section (or the end of the heap)
+        // if there is some space after this allocation and before the next section (or the end of the memory pool)
         if (new_next != NULL && new_next != old_next) {
             new_next->index = next_index;
             new_next->next = old_next;
@@ -184,18 +116,16 @@ void* koi_static_alloc(size_t size) {
         }
 
         if (result == free_list) {
-            free_list = &heap[result->index + blocks_needed + 1u];
+            free_list = &memory_pool[result->index + blocks_needed + 1u];
         }
     } else {
         free_list = NULL;
     }
 
     result->size = blocks_needed;
-    result->data = (char*)&heap[result->index + 1u];
+    result->data = (char*)&memory_pool[result->index + 1u];
     result->capacity = 0u;
     memset(result->data, '\0', size);
-
-    koi_push_block_to_map(result);
 
     return result->data;
 }
@@ -206,7 +136,10 @@ void* koi_static_free(void* ptr) {
         return NULL;
     }
 
-    Block* block = koi_pull_block_from_map((char*)ptr);
+    Block* block = start;
+    while (block && block->data != ptr) {
+        block = block->next;
+    }
 
     if (block->next == NULL && block->previous == NULL) {
         block->capacity = block->size;
@@ -240,7 +173,7 @@ void* koi_static_free(void* ptr) {
     block->size = 0u;
     block->data = NULL;
 
-    // update the free list to be the earliest in the heap
+    // update the free list to be the earliest in the memory pool
     if (free_list == NULL || block->index < free_list->index) {
         free_list = block;
     }
