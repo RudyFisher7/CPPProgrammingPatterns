@@ -23,22 +23,50 @@
  */
 
 
-#include <catch2/catch_session.hpp>
-#include <catch2/catch_test_macros.hpp>
+#ifndef STATIC_ALLOCATORS_FREE_LIST_ALLOCATOR_H
+#define STATIC_ALLOCATORS_FREE_LIST_ALLOCATOR_H
 
 
-TEST_CASE("REPLACE", "[REPLACE]") {
-    bool is_replaced = false;
-    CHECK(is_replaced);
-}
 
 
-int main(int argc, char* argv[]) {
-    // your setup ...
+#ifdef __cplusplus
+#include <cstdlib>
+extern "C" {
+#else
+#include <stdlib.h>
+#endif
 
-    int result = Catch::Session().run(argc, argv);
+#ifndef KOI_HEAP_SIZE
+#define KOI_HEAP_SIZE 16u
+#endif
 
-    // your clean-up...
+/**
+ * Gets the size of the data block structure used in the static heap.
+ */
+extern size_t koi_static_get_block_size(void);
 
-    return result;
-}
+/**
+ * Initializes the static memory pool for use.
+ */
+extern void koi_static_init(void);
+
+/**
+ * Allocates the number of bytes to the memory pool, if enough exists.
+ * @param size The number of bytes to allocate. If 0, does nothing.
+ * @return A pointer to the first byte in memory if successful, or NULL if couldn't allocate.
+ */
+extern void* koi_static_alloc(size_t size);
+
+/**
+ * Frees the memory allocated starting at the given pointer.
+ * @param ptr The pointer at the first byte of allocated memory that needs to be freed. If NULL, does nothing.
+ * @return NULL.
+ */
+extern void* koi_static_free(void* ptr);
+
+#ifdef __cplusplus
+};
+#endif
+
+
+#endif //STATIC_ALLOCATORS_FREE_LIST_ALLOCATOR_H
