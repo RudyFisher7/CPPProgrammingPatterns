@@ -49,13 +49,24 @@ protected:
 
     std::array<TThisNode , size> _arena {};
 
+    size_t _arena_size;
     size_t _current_index;
 
     TThisNode* _current_parent;
 
 public:
-    NTree() : _current_index(0u), _current_parent(nullptr) {}
+    NTree() : _arena_size(0u), _current_index(0u), _current_parent(nullptr) {}
     virtual ~NTree() = default;
+
+    virtual TThis* BeginRoot() {
+        _begin_root();
+        return this;
+    }
+
+    virtual TThis* EndRoot() {
+        _end_root();
+        return this;
+    }
 
     virtual TThis* Begin() {
         _begin();
@@ -67,7 +78,36 @@ public:
         return this;
     }
 
+    virtual TThis* SetData(TNodeData value) {
+        _current_parent->data = value;
+        return this;
+    }
+
+    virtual TThisNode* Root() {
+        return &_get(0u);
+    }
+
 protected:
+    virtual void _begin_root() {
+        _get(0u) = {
+                {},
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+        };
+
+        _current_parent = &_get(0u);
+        _current_index = 1u;
+    }
+
+    virtual void _end_root() {
+        _current_parent = nullptr;
+        _arena_size = _current_index;
+        _current_index = 0u;
+    }
+
     virtual void _begin() {
         _get(_current_index) = {
                 {},
