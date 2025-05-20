@@ -58,6 +58,11 @@ int main() {
     control.draw = build_ray_gui(pressed, &GuiButton, "Hello!");
 //    control.draw = build_raylib_draw_ellipse(&DrawEllipse, 1.0f, 1.0f, RAYWHITE);
 
+        graph.BeginRoot();
+        graph.Begin();
+        graph.End();
+        graph.EndRoot();
+
     while (!WindowShouldClose()) // Main loop
     {
         Rectangle bounds {
@@ -67,13 +72,11 @@ int main() {
                 60.0f,
         };
 
-        graph.BeginRoot();
-        graph.Begin();
-        graph.End();
-        graph.EndRoot();
-
+        graph.UpdateLayout();
         BeginDrawing();
         ClearBackground(BLACK);
+
+        graph.Draw();
 
         control.draw(bounds);
 
