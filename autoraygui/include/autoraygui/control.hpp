@@ -38,16 +38,20 @@
 
 namespace AutoRayGui {
 
+typedef std::function<void(Rectangle)> DrawFunction;
+
 typedef struct control_t {
-    std::function<void(Rectangle)> draw_function;
+    std::function<void(Rectangle)> draw;
 } Control;
 
 
-void passthrough_draw_command(Rectangle bounds){}
+void draw_passthrough(Rectangle _bounds){
+    std::ignore = _bounds;
+}
 
 template<typename ... TArgs>
 std::function<void(Rectangle)> build_ray_gui(int& out_return, int(*func)(Rectangle, TArgs...), TArgs ... args) {
-    return [&out_return, &func, &args...](Rectangle bounds) -> void {
+    return [&out_return, func, &args...](Rectangle bounds) -> void {
         out_return = func(std::forward<Rectangle>(bounds), std::forward<TArgs>(args) ...);
     };
 }
@@ -55,7 +59,7 @@ std::function<void(Rectangle)> build_ray_gui(int& out_return, int(*func)(Rectang
 // pixel drawing
 template<typename ... TArgs>
 std::function<void(Rectangle)> build_raylib_draw_pixel(void(*func)(int, int, TArgs...), TArgs ... args) {
-    return [&func, &args...](Rectangle bounds) -> void {
+    return [func, &args...](Rectangle bounds) -> void {
         Vector2 center {
                 bounds.x + (bounds.width / 2.0f),
                 bounds.y + (bounds.height / 2.0f),
@@ -67,7 +71,7 @@ std::function<void(Rectangle)> build_raylib_draw_pixel(void(*func)(int, int, TAr
 
 template<typename ... TArgs>
 std::function<void(Rectangle)> build_raylib_draw_pixel(void(*func)(Vector2, TArgs...), TArgs ... args) {
-    return [&func, &args...](Rectangle bounds) -> void {
+    return [func, &args...](Rectangle bounds) -> void {
         Vector2 center {
                 bounds.x + (bounds.width / 2.0f),
                 bounds.y + (bounds.height / 2.0f),
@@ -80,14 +84,14 @@ std::function<void(Rectangle)> build_raylib_draw_pixel(void(*func)(Vector2, TArg
 // line drawing
 template<typename ... TArgs>
 std::function<void(Rectangle)> build_raylib_draw_line(void(*func)(int, int, int, int, TArgs...), TArgs ... args) {
-    return [&func, &args...](Rectangle bounds) -> void {
+    return [func, &args...](Rectangle bounds) -> void {
         func(bounds.x, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height, std::forward<TArgs>(args) ...);
     };
 }
 
 template<typename ... TArgs>
 std::function<void(Rectangle)> build_raylib_draw_line(void(*func)(Vector2, Vector2, TArgs...), TArgs ... args) {
-    return [&func, &args...](Rectangle bounds) -> void {
+    return [func, &args...](Rectangle bounds) -> void {
         func({bounds.x, bounds.y}, {bounds.x + bounds.width, bounds.y + bounds.height}, std::forward<TArgs>(args) ...);
     };
 }
@@ -95,7 +99,7 @@ std::function<void(Rectangle)> build_raylib_draw_line(void(*func)(Vector2, Vecto
 // line segments from points drawing
 template<int point_count, typename ... TArgs>
 std::function<void(Rectangle)> build_raylib_draw_line(void(*func)(const Vector2*, int, TArgs...), Vector2 points[point_count], TArgs ... args) {
-    return [&func, points, &args...](Rectangle bounds) -> void {
+    return [func, points, &args...](Rectangle bounds) -> void {
         Vector2 absolute_points[point_count];
         for (int i = 0; i < point_count; ++i) {
             absolute_points[i].x = bounds.x + (points[i].x * bounds.width);
@@ -109,7 +113,7 @@ std::function<void(Rectangle)> build_raylib_draw_line(void(*func)(const Vector2*
 // circle drawing
 template<typename ... TArgs>
 std::function<void(Rectangle)> build_raylib_draw_circle(void(*func)(int, int, float, TArgs...), float radius, TArgs ... args) {
-    return [&func, radius, &args...](Rectangle bounds) -> void {
+    return [func, radius, &args...](Rectangle bounds) -> void {
         Vector2 center {
                 bounds.x + (bounds.width / 2.0f),
                 bounds.y + (bounds.height / 2.0f),
@@ -123,7 +127,7 @@ std::function<void(Rectangle)> build_raylib_draw_circle(void(*func)(int, int, fl
 
 template<typename ... TArgs>
 std::function<void(Rectangle)> build_raylib_draw_circle(void(*func)(Vector2, float, TArgs...), float radius, TArgs ... args) {
-    return [&func, radius, &args...](Rectangle bounds) -> void {
+    return [func, radius, &args...](Rectangle bounds) -> void {
         Vector2 center {
                 bounds.x + (bounds.width / 2.0f),
                 bounds.y + (bounds.height / 2.0f),
@@ -138,7 +142,7 @@ std::function<void(Rectangle)> build_raylib_draw_circle(void(*func)(Vector2, flo
 // ellipse drawing
 template<typename ... TArgs>
 std::function<void(Rectangle)> build_raylib_draw_ellipse(void(*func)(int, int, float, float, TArgs...), float radius_h, float radius_v, TArgs ... args) {
-    return [&func, radius_h, radius_v, &args...](Rectangle bounds) -> void {
+    return [func, radius_h, radius_v, &args...](Rectangle bounds) -> void {
         float center_h = (bounds.width / 2.0f);
         float center_v = (bounds.height / 2.0f);
         Vector2 center {

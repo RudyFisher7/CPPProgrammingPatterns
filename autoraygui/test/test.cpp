@@ -125,18 +125,18 @@ void TestDrawCircleSectorFunc(Vector2 center, float radius, float start_angle, f
 TEST_CASE("Control GuiFuncs", "[Control][RayGui]") {
     Rectangle bounds {0.0f, 0.0f, 100.0f, 20.0f};
 
-    AutoRayGui::Control passthrough { &AutoRayGui::passthrough_draw_command };
-    passthrough.draw_function(bounds);
+    AutoRayGui::Control passthrough { &AutoRayGui::draw_passthrough };
+    passthrough.draw(bounds);
     CHECK(true);
 
 
-    AutoRayGui::Control reassigned { &AutoRayGui::passthrough_draw_command };
-    reassigned.draw_function(bounds);
+    AutoRayGui::Control reassigned { &AutoRayGui::draw_passthrough };
+    reassigned.draw(bounds);
     REQUIRE(true);
 
     int r_reassigned = 0;
-    reassigned.draw_function = AutoRayGui::build_ray_gui(r_reassigned, &TestGuiFuncP0);
-    reassigned.draw_function(bounds);
+    reassigned.draw = AutoRayGui::build_ray_gui(r_reassigned, &TestGuiFuncP0);
+    reassigned.draw(bounds);
     CHECK(r_reassigned == 1);
 
 
@@ -145,7 +145,7 @@ TEST_CASE("Control GuiFuncs", "[Control][RayGui]") {
             AutoRayGui::build_ray_gui(r0, &TestGuiFuncP0)
     };
 
-    c0.draw_function(bounds);
+    c0.draw(bounds);
     CHECK(r0 == 1);
 
 
@@ -154,7 +154,7 @@ TEST_CASE("Control GuiFuncs", "[Control][RayGui]") {
             AutoRayGui::build_ray_gui(r1, &TestGuiFuncP1, "Hello Draw Func!")
     };
 
-    c1.draw_function(bounds);
+    c1.draw(bounds);
     CHECK(r1 == 1);
 
 
@@ -163,7 +163,7 @@ TEST_CASE("Control GuiFuncs", "[Control][RayGui]") {
             AutoRayGui::build_ray_gui(r2, &TestGuiFuncP1, 1)
     };
 
-    c2.draw_function(bounds);
+    c2.draw(bounds);
     CHECK(r2 == 1);
 
 
@@ -173,7 +173,7 @@ TEST_CASE("Control GuiFuncs", "[Control][RayGui]") {
             AutoRayGui::build_ray_gui(r3, &TestGuiFuncP1, p3)
     };
 
-    c3.draw_function(bounds);
+    c3.draw(bounds);
     CHECK(r3 == p3);
 
 
@@ -183,7 +183,7 @@ TEST_CASE("Control GuiFuncs", "[Control][RayGui]") {
             AutoRayGui::build_ray_gui(r4, &TestGuiFuncP2, "Hello P2!", p4)
     };
 
-    c4.draw_function(bounds);
+    c4.draw(bounds);
     CHECK(r4 == p4);
 
 
@@ -193,7 +193,7 @@ TEST_CASE("Control GuiFuncs", "[Control][RayGui]") {
             AutoRayGui::build_ray_gui(r5, &TestGuiFuncP2, "Hello P2!", &p5_pressed)
     };
 
-    c5.draw_function(bounds);
+    c5.draw(bounds);
     CHECK(r5 == 1);
     CHECK(p5_pressed == 1);
 
@@ -214,7 +214,7 @@ TEST_CASE("Control GuiFuncs", "[Control][RayGui]") {
             )
     };
 
-    c6.draw_function(bounds);
+    c6.draw(bounds);
     CHECK(r6 == 1);
     CHECK(p6_pressed == 1);
     CHECK(p6_active == 1);
@@ -230,14 +230,14 @@ TEST_CASE("Control DrawFuncs", "[Control][RayLib]") {
             AutoRayGui::build_raylib_draw_line(&TestDrawLineFunc, color)
     };
 
-    c0.draw_function(bounds);
+    c0.draw(bounds);
 
 
     AutoRayGui::Control c1 {
             AutoRayGui::build_raylib_draw_line(&TestDrawLineFuncV, color)
     };
 
-    c1.draw_function(bounds);
+    c1.draw(bounds);
 
 
     Vector2 points2[5] = {
@@ -252,7 +252,7 @@ TEST_CASE("Control DrawFuncs", "[Control][RayLib]") {
             AutoRayGui::build_raylib_draw_line<5, Color>(&TestDrawFromPointsFunc, points2, color)
     };
 
-    c2.draw_function(bounds);
+    c2.draw(bounds);
 
 
     AutoRayGui::Control c3 {
@@ -263,7 +263,7 @@ TEST_CASE("Control DrawFuncs", "[Control][RayLib]") {
             )
     };
 
-    c3.draw_function(bounds);
+    c3.draw(bounds);
 
 
     AutoRayGui::Control c4 {
@@ -274,7 +274,7 @@ TEST_CASE("Control DrawFuncs", "[Control][RayLib]") {
             )
     };
 
-    c4.draw_function(bounds);
+    c4.draw(bounds);
 
 
     AutoRayGui::Control c5 {
@@ -288,7 +288,7 @@ TEST_CASE("Control DrawFuncs", "[Control][RayLib]") {
             )
     };
 
-    c5.draw_function(bounds);
+    c5.draw(bounds);
 
 
     CHECK(true);

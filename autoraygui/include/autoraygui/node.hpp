@@ -33,6 +33,8 @@ template<typename TData>
 struct Node {
     TData data;
     Node* parent;
+    Node* left_sibling;
+    Node* right_sibling;
     Node* first_child;
     Node* last_child;
 };

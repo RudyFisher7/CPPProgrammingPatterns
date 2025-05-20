@@ -52,9 +52,30 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
         AutoRayGui
+        raygui
         Catch2::Catch2
 )
 
 include(CTest)
 include(Catch)
 catch_discover_tests(${PROJECT_NAME})
+
+
+add_executable(AutoRayGuiControlSandbox
+        control_sandbox.cpp
+)
+
+target_link_libraries(AutoRayGuiControlSandbox PUBLIC
+        AutoRayGui
+        raygui
+)
+
+
+add_executable(AutoRayGuiSandbox
+        sandbox.cpp
+)
+
+target_link_libraries(AutoRayGuiSandbox PUBLIC
+        AutoRayGui
+        raygui
+)

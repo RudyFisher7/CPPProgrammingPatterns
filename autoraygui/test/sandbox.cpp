@@ -25,6 +25,7 @@
 
 #include "autoraygui/gui_graph.hpp"
 
+#include "autoraygui/control.hpp"
 
 #include <raylib.h>
 
@@ -33,48 +34,49 @@
 #endif
 #include <raygui.h>
 
-#include <iostream>
+
+using namespace AutoRayGui;
 
 
 int main() {
+    GuiGraph<128u, AutoRayGui::INDEXING_MODE_SAFE> graph;
+    const int point_count = 5;
+    Vector2 points[point_count] = {
+            {0.0f, 1.0f},
+            {0.12f, 0.1f},
+            {0.4f, 0.2f},
+            {0.6f, 0.2f},
+            {1.0f, 0.5f},
+    };
 
-    AutoRayGui::GuiGraph<128u, AutoRayGui::INDEXING_MODE_SAFE>& gui = AutoRayGui::GuiGraph<128u, AutoRayGui::INDEXING_MODE_SAFE>::get_singleton();
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(800, 600, "Raylib + RayGUI Example");
 
-    float width = 100;
-    float height = 40;
+    Control control;
 
-    bool is_checked = false;
+    int pressed = 0;
+    control.draw = build_ray_gui(pressed, &GuiButton, "Hello!");
+//    control.draw = build_raylib_draw_ellipse(&DrawEllipse, 1.0f, 1.0f, RAYWHITE);
 
-    AutoRayGui::Layout* parent = gui.BeginRoot();
-
-    int ret = 0;
-    std::function<void()> draw_command = gui.DrawCommand(&ret, &GuiButton, (Rectangle){0.0f, 0.0f, 100.0f, 40.0f}, "Hello Draw Command!");
-//
-//        Vector2 m = MeasureTextEx(GuiGetFont(), "Hello Free Child!", GetFontDefault().baseSize, 2.0f);
-//        int current_child_id = gui.Begin<AutoRayGui::CONTAINER_TYPE_CENTER>(current_id, m.x, m.y);
-//        std::pair<int, int> result {current_child_id, 0};
-//        result = gui.Child<AutoRayGui::CONTAINER_TYPE_CENTER>(result.first, current_id, &GuiButton, "Hello Btn  Child!");
-//        result = gui.Child<AutoRayGui::CONTAINER_TYPE_CENTER>(result.first, current_id, &GuiLabel, "Hello Free Child!");
-//        current_child_id = result.first;
-//        gui.End(current_id);
-//        current_id = current_child_id;
-
-    gui.EndRoot();
     while (!WindowShouldClose()) // Main loop
     {
-        gui.UpdateLayout();
+        Rectangle bounds {
+                0.0f,
+                0.0f,
+                200.0f,
+                60.0f,
+        };
+
+        graph.BeginRoot();
+        graph.Begin();
+        graph.End();
+        graph.EndRoot();
+
         BeginDrawing();
         ClearBackground(BLACK);
-        draw_command();
-        GuiButton((Rectangle){120.0f, 0.0f, 100.0f, 40.0f}, "Hello Draw Command!");
-//        gui.Call(ret, &GuiButton, (Rectangle){240.0f, 0.0f, 100.0f, 40.0f}, "Hello Draw Command!");
 
-        if (ret)
-            std::cout << "ret: " << ret << std::endl;
+        control.draw(bounds);
 
-        gui.Draw();
         EndDrawing();
     }
 
