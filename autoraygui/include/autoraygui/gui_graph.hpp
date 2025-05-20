@@ -27,6 +27,8 @@
 #define AUTO_RAY_GUI_GUI_GRAPH_HPP
 
 
+#include "autoraygui/n_tree.hpp"
+
 #include "autoraygui/enums.hpp"
 #include "autoraygui/node.hpp"
 #include "autoraygui/node_data.hpp"
@@ -50,126 +52,70 @@ namespace AutoRayGui {
 typedef Node<NodeData> GuiNode;
 
 template<size_t size, IndexingMode indexing_mode>
-class GuiGraph final {
+class GuiGraph : public NTree<NodeData, size, indexing_mode> {
 private:
-    typedef GuiGraph<size, indexing_mode> Graph;
-
-    std::array<GuiNode, size> _arena {};
-
-    size_t _next_id;
-    size_t _arena_size;
-
-    GuiNode* _current_parent;
-    GuiNode* _current_left_sibling;
-
+    typedef GuiGraph<size, indexing_mode> TGuiThis;
 public:
-    GuiGraph() : _next_id(0u), _arena_size(0u), _current_parent(nullptr), _current_left_sibling(nullptr) {}
+    GuiGraph() = default;
+    ~GuiGraph() override = default;
 
-    Graph* BeginRoot() {
-        _get(_next_id) = {
-            {
-                {},
-                { &draw_passthrough },
-            },
-            nullptr,
-            nullptr,
-            nullptr,
-            nullptr,
-            nullptr,
-        };
-
-        GuiNode* root = &_get(_next_id++);
-
-        _current_parent = root;
-
+    TGuiThis* BeginRoot() override {
+        this->_begin_root();
         return this;
     }
 
-    Graph* EndRoot() {
-        _arena_size = _next_id;
-        _next_id = 0;
-        _current_parent = nullptr;
-        _current_left_sibling = nullptr;
+    TGuiThis* EndRoot() override {
+        this->_end_root();
         return this;
     }
 
-    Graph* Begin() {
-        _get(_next_id++) = {
-                {
-                        {
-                                {0.0f, 0.0f, 0.0f, 0.0f},
-                                {0.0f, 0.0f},
-                                {0.0f, 0.0f},
-                                SIZE_FLAGS_SHRINK,
-                                CONTAINER_TYPE_CHILD,
-                        },
-                        { &draw_passthrough },
-                },
-                _current_parent,
-                _current_left_sibling,
-                nullptr,
-                nullptr,
-                nullptr,
-        };
-
-        GuiNode* child = &_get(_next_id++);
-
-        if (!_current_parent->first_child) {
-            _current_parent->first_child = child;
-        }
-
-        _current_parent->last_child = child;
-
-        if (_current_left_sibling) {
-            _current_left_sibling->right_sibling = child;
-        } else {
-            _current_left_sibling = child;
-        }
-
-        _current_parent = child;
-        _current_left_sibling = nullptr;
-
+    TGuiThis* Begin() override {
+        this->_begin();
         return this;
     }
 
-    Graph* End() {
-        _current_left_sibling = _current_parent->right_sibling;
-        _current_parent = _current_parent->parent;
+    TGuiThis* End() override {
+        this->_end();
         return this;
     }
 
-    Graph* SetBounds(const Rectangle& bounds) {
-        _current_parent->data.layout.bounds = bounds;
+    TGuiThis* SetData(NodeData value) override {
+        this->_current_parent->data = std::move(value);
         return this;
     }
 
-    Graph* SetMinSize(const Vector2& min_size) {
-        _current_parent->data.layout.min_size = min_size;
+    TGuiThis* SetBounds(const Rectangle& bounds) {
+        this->_current_parent->data.layout.bounds = bounds;
         return this;
     }
 
-    Graph* SetMaxSize(const Vector2& max_size) {
-        _current_parent->data.layout.max_size = max_size;
+    TGuiThis* SetMinSize(const Vector2& min_size) {
+        this->_current_parent->data.layout.min_size = min_size;
         return this;
     }
 
-    Graph* SetSizeFlags(SizeFlags size_flags) {
-        _current_parent->data.layout.size_flags = size_flags;
+    TGuiThis* SetMaxSize(const Vector2& max_size) {
+        this->_current_parent->data.layout.max_size = max_size;
         return this;
     }
 
-    Graph* SetContainerType(ContainerType type) {
-        _current_parent->data.layout.type = type;
+    TGuiThis* SetSizeFlags(SizeFlags size_flags) {
+        this->_current_parent->data.layout.size_flags = size_flags;
         return this;
     }
 
-    Graph* SetDrawFunc(const DrawFunction& draw) {
-        _current_parent->data.control.draw = draw;
+    TGuiThis* SetContainerType(ContainerType type) {
+        this->_current_parent->data.layout.type = type;
         return this;
     }
 
-    void UpdateLayout(SizeFlags root_size_flags = SIZE_FLAGS_FIT) {
-        _get(0u).data.layout = {
+    TGuiThis* SetDrawFunc(const DrawFunction& draw) {
+        this->_current_parent->data.control.draw = draw;
+        return this;
+    }
+
+    void UpdateLayout(SizeFlags root_size_flags = SIZE_FLAGS_FIXED) {
+        this->_get(0u).data.layout = {
                 {0.0f, 0.0f, GetScreenWidth(), GetScreenHeight()},
                 {0.0f, 0.0f},
                 {GetScreenWidth(), GetScreenHeight()},
@@ -194,22 +140,6 @@ private:
     void _update_fit_heights() {}
     void _update_grow_and_shrink_heights() {}
     void _update_positions_and_anchors() {}
-
-    inline int _register_next_id() {
-        return ++_next_id;
-    }
-
-    template<IndexingMode in_indexing_mode = indexing_mode>
-    inline typename std::enable_if<in_indexing_mode == INDEXING_MODE_SAFE, GuiNode&>::type
-    _get(int index) {
-        return _arena.at(index);
-    }
-
-    template<IndexingMode in_indexing_mode = indexing_mode>
-    inline typename std::enable_if<in_indexing_mode == INDEXING_MODE_UNCHECKED, GuiNode&>::type
-    _get(int index) {
-        return _arena[index];
-    }
 };
 
 

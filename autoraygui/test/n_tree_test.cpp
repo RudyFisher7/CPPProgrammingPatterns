@@ -24,6 +24,7 @@
 
 
 #include "autoraygui/n_tree.hpp"
+#include "autoraygui/gui_graph.hpp"
 
 #include <catch2/catch_session.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -289,6 +290,11 @@ TEST_CASE("NTree 2-4 Children", "[NTree]") {
         CHECK(child2->data == v8);
         CHECK(child3->data == v9);
     }
+}
+
+
+TEST_CASE("GuiGraph", "[GuiGraph]") {
+    AutoRayGui::GuiGraph<32u, AutoRayGui::INDEXING_MODE_SAFE> graph;
 }
 
 
