@@ -46,21 +46,36 @@ else()
 endif()
 
 
-add_executable(${PROJECT_NAME}
-        test.cpp
+include(CTest)
+include(Catch)
+
+# UNIT TESTS
+add_executable(AutoRayGuiControlTest
+        control_test.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
+target_link_libraries(AutoRayGuiControlTest PUBLIC
         AutoRayGui
         raygui
         Catch2::Catch2
 )
 
-include(CTest)
-include(Catch)
-catch_discover_tests(${PROJECT_NAME})
+catch_discover_tests(AutoRayGuiControlTest)
 
 
+add_executable(AutoRayGuiNTreeTest
+        n_tree_test.cpp
+)
+
+target_link_libraries(AutoRayGuiNTreeTest PUBLIC
+        AutoRayGui
+        Catch2::Catch2
+)
+
+catch_discover_tests(AutoRayGuiNTreeTest)
+
+
+# SANDBOXES
 add_executable(AutoRayGuiControlSandbox
         control_sandbox.cpp
 )

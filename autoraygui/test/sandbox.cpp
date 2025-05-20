@@ -73,6 +73,7 @@ int main() {
         };
 
         graph.UpdateLayout();
+
         BeginDrawing();
         ClearBackground(BLACK);
 

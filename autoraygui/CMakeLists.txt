@@ -54,6 +54,7 @@ set(HEADERS
         include/autoraygui/node.hpp
         include/autoraygui/node_data.hpp
         include/autoraygui/gui_graph.hpp
+        include/autoraygui/n_tree.hpp
 )
 
 add_library(${PROJECT_NAME} STATIC

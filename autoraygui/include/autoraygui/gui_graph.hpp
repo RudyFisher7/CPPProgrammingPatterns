@@ -68,13 +68,7 @@ public:
     Graph* BeginRoot() {
         _get(_next_id) = {
             {
-                {
-                     {0.0f, 0.0f, 0.0f, 0.0f},
-                     {0.0f, 0.0f},
-                     {0.0f, 0.0f},
-                     SIZE_FLAGS_FIT,
-                     CONTAINER_TYPE_ROOT,
-                },
+                {},
                 { &draw_passthrough },
             },
             nullptr,
@@ -94,6 +88,8 @@ public:
     Graph* EndRoot() {
         _arena_size = _next_id;
         _next_id = 0;
+        _current_parent = nullptr;
+        _current_left_sibling = nullptr;
         return this;
     }
 
@@ -142,42 +138,42 @@ public:
         return this;
     }
 
-    Graph* Bounds(const Rectangle& bounds) {
+    Graph* SetBounds(const Rectangle& bounds) {
         _current_parent->data.layout.bounds = bounds;
         return this;
     }
 
-    Graph* MinSize(const Vector2& min_size) {
+    Graph* SetMinSize(const Vector2& min_size) {
         _current_parent->data.layout.min_size = min_size;
         return this;
     }
 
-    Graph* MaxSize(const Vector2& max_size) {
+    Graph* SetMaxSize(const Vector2& max_size) {
         _current_parent->data.layout.max_size = max_size;
         return this;
     }
 
-    Graph* SizeFlags(SizeFlags size_flags) {
+    Graph* SetSizeFlags(SizeFlags size_flags) {
         _current_parent->data.layout.size_flags = size_flags;
         return this;
     }
 
-    Graph* ContainerType(ContainerType type) {
+    Graph* SetContainerType(ContainerType type) {
         _current_parent->data.layout.type = type;
         return this;
     }
 
-    Graph* DrawFunc(const DrawFunction& draw) {
+    Graph* SetDrawFunc(const DrawFunction& draw) {
         _current_parent->data.control.draw = draw;
         return this;
     }
 
-    void UpdateLayout() {
+    void UpdateLayout(SizeFlags root_size_flags = SIZE_FLAGS_FIT) {
         _get(0u).data.layout = {
                 {0.0f, 0.0f, GetScreenWidth(), GetScreenHeight()},
                 {0.0f, 0.0f},
-                {GetMonitorWidth(0), GetMonitorHeight(0)},
-                SIZE_FLAGS_FIT,
+                {GetScreenWidth(), GetScreenHeight()},
+                root_size_flags,
                 CONTAINER_TYPE_ROOT,
         };
 
