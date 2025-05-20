@@ -118,6 +118,7 @@ public:
         this->_get(0u).data.layout = {
                 {0.0f, 0.0f, GetScreenWidth(), GetScreenHeight()},
                 {0.0f, 0.0f},
+                {0.0f, 0.0f},
                 {GetScreenWidth(), GetScreenHeight()},
                 root_size_flags,
                 CONTAINER_TYPE_ROOT,

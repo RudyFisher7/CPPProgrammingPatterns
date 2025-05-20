@@ -293,8 +293,8 @@ TEST_CASE("NTree 2-4 Children", "[NTree]") {
 }
 
 
-TEST_CASE("GuiGraph", "[GuiGraph]") {
-    AutoRayGui::GuiTree<32u, AutoRayGui::INDEXING_MODE_SAFE> graph;
+TEST_CASE("GuiTree", "[GuiTree]") {
+    AutoRayGui::GuiTree<32u, AutoRayGui::INDEXING_MODE_SAFE> tree;
 }
 
 

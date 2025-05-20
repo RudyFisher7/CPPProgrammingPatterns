@@ -36,9 +36,12 @@ namespace AutoRayGui {
 
 typedef struct layout_t {
     Rectangle bounds;
+    Vector4 padding;
+    Vector2 anchor;
     Vector2 min_size;
     Vector2 max_size;
     SizeFlags size_flags;
+    ChildLayoutAxis child_layout_axis;
     ContainerType type;
 } Layout;
 

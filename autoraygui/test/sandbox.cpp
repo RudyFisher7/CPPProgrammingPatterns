@@ -39,7 +39,7 @@ using namespace AutoRayGui;
 
 
 int main() {
-    GuiTree<128u, AutoRayGui::INDEXING_MODE_SAFE> graph;
+    GuiTree<128u, AutoRayGui::INDEXING_MODE_SAFE> tree;
     const int point_count = 5;
     Vector2 points[point_count] = {
             {0.0f, 1.0f},
@@ -58,10 +58,8 @@ int main() {
     control.draw = build_ray_gui(pressed, &GuiButton, "Hello!");
 //    control.draw = build_raylib_draw_ellipse(&DrawEllipse, 1.0f, 1.0f, RAYWHITE);
 
-        graph.BeginRoot();
-        graph.Begin();
-        graph.End();
-        graph.EndRoot();
+        tree.BeginRoot()
+        ->EndRoot();
 
     while (!WindowShouldClose()) // Main loop
     {
