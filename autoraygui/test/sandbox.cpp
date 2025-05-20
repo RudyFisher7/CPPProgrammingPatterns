@@ -23,7 +23,7 @@
  */
 
 
-#include "autoraygui/gui_graph.hpp"
+#include "autoraygui/gui_tree.hpp"
 
 #include "autoraygui/control.hpp"
 
@@ -39,7 +39,7 @@ using namespace AutoRayGui;
 
 
 int main() {
-    GuiGraph<128u, AutoRayGui::INDEXING_MODE_SAFE> graph;
+    GuiTree<128u, AutoRayGui::INDEXING_MODE_SAFE> graph;
     const int point_count = 5;
     Vector2 points[point_count] = {
             {0.0f, 1.0f},

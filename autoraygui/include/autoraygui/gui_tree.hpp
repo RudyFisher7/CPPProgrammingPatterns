@@ -52,12 +52,12 @@ namespace AutoRayGui {
 typedef Node<NodeData> GuiNode;
 
 template<size_t size, IndexingMode indexing_mode>
-class GuiGraph : public NTree<NodeData, size, indexing_mode> {
+class GuiTree : public NTree<NodeData, size, indexing_mode> {
 private:
-    typedef GuiGraph<size, indexing_mode> TGuiThis;
+    typedef GuiTree<size, indexing_mode> TGuiThis;
 public:
-    GuiGraph() = default;
-    ~GuiGraph() override = default;
+    GuiTree() = default;
+    ~GuiTree() override = default;
 
     TGuiThis* BeginRoot() override {
         this->_begin_root();

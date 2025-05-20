@@ -24,7 +24,7 @@
 
 
 #include "autoraygui/n_tree.hpp"
-#include "autoraygui/gui_graph.hpp"
+#include "autoraygui/gui_tree.hpp"
 
 #include <catch2/catch_session.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -294,7 +294,7 @@ TEST_CASE("NTree 2-4 Children", "[NTree]") {
 
 
 TEST_CASE("GuiGraph", "[GuiGraph]") {
-    AutoRayGui::GuiGraph<32u, AutoRayGui::INDEXING_MODE_SAFE> graph;
+    AutoRayGui::GuiTree<32u, AutoRayGui::INDEXING_MODE_SAFE> graph;
 }
 
 

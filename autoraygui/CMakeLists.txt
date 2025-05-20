@@ -42,7 +42,7 @@ add_subdirectory(third_party/raygui/projects/CMake)
 
 
 set(SOURCES
-        source/gui_graph.cpp
+        source/gui_tree.cpp
 )
 
 set(HEADERS
@@ -53,7 +53,7 @@ set(HEADERS
         include/autoraygui/control.hpp
         include/autoraygui/node.hpp
         include/autoraygui/node_data.hpp
-        include/autoraygui/gui_graph.hpp
+        include/autoraygui/gui_tree.hpp
         include/autoraygui/n_tree.hpp
 )
 

@@ -23,7 +23,7 @@
  */
 
 
-#include "autoraygui/gui_graph.hpp"
+#include "autoraygui/gui_tree.hpp"
 
 namespace AutoRayGui {
 } // AutoRayGui
