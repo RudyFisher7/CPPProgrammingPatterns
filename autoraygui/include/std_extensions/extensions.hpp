@@ -23,17 +23,27 @@
  */
 
 
-#include "koi_object/variant_reference.hpp"
+#ifndef STD_EXTENSIONS_EXTENSIONS_HPP
+#define STD_EXTENSIONS_EXTENSIONS_HPP
 
 
-namespace Koi {
+#include <type_traits>
 
-VarRef::VarRef() : _type(typeid(nullptr)), _pointer(nullptr) {
+
+namespace StdExtensions {
+
+template<typename _Tp>
+constexpr bool has_reference_type() {
+    return std::is_reference<_Tp>::value;
+}
+
+template<typename _Tp, typename ... _Tps>
+constexpr typename std::enable_if<(sizeof ... (_Tps) > 0), bool>::type
+has_reference_type() {
+    return (std::is_reference<_Tp>::value || has_reference_type<_Tps...>());
+}
 
 }
 
-const std::type_info& VarRef::get_type() const {
-    return _type;
-}
 
-} // Koi
+#endif //STD_EXTENSIONS_EXTENSIONS_HPP

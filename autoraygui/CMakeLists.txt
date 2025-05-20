@@ -42,11 +42,18 @@ add_subdirectory(third_party/raygui/projects/CMake)
 
 
 set(SOURCES
-        source/container.cpp
+        source/gui_graph.cpp
 )
 
 set(HEADERS
-        include/autoraygui/container.hpp
+        include/std_extensions/extensions.hpp
+
+        include/autoraygui/enums.hpp
+        include/autoraygui/layout.hpp
+        include/autoraygui/control.hpp
+        include/autoraygui/node.hpp
+        include/autoraygui/node_data.hpp
+        include/autoraygui/gui_graph.hpp
 )
 
 add_library(${PROJECT_NAME} STATIC

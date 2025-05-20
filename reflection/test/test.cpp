@@ -86,7 +86,7 @@ TEST_CASE("StringName", "[StringName]") {
 
 
 TEST_CASE("VarRef", "[VarRef]") {
-    SECTION("Type", "[int]") {
+    SECTION("Type int") {
         int one = 11;
         int two = 8;
         Koi::VarRef one_ref(one);
@@ -107,7 +107,7 @@ TEST_CASE("VarRef", "[VarRef]") {
         CHECK(three == 1);
     }
 
-    SECTION("Equality", "[int]") {
+    SECTION("Equality int") {
         int one = 11;
         int* one_raw = &one;
         Koi::VarRef one_ref(one);
@@ -128,7 +128,7 @@ TEST_CASE("VarRef", "[VarRef]") {
         CHECK_FALSE(one_ref.get<MockObject*>().second);
     }
 
-    SECTION("Mutation", "[int]") {
+    SECTION("Mutation int") {
         int two = 90;
         int one = 11;
         int* one_raw = &one;
@@ -149,7 +149,7 @@ TEST_CASE("VarRef", "[VarRef]") {
         CHECK(two == one_ref.get<int>().first);
     }
 
-    SECTION("Equality", "[double]") {
+    SECTION("Equality double") {
         double one = 11;
         double* one_raw = &one;
         Koi::VarRef one_ref(one);
@@ -157,7 +157,7 @@ TEST_CASE("VarRef", "[VarRef]") {
         CHECK(one == one_ref.get<double>().first);
     }
 
-    SECTION("Mutation", "[double]") {
+    SECTION("Mutation double") {
         double two = 90;
         double one = 11;
         double* one_raw = &one;
@@ -178,7 +178,7 @@ TEST_CASE("VarRef", "[VarRef]") {
         CHECK(two == one_ref.get<double>().first);
     }
 
-    SECTION("Equality", "[std::array]") {
+    SECTION("Equality std::array") {
         std::array<float, 4> one {1.1f, 2.2f, 3.3f, 4.4f};
         std::array<float, 4>* one_raw = &one;
         Koi::VarRef one_ptr_ref(&one);

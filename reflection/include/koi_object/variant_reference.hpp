@@ -33,12 +33,13 @@
 #include <utility>
 
 
+namespace Koi {
+
 template<typename T>
 struct is_pointer_to_pointer {
     static constexpr bool value = std::is_pointer<typename std::remove_pointer<T>::type>::value;
 };
 
-namespace Koi {
 
 /**
  * A class that stores a reference to another variable and basic _type information.
@@ -56,15 +57,6 @@ private:
 public:
     VarRef();
     ~VarRef() = default;
-
-//    VarRef(const VarRef& rhs) = default;
-//    VarRef(VarRef&& rhs) noexcept;
-//
-//    VarRef& operator=(const VarRef& rhs);
-//    VarRef& operator=(VarRef&& rhs) noexcept;
-
-//    VarRef(int& value) : _type(typeid(value)), _pointer(&value) {
-//    }
 
     template<typename T, typename = typename std::enable_if<!std::is_pointer<T>::value, VarRef>::type>
     VarRef(T& value) : _type(typeid(value)), _pointer(&value) {

@@ -23,7 +23,7 @@
  */
 
 
-#include "autoraygui/container.hpp"
+#include "autoraygui/gui_graph.hpp"
 
 
 #include <raylib.h>
@@ -38,7 +38,7 @@
 
 int main() {
 
-    AutoRayGui::GUI<128u, AutoRayGui::INDEXING_MODE_SAFE>& gui = AutoRayGui::GUI<128u, AutoRayGui::INDEXING_MODE_SAFE>::get_singleton();
+    AutoRayGui::GuiGraph<128u, AutoRayGui::INDEXING_MODE_SAFE>& gui = AutoRayGui::GuiGraph<128u, AutoRayGui::INDEXING_MODE_SAFE>::get_singleton();
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(800, 600, "Raylib + RayGUI Example");
 
