@@ -41,7 +41,7 @@ typedef struct layout_t {
     Vector2 max_size;
     float child_spacing;
     SizeFlags size_flags;
-    ChildAlignment child_alignment;
+    Vector2UInt8 child_alignment;
     ChildLayoutAxis child_layout_axis;
 } Layout;
 

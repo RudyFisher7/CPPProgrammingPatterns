@@ -114,7 +114,7 @@ public:
         return this;
     }
 
-    TGuiThis* SetChildAlignment(ChildAlignment value) {
+    TGuiThis* SetChildAlignment(Vector2UInt8 value) {
         this->_current_parent->data.layout.child_alignment = value;
         return this;
     }
@@ -171,9 +171,16 @@ private:
         Node<NodeData>* root = this->Root();
         Layout& layout = root->first_child->data.layout;
 
-        switch (root->data.layout.child_alignment) {
+        switch (root->data.layout.child_alignment.x) {
             case CHILD_ALIGNMENT_CENTER:
                 layout.bounds.x = root->data.layout.bounds.x + ((root->data.layout.bounds.width / 2.0f) - (layout.bounds.width / 2.0f));
+                break;
+            default:
+                break;
+        }
+
+        switch (root->data.layout.child_alignment.y) {
+            case CHILD_ALIGNMENT_CENTER:
                 layout.bounds.y = root->data.layout.bounds.y + ((root->data.layout.bounds.height / 2.0f) - (layout.bounds.height / 2.0f));
                 break;
             default:
