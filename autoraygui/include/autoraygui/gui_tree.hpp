@@ -109,7 +109,7 @@ public:
         return this;
     }
 
-    TGuiThis* SetSizeFlags(SizeFlags value) {
+    TGuiThis* SetSizeFlags(Vector2UInt8 value) {
         this->_current_parent->data.layout.size_flags = value;
         return this;
     }
@@ -134,7 +134,7 @@ public:
         root_layout.min_size = {0.0f, 0.0f};
         root_layout.max_size = {(float)GetScreenWidth(), (float)GetScreenHeight()};
         root_layout.bounds = {0.0f, 0.0f, (float)GetScreenWidth(), (float)GetScreenHeight()};
-        root_layout.size_flags = SIZE_FLAGS_FIXED;
+        root_layout.size_flags = {SIZE_FLAGS_FIXED, SIZE_FLAGS_FIXED};
 
         _update_fit_widths();
         _update_grow_and_shrink_widths();

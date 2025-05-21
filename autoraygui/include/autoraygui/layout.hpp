@@ -40,7 +40,7 @@ typedef struct layout_t {
     Vector2 min_size;
     Vector2 max_size;
     float child_spacing;
-    SizeFlags size_flags;
+    Vector2UInt8 size_flags;
     Vector2UInt8 child_alignment;
     ChildLayoutAxis child_layout_axis;
 } Layout;
