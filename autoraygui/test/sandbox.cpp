@@ -39,7 +39,7 @@ using namespace AutoRayGui;
 
 
 int main() {
-    GuiTree<128u, AutoRayGui::INDEXING_MODE_SAFE> tree;
+    GuiTree<128u, 32u, AutoRayGui::INDEXING_MODE_SAFE> tree;
     const int point_count = 5;
     Vector2 points[point_count] = {
             {0.0f, 1.0f},
@@ -58,8 +58,8 @@ int main() {
     control.draw = build_ray_gui(pressed, &GuiButton, "Hello!");
 //    control.draw = build_raylib_draw_ellipse(&DrawEllipse, 1.0f, 1.0f, RAYWHITE);
 
-        tree.BeginRoot()->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
-            ->Begin()->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})->SetDimensions({100.0f, 50.0f})->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello!"))
+        tree.BeginRoot()->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})->SetChildSpacing(32.0f)
+            ->Begin()->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})->SetDimensions({100.0f, 50.0f})->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello!"))->SetPadding({16.0f, 16.0f, 16.0f, 16.0f})
             ->End()
             ->Begin()->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})->SetDimensions({140.0f, 30.0f})->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello Again!"))
             ->End()

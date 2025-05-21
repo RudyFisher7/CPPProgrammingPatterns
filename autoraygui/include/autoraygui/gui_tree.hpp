@@ -51,10 +51,10 @@ namespace AutoRayGui {
 
 typedef Node<NodeData> GuiNode;
 
-template<size_t size, IndexingMode indexing_mode>
+template<size_t size, size_t max_child_count, IndexingMode indexing_mode>
 class GuiTree : public NTree<NodeData, size, indexing_mode> {
 private:
-    typedef GuiTree<size, indexing_mode> TGuiThis;
+    typedef GuiTree<size, max_child_count, indexing_mode> TGuiThis;
 
 protected:
     NodeData _default_node_data;
@@ -140,7 +140,7 @@ public:
     }
 
     TGuiThis* SetPadding(const Vector4& value) {
-        this->_current_parent->data.layout.bounds = value;
+        this->_current_parent->data.layout.padding = value;
         return this;
     }
 
@@ -198,12 +198,20 @@ public:
 
     void Draw() {
         GuiNode* root = this->Root();
-
-        root->data.control.draw(root->data.layout.bounds);
-        root->first_child->data.control.draw(root->first_child->data.layout.bounds);
+        _draw(root);
     }
 
 protected:
+    void _draw(GuiNode* current) {
+        current->data.control.draw(current->data.layout.bounds);
+
+        GuiNode* current_child = current->first_child;
+        while (current_child) {
+            _draw(current_child);
+            current_child = current_child->right_sibling;
+        }
+    }
+
     void _update_fit_widths() {
         GuiNode* root = this->Root();
         GuiNode* current = root;
@@ -224,7 +232,7 @@ protected:
                     Layout* layout = &current->data.layout;
                     // add up all the siblings' widths, including their padding on both sides
                     width += layout->bounds.width + layout->padding.y + layout->padding.z;
-                    while (current->right_sibling != nullptr) {
+                    while (current->right_sibling != nullptr) {// fixme:: this isn't quite right. there could be deeper children to the right
                         layout = &current->data.layout;
                         width += layout->bounds.width + layout->padding.y + layout->padding.z;
                         current = current->right_sibling;
@@ -239,7 +247,7 @@ protected:
                     // get the max width out of each child, including their padding on both sides
                     Layout* layout = &current->data.layout;
                     width = fmaxf(layout->bounds.width + layout->padding.y + layout->padding.z, width);
-                    while (current->right_sibling != nullptr) {
+                    while (current->right_sibling != nullptr) {// fixme:: this isn't quite right. there could be deeper children to the right
                         layout = &current->data.layout;
                         width = fmaxf(layout->bounds.width + layout->padding.y + layout->padding.z, width);
                         current = current->right_sibling;
@@ -249,6 +257,9 @@ protected:
                 // set the parent's width to the calculated width
                 current_parent->data.layout.bounds.width = width;
             }
+
+
+            /* fixme:: this traversal step isn't quite right */
 
             // if the parent has a sibling to the right
             if (current_parent->right_sibling) {
@@ -290,13 +301,59 @@ protected:
     void _update_positions_and_alignment() {
         GuiNode* root = this->Root();
 
-        GuiNode* current_layer_start = root;
-        while (current_layer_start->right_sibling != nullptr) {
+        GuiNode* layer_begin = root;
+        GuiNode* current = layer_begin;
+        while (layer_begin && layer_begin->first_child) {
+            while (current) {
+                if (current->data.layout.child_alignment.x == CHILD_ALIGNMENT_CENTER) {
+                    if (current->data.layout.child_layout_axis == CHILD_LAYOUT_AXIS_X) {
+                        _set_children_positions_center_x(current);
+                    }
+                }
 
-//            GuiNode* current = current_layer_start->
+                current = current->left_sibling;
+            }
+
+            layer_begin = layer_begin->first_child;//fixme:: i don't think this is quite right
+            current - layer_begin;
+        }
+    }
+
+    void _set_children_positions_center_x(GuiNode* current) {
+        float child_widths = 0.0f;
+        size_t child_count = 0u;
+        GuiNode *current_child = current->first_child;
+        while (current_child) {
+            child_widths +=
+                    current_child->data.layout.bounds.width + current_child->data.layout.padding.y +
+                    current_child->data.layout.padding.z;
+            ++child_count;
+
+            current_child = current_child->right_sibling;
         }
 
-        _set_child_position(root->first_child->data.layout.bounds, root->data.layout.bounds, root->data.layout.child_alignment);
+        float child_spacing = current->data.layout.child_spacing * (float) (child_count - 1u);
+
+        float current_x = (current->data.layout.bounds.width - child_widths) / 2.0f;
+        float current_y_parent_part =
+                current->data.layout.bounds.y + (current->data.layout.bounds.height / 2.0f);
+
+        current_child = current->first_child;
+        while (current_child) {
+            float left_padding_adjustment_x = current_child->data.layout.padding.z;
+            if (current_child->left_sibling) {
+                left_padding_adjustment_x +=
+                        current_child->left_sibling->data.layout.padding.y + child_spacing;
+            }
+
+            current_child->data.layout.bounds.x = current_x + left_padding_adjustment_x;
+
+            float current_y = current_y_parent_part - (current_child->data.layout.bounds.height / 2.0f);
+            current_child->data.layout.bounds.y = current_y;
+            current_x += current_child->data.layout.bounds.width + left_padding_adjustment_x;
+
+            current_child = current_child->right_sibling;
+        }
     }
 
     void _set_child_position(Rectangle& child_bounds, const Rectangle& parent_bounds, const Vector2UInt8& child_alignment) {
