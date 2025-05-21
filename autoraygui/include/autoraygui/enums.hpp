@@ -41,9 +41,9 @@ enum SizeFlags : uint8_t {
 
 
 enum ChildAlignment : uint8_t {
-    CHILD_ALIGNMENT_LEFT = 0x01 << 0,
+    CHILD_ALIGNMENT_BEGIN = 0x01 << 0,
     CHILD_ALIGNMENT_CENTER = 0x01 << 1,
-    CHILD_ALIGNMENT_RIGHT = 0x01 << 2,
+    CHILD_ALIGNMENT_END = 0x01 << 2,
     CHILD_ALIGNMENT_RADIAL = 0x01 << 3,
 };
 

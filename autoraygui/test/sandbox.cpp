@@ -58,8 +58,10 @@ int main() {
     control.draw = build_ray_gui(pressed, &GuiButton, "Hello!");
 //    control.draw = build_raylib_draw_ellipse(&DrawEllipse, 1.0f, 1.0f, RAYWHITE);
 
-        tree.BeginRoot()->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})->SetChildLayoutAxis(AutoRayGui::CHILD_LAYOUT_AXIS_X)->SetDrawFunc(&AutoRayGui::draw_passthrough)
-            ->Begin()->SetSizeFlags({AutoRayGui::SIZE_FLAGS_SHRINK, AutoRayGui::SIZE_FLAGS_SHRINK})->SetMinSize({100.0f, 50.0f})->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello!"))
+        tree.BeginRoot()->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
+            ->Begin()->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})->SetDimensions({100.0f, 50.0f})->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello!"))
+            ->End()
+            ->Begin()->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})->SetDimensions({140.0f, 30.0f})->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello Again!"))
             ->End()
         ->EndRoot();
 

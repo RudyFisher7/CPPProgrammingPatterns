@@ -59,6 +59,15 @@ public:
     virtual ~NTree() = default;
 
     virtual TThis* BeginRoot() {
+        _get(0u) = {
+                {},
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+        };
+
         _begin_root();
         return this;
     }
@@ -69,6 +78,15 @@ public:
     }
 
     virtual TThis* Begin() {
+        _get(_current_index) = {
+                {},
+                _current_parent,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+        };
+
         _begin();
         return this;
     }
@@ -89,15 +107,6 @@ public:
 
 protected:
     virtual void _begin_root() {
-        _get(0u) = {
-                {},
-                nullptr,
-                nullptr,
-                nullptr,
-                nullptr,
-                nullptr,
-        };
-
         _current_parent = &_get(0u);
         _current_index = 1u;
     }
@@ -109,15 +118,6 @@ protected:
     }
 
     virtual void _begin() {
-        _get(_current_index) = {
-                {},
-                _current_parent,
-                nullptr,
-                nullptr,
-                nullptr,
-                nullptr,
-        };
-
         TThisNode* current = &_get(_current_index);
 
         // if there is a current parent
@@ -153,13 +153,13 @@ protected:
 
     template<IndexingMode in_indexing_mode = indexing_mode>
     inline typename std::enable_if<in_indexing_mode == INDEXING_MODE_SAFE, TThisNode&>::type
-    _get(int index) {
+    _get(size_t index) {
         return _arena.at(index);
     }
 
     template<IndexingMode in_indexing_mode = indexing_mode>
     inline typename std::enable_if<in_indexing_mode == INDEXING_MODE_UNCHECKED, TThisNode&>::type
-    _get(int index) {
+    _get(size_t index) {
         return _arena[index];
     }
 };

@@ -36,7 +36,7 @@ namespace AutoRayGui {
 
 typedef struct layout_t {
     Rectangle bounds;
-    Vector4 padding;
+    Vector4 padding; // padding is in css's order, so {x=top, y=right, z=bottom, w=left}. Vector4 is used for convenience.
     Vector2 min_size;
     Vector2 max_size;
     float child_spacing;

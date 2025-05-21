@@ -55,11 +55,40 @@ template<size_t size, IndexingMode indexing_mode>
 class GuiTree : public NTree<NodeData, size, indexing_mode> {
 private:
     typedef GuiTree<size, indexing_mode> TGuiThis;
+
+protected:
+    NodeData _default_node_data;
+
 public:
-    GuiTree() = default;
+    GuiTree() :
+        _default_node_data {
+        {
+                {0.0f, 0.0f, 0.0f, 0.0f},
+                {0.0f, 0.0f, 0.0f, 0.0f},
+                {0.0f, 0.0f},
+                {0.0f, 0.0f},
+                0.0f,
+                {SIZE_FLAGS_FIT, SIZE_FLAGS_FIT},
+                {CHILD_ALIGNMENT_BEGIN, CHILD_ALIGNMENT_BEGIN},
+                CHILD_LAYOUT_AXIS_X,
+        },
+        {&draw_passthrough},
+    } {};
+
     ~GuiTree() override = default;
 
+    explicit GuiTree(NodeData  in_default_data) : _default_node_data(std::move(in_default_data)) {};
+
     TGuiThis* BeginRoot() override {
+        this->_get(0u) = {
+                _default_node_data,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+        };
+
         this->_begin_root();
         return this;
     }
@@ -70,6 +99,15 @@ public:
     }
 
     TGuiThis* Begin() override {
+        this->_get(this->_current_index) = {
+                _default_node_data,
+                this->_current_parent,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+        };
+
         this->_begin();
         return this;
     }
@@ -86,6 +124,18 @@ public:
 
     TGuiThis* SetBounds(const Rectangle& value) {
         this->_current_parent->data.layout.bounds = value;
+        return this;
+    }
+
+    TGuiThis* SetPosition(const Vector2& value) {
+        this->_current_parent->data.layout.bounds.x = value.x;
+        this->_current_parent->data.layout.bounds.y = value.y;
+        return this;
+    }
+
+    TGuiThis* SetDimensions(const Vector2& value) {
+        this->_current_parent->data.layout.bounds.width = value.x;
+        this->_current_parent->data.layout.bounds.height = value.y;
         return this;
     }
 
@@ -130,63 +180,147 @@ public:
     }
 
     void UpdateLayout() {
-        Layout& root_layout = this->_get(0u).data.layout;
+        Layout& root_layout = this->Root()->data.layout;
         root_layout.min_size = {0.0f, 0.0f};
         root_layout.max_size = {(float)GetScreenWidth(), (float)GetScreenHeight()};
         root_layout.bounds = {0.0f, 0.0f, (float)GetScreenWidth(), (float)GetScreenHeight()};
         root_layout.size_flags = {SIZE_FLAGS_FIXED, SIZE_FLAGS_FIXED};
 
+        // note:: update fixed widths would go here, but is unnecessary since the bounds' widths are just the values set at design time
         _update_fit_widths();
         _update_grow_and_shrink_widths();
+        // note:: update fixed heights would go here, but is unnecessary since the bounds' heights are just the values set at design time
         _update_text_wrapping();
         _update_fit_heights();
         _update_grow_and_shrink_heights();
-        _update_positions();
+        _update_positions_and_alignment();
     }
 
     void Draw() {
-        Node<NodeData>* root = this->Root();
+        GuiNode* root = this->Root();
 
         root->data.control.draw(root->data.layout.bounds);
         root->first_child->data.control.draw(root->first_child->data.layout.bounds);
     }
 
-private:
-    void _update_fit_widths() {}
+protected:
+    void _update_fit_widths() {
+        GuiNode* root = this->Root();
+        GuiNode* current = root;
+
+        // get to the left-most bottom leaf node of the tree
+        while (current->first_child != nullptr) {
+            current = current->first_child;
+        }
+
+        while (current != root) {
+            // if the parent has a fixed size, then its children don't determine its size
+            GuiNode* current_parent = current->parent;
+            if (current_parent->data.layout.size_flags.x != SIZE_FLAGS_FIXED) {// todo:: revisit this. i think we assume all parents fit their children in this pass, then the 'grow' pass will overwrite the necessary parents' widths
+                float width = 0.0f;
+                if (current_parent->data.layout.child_layout_axis == CHILD_LAYOUT_AXIS_X) {
+                    float spacing_from_parent = current_parent->data.layout.child_spacing;
+                    size_t child_count = 1u;
+                    Layout* layout = &current->data.layout;
+                    // add up all the siblings' widths, including their padding on both sides
+                    width += layout->bounds.width + layout->padding.y + layout->padding.z;
+                    while (current->right_sibling != nullptr) {
+                        layout = &current->data.layout;
+                        width += layout->bounds.width + layout->padding.y + layout->padding.z;
+                        current = current->right_sibling;
+
+                        ++child_count;
+                    }
+
+                    // add the total spacing from the parent to the total width
+                    width += spacing_from_parent * (float)(child_count - 1u);
+
+                } else {
+                    // get the max width out of each child, including their padding on both sides
+                    Layout* layout = &current->data.layout;
+                    width = fmaxf(layout->bounds.width + layout->padding.y + layout->padding.z, width);
+                    while (current->right_sibling != nullptr) {
+                        layout = &current->data.layout;
+                        width = fmaxf(layout->bounds.width + layout->padding.y + layout->padding.z, width);
+                        current = current->right_sibling;
+                    }
+                }
+
+                // set the parent's width to the calculated width
+                current_parent->data.layout.bounds.width = width;
+            }
+
+            // if the parent has a sibling to the right
+            if (current_parent->right_sibling) {
+                // get the next parent's first child and repeat
+                if (current_parent->right_sibling->first_child) {
+                    current = current_parent->right_sibling->first_child;
+                }
+            } else if (current_parent->parent) {
+                // else, if there are no more parents, then return to left-most parent
+                // the parents are now the current children to add up the widths of
+                if (current_parent->parent->first_child) {
+                    current = current_parent->parent->first_child;
+                } else {
+                    current = current_parent;
+                }
+            } else {
+                current = current_parent;
+            }
+
+            current_parent = current->parent;
+        }
+    }
+
     void _update_grow_and_shrink_widths() {
-        Node<NodeData>* root = this->Root();
-        Layout& layout = root->first_child->data.layout;
-        layout.bounds.width = layout.min_size.x;
+//        GuiNode* root = this->Root();
+//        Layout& layout = root->first_child->data.layout;
+//        layout.bounds.width = layout.min_size.x;
     }
 
     void _update_text_wrapping() {}
+
     void _update_fit_heights() {}
     void _update_grow_and_shrink_heights() {
-        Node<NodeData>* root = this->Root();
-        Layout& layout = root->first_child->data.layout;
-        layout.bounds.height = layout.min_size.y;
+//        GuiNode* root = this->Root();
+//        Layout& layout = root->first_child->data.layout;
+//        layout.bounds.height = layout.min_size.y;
     }
 
-    void _update_positions() {
-        Node<NodeData>* root = this->Root();
-        Layout& layout = root->first_child->data.layout;
+    void _update_positions_and_alignment() {
+        GuiNode* root = this->Root();
 
-        switch (root->data.layout.child_alignment.x) {
+        GuiNode* current_layer_start = root;
+        while (current_layer_start->right_sibling != nullptr) {
+
+//            GuiNode* current = current_layer_start->
+        }
+
+        _set_child_position(root->first_child->data.layout.bounds, root->data.layout.bounds, root->data.layout.child_alignment);
+    }
+
+    void _set_child_position(Rectangle& child_bounds, const Rectangle& parent_bounds, const Vector2UInt8& child_alignment) {
+        switch (child_alignment.x) {
             case CHILD_ALIGNMENT_CENTER:
-                layout.bounds.x = root->data.layout.bounds.x + ((root->data.layout.bounds.width / 2.0f) - (layout.bounds.width / 2.0f));
+                child_bounds.x = parent_bounds.x + ((parent_bounds.width / 2.0f) - (child_bounds.width / 2.0f));
                 break;
             default:
                 break;
         }
 
-        switch (root->data.layout.child_alignment.y) {
+        switch (child_alignment.y) {
             case CHILD_ALIGNMENT_CENTER:
-                layout.bounds.y = root->data.layout.bounds.y + ((root->data.layout.bounds.height / 2.0f) - (layout.bounds.height / 2.0f));
+                child_bounds.y = parent_bounds.y + ((parent_bounds.height / 2.0f) - (child_bounds.height / 2.0f));
                 break;
             default:
                 break;
         }
+    }
 
+    GuiNode* _get_next_parent(GuiNode* current) {
+        GuiNode* result = nullptr;
+
+        return result;
     }
 };
 

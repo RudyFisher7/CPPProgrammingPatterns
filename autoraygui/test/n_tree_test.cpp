@@ -36,6 +36,15 @@ public:
     ~TestIntNTree() override = default;
 
     TestIntNTree* BeginRoot() override {
+        _get(0u) = {
+                0,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+        };
+
         _begin_root();
         return this;
     }
@@ -46,6 +55,15 @@ public:
     }
 
     TestIntNTree* Begin() override {
+        _get(_current_index) = {
+                0,
+                _current_parent,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+        };
+
         _begin();
         return this;
     }
