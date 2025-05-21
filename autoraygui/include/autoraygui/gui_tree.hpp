@@ -84,63 +84,103 @@ public:
         return this;
     }
 
-    TGuiThis* SetBounds(const Rectangle& bounds) {
-        this->_current_parent->data.layout.bounds = bounds;
+    TGuiThis* SetBounds(const Rectangle& value) {
+        this->_current_parent->data.layout.bounds = value;
         return this;
     }
 
-    TGuiThis* SetMinSize(const Vector2& min_size) {
-        this->_current_parent->data.layout.min_size = min_size;
+    TGuiThis* SetPadding(const Vector4& value) {
+        this->_current_parent->data.layout.bounds = value;
         return this;
     }
 
-    TGuiThis* SetMaxSize(const Vector2& max_size) {
-        this->_current_parent->data.layout.max_size = max_size;
+    TGuiThis* SetMinSize(const Vector2& value) {
+        this->_current_parent->data.layout.min_size = value;
         return this;
     }
 
-    TGuiThis* SetSizeFlags(SizeFlags size_flags) {
-        this->_current_parent->data.layout.size_flags = size_flags;
+    TGuiThis* SetMaxSize(const Vector2& value) {
+        this->_current_parent->data.layout.max_size = value;
         return this;
     }
 
-    TGuiThis* SetContainerType(ContainerType type) {
-        this->_current_parent->data.layout.type = type;
+    TGuiThis* SetChildSpacing(float value) {
+        this->_current_parent->data.layout.child_spacing = value;
         return this;
     }
 
-    TGuiThis* SetDrawFunc(const DrawFunction& draw) {
-        this->_current_parent->data.control.draw = draw;
+    TGuiThis* SetSizeFlags(SizeFlags value) {
+        this->_current_parent->data.layout.size_flags = value;
         return this;
     }
 
-    void UpdateLayout(SizeFlags root_size_flags = SIZE_FLAGS_FIXED) {
-        this->_get(0u).data.layout = {
-                {0.0f, 0.0f, GetScreenWidth(), GetScreenHeight()},
-                {0.0f, 0.0f},
-                {0.0f, 0.0f},
-                {GetScreenWidth(), GetScreenHeight()},
-                root_size_flags,
-                CONTAINER_TYPE_ROOT,
-        };
+    TGuiThis* SetChildAlignment(ChildAlignment value) {
+        this->_current_parent->data.layout.child_alignment = value;
+        return this;
+    }
+
+    TGuiThis* SetChildLayoutAxis(ChildLayoutAxis value) {
+        this->_current_parent->data.layout.child_layout_axis = value;
+        return this;
+    }
+
+    TGuiThis* SetDrawFunc(const DrawFunction& value) {
+        this->_current_parent->data.control.draw = value;
+        return this;
+    }
+
+    void UpdateLayout() {
+        Layout& root_layout = this->_get(0u).data.layout;
+        root_layout.min_size = {0.0f, 0.0f};
+        root_layout.max_size = {(float)GetScreenWidth(), (float)GetScreenHeight()};
+        root_layout.bounds = {0.0f, 0.0f, (float)GetScreenWidth(), (float)GetScreenHeight()};
+        root_layout.size_flags = SIZE_FLAGS_FIXED;
 
         _update_fit_widths();
         _update_grow_and_shrink_widths();
         _update_text_wrapping();
         _update_fit_heights();
         _update_grow_and_shrink_heights();
-        _update_positions_and_anchors();
+        _update_positions();
     }
 
-    void Draw() {}
+    void Draw() {
+        Node<NodeData>* root = this->Root();
+
+        root->data.control.draw(root->data.layout.bounds);
+        root->first_child->data.control.draw(root->first_child->data.layout.bounds);
+    }
 
 private:
     void _update_fit_widths() {}
-    void _update_grow_and_shrink_widths() {}
+    void _update_grow_and_shrink_widths() {
+        Node<NodeData>* root = this->Root();
+        Layout& layout = root->first_child->data.layout;
+        layout.bounds.width = layout.min_size.x;
+    }
+
     void _update_text_wrapping() {}
     void _update_fit_heights() {}
-    void _update_grow_and_shrink_heights() {}
-    void _update_positions_and_anchors() {}
+    void _update_grow_and_shrink_heights() {
+        Node<NodeData>* root = this->Root();
+        Layout& layout = root->first_child->data.layout;
+        layout.bounds.height = layout.min_size.y;
+    }
+
+    void _update_positions() {
+        Node<NodeData>* root = this->Root();
+        Layout& layout = root->first_child->data.layout;
+
+        switch (root->data.layout.child_alignment) {
+            case CHILD_ALIGNMENT_CENTER:
+                layout.bounds.x = root->data.layout.bounds.x + ((root->data.layout.bounds.width / 2.0f) - (layout.bounds.width / 2.0f));
+                layout.bounds.y = root->data.layout.bounds.y + ((root->data.layout.bounds.height / 2.0f) - (layout.bounds.height / 2.0f));
+                break;
+            default:
+                break;
+        }
+
+    }
 };
 
 

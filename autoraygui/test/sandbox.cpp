@@ -58,7 +58,9 @@ int main() {
     control.draw = build_ray_gui(pressed, &GuiButton, "Hello!");
 //    control.draw = build_raylib_draw_ellipse(&DrawEllipse, 1.0f, 1.0f, RAYWHITE);
 
-        tree.BeginRoot()
+        tree.BeginRoot()->SetChildAlignment(AutoRayGui::CHILD_ALIGNMENT_CENTER)->SetChildLayoutAxis(AutoRayGui::CHILD_LAYOUT_AXIS_X)->SetDrawFunc(&AutoRayGui::draw_passthrough)
+            ->Begin()->SetSizeFlags(AutoRayGui::SIZE_FLAGS_SHRINK)->SetMinSize({100.0f, 50.0f})->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello!"))
+            ->End()
         ->EndRoot();
 
     while (!WindowShouldClose()) // Main loop
@@ -70,14 +72,14 @@ int main() {
                 60.0f,
         };
 
-        graph.UpdateLayout();
+        tree.UpdateLayout();
 
         BeginDrawing();
         ClearBackground(BLACK);
 
-        graph.Draw();
+        tree.Draw();
 
-        control.draw(bounds);
+//        control.draw(bounds);
 
         EndDrawing();
     }
