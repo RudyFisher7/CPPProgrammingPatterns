@@ -65,6 +65,7 @@ public:
         {
                 {0.0f, 0.0f, 0.0f, 0.0f},
                 {0.0f, 0.0f, 0.0f, 0.0f},
+                {0.0f, 0.0f, 0.0f, 0.0f},
                 {0.0f, 0.0f},
                 {0.0f, 0.0f},
                 0.0f,
@@ -136,6 +137,28 @@ public:
     TGuiThis* SetDimensions(const Vector2& value) {
         this->_current_parent->data.layout.bounds.width = value.x;
         this->_current_parent->data.layout.bounds.height = value.y;
+        return this;
+    }
+
+    TGuiThis* SetMargins(const Vector4& value) {
+        this->_current_parent->data.layout.margins = value;
+        return this;
+    }
+
+    TGuiThis* SetMarginsAll(float value) {
+        this->_current_parent->data.layout.margins = {value, value, value, value};
+        return this;
+    }
+
+    TGuiThis* SetMarginsX(const Vector2& value) {
+        this->_current_parent->data.layout.margins.y = value.y;
+        this->_current_parent->data.layout.margins.w = value.x;
+        return this;
+    }
+
+    TGuiThis* SetMarginsY(const Vector2& value) {
+        this->_current_parent->data.layout.margins.x = value.x;
+        this->_current_parent->data.layout.margins.z = value.y;
         return this;
     }
 
@@ -274,7 +297,7 @@ protected:
             size_t child_count = 0u;
             while (current) {
                 Layout* layout = &current->data.layout;
-                width += layout->bounds.width + layout->padding.y + layout->padding.w;
+                width += layout->bounds.width + layout->margins.y + layout->margins.w;
                 ++child_count;
 
                 current = current->right_sibling;
@@ -287,17 +310,21 @@ protected:
             // get the max width out of each child, including their padding on both sides
             while (current) {
                 Layout* layout = &current->data.layout;
-                width = fmaxf(layout->bounds.width + layout->padding.y + layout->padding.w, width);
+                width = fmaxf(layout->bounds.width + layout->margins.y + layout->margins.w, width);
 
                 current = current->right_sibling;
             }
         }
 
+        width += node->data.layout.padding.y + node->data.layout.padding.w;
+
         // set the parent's width to the calculated width
         node->data.layout.bounds.width = width;
     }
 
-    void _update_grow_and_shrink_widths() {}//todo:: pickup here
+    void _update_grow_and_shrink_widths() {
+
+    }
 
     void _update_text_wrapping() {}
 
@@ -331,7 +358,7 @@ protected:
             size_t child_count = 0u;
             while (current) {
                 Layout* layout = &current->data.layout;
-                height += layout->bounds.height + layout->padding.x + layout->padding.z;
+                height += layout->bounds.height + layout->margins.x + layout->margins.z;
                 ++child_count;
 
                 current = current->right_sibling;
@@ -344,11 +371,13 @@ protected:
             // get the max width out of each child, including their padding on both sides
             while (current) {
                 Layout* layout = &current->data.layout;
-                height = fmaxf(layout->bounds.height + layout->padding.x + layout->padding.z, height);
+                height = fmaxf(layout->bounds.height + layout->margins.x + layout->margins.z, height);
 
                 current = current->right_sibling;
             }
         }
+
+        height += node->data.layout.padding.x + node->data.layout.padding.z;
 
         // set the parent's width to the calculated width
         node->data.layout.bounds.height = height;
@@ -457,14 +486,13 @@ protected:
         }
 
         float child_spacing = current->data.layout.child_spacing * (float) (child_count - 1u);
-
-        float current_x = current->data.layout.bounds.x;
+        float current_x = current->data.layout.bounds.x + current->data.layout.padding.w;
 
         current_child = current->first_child;
         while (current_child) {
-            float left_padding_adjustment_x = current_child->data.layout.padding.z;
+            float left_padding_adjustment_x = current_child->data.layout.margins.w;
             if (current_child->left_sibling) {
-                left_padding_adjustment_x += current_child->left_sibling->data.layout.padding.y + child_spacing;
+                left_padding_adjustment_x += current_child->left_sibling->data.layout.margins.y + child_spacing;
             }
 
             current_child->data.layout.bounds.x = current_x + left_padding_adjustment_x;
@@ -475,11 +503,10 @@ protected:
     }
 
     void _set_children_y_begin_along_x(GuiNode* current) {
-        float current_y = current->data.layout.bounds.y;
-
+        float current_y = current->data.layout.bounds.y + current->data.layout.padding.x;
         GuiNode *current_child = current->first_child;
         while (current_child) {
-            float top_padding_adjustment = current_child->data.layout.padding.x;
+            float top_padding_adjustment = current_child->data.layout.margins.x;
             current_child->data.layout.bounds.y = current_y + top_padding_adjustment;
 
             current_child = current_child->right_sibling;
@@ -490,11 +517,13 @@ protected:
         float child_widths = 0.0f;
         size_t child_count = 0u;
         GuiNode *current_child = current->first_child;
+
+        child_widths += current->data.layout.padding.y + current->data.layout.padding.z;
         while (current_child) {
             child_widths += (
                     current_child->data.layout.bounds.width
-                    + current_child->data.layout.padding.y
-                    + current_child->data.layout.padding.z
+                    + current_child->data.layout.margins.y
+                    + current_child->data.layout.margins.z
             );
 
             ++child_count;
@@ -504,13 +533,27 @@ protected:
 
         float child_spacing = current->data.layout.child_spacing * (float) (child_count - 1u);
 
-        float current_x = (current->data.layout.bounds.width - child_widths) / 2.0f;
+        float current_x = 0.0f;
+        switch (current->data.layout.size_flags.x) {
+            case SIZE_FLAGS_FIT:
+                current_x = current->data.layout.bounds.x + current->data.layout.padding.w;
+                break;
+            case SIZE_FLAGS_FIXED:
+                current_x = current->data.layout.bounds.x + current->data.layout.padding.w + ((current->data.layout.bounds.width - child_widths) / 2.0f);
+                break;
+            case SIZE_FLAGS_SHRINK:
+                break;
+            case SIZE_FLAGS_EXPAND:
+                break;
+            default:
+                break;
+        }
 
         current_child = current->first_child;
         while (current_child) {
-            float left_padding_adjustment_x = current_child->data.layout.padding.w;
+            float left_padding_adjustment_x = current_child->data.layout.margins.w;
             if (current_child->left_sibling) {
-                left_padding_adjustment_x += current_child->left_sibling->data.layout.padding.y + child_spacing;
+                left_padding_adjustment_x += current_child->left_sibling->data.layout.margins.y + child_spacing;
             }
 
             current_child->data.layout.bounds.x = current_x + left_padding_adjustment_x;
@@ -521,16 +564,14 @@ protected:
     }
 
     void _set_children_y_center_along_x(GuiNode* current) {
-        float current_y_parent_part = (
-                current->data.layout.bounds.y
-                + (current->data.layout.bounds.height / 2.0f)
-        );
+        float current_y_parent_part = 0.0f;
+
+        current_y_parent_part = current->data.layout.bounds.y + (current->data.layout.bounds.height / 2.0f);
 
         GuiNode *current_child = current->first_child;
         while (current_child) {
             float current_y = (
                     current_y_parent_part
-                    + current_child->data.layout.padding.x
                     - (current_child->data.layout.bounds.height / 2.0f)
             );
 
@@ -550,14 +591,13 @@ protected:
         }
 
         float child_spacing = current->data.layout.child_spacing * (float) (child_count - 1u);
-
-        float current_x = current->data.layout.bounds.width;
+        float current_x = current->data.layout.bounds.x + current->data.layout.bounds.width - current->data.layout.padding.y;
 
         current_child = current->last_child;
         while (current_child) {
-            float right_padding_adjustment_x = current_child->data.layout.padding.y;
+            float right_padding_adjustment_x = current_child->data.layout.margins.y;
             if (current_child->right_sibling) {
-                right_padding_adjustment_x += current_child->right_sibling->data.layout.padding.w + child_spacing;
+                right_padding_adjustment_x += current_child->right_sibling->data.layout.margins.w + child_spacing;
             }
 
             current_x -= current_child->data.layout.bounds.width + right_padding_adjustment_x;
@@ -568,11 +608,11 @@ protected:
     }
 
     void _set_children_y_end_along_x(GuiNode* current) {
-        float current_y_parent_part = current->data.layout.bounds.height;
+        float current_y_parent_part = current->data.layout.bounds.y + current->data.layout.bounds.height - current->data.layout.padding.z;
 
         GuiNode *current_child = current->first_child;
         while (current_child) {
-            float current_y = current_y_parent_part - current_child->data.layout.bounds.height - current_child->data.layout.padding.z;
+            float current_y = current_y_parent_part - current_child->data.layout.bounds.height - current_child->data.layout.margins.z;
             current_child->data.layout.bounds.y = current_y;
 
             current_child = current_child->right_sibling;
