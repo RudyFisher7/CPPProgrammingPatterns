@@ -36,7 +36,7 @@ enum SizeFlags : uint8_t {
     SIZE_FLAGS_FIT = 0x01 << 0,
     SIZE_FLAGS_FIXED = 0x01 << 1,
     SIZE_FLAGS_SHRINK = 0x01 << 2,
-    SIZE_FLAGS_EXPAND = 0x01 << 3,
+    SIZE_FLAGS_GROW = 0x01 << 3,
 };
 
 

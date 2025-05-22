@@ -323,7 +323,51 @@ protected:
     }
 
     void _update_grow_and_shrink_widths() {
+        for (size_t i = 0u; i < this->_arena_size; ++i) {
+            GuiNode* current = this->_bfs_queue[i];
 
+            if (current->first_child) {
+                _update_grow_width_containers(this->_bfs_queue[i]);
+            }
+        }
+    }
+
+    void _update_grow_width_containers(GuiNode* node) {
+        float parent_remaining_width = (
+                node->data.layout.bounds.width
+                - node->data.layout.padding.w
+                - node->data.layout.padding.y
+        );
+
+        if (node->data.layout.child_layout_axis == CHILD_LAYOUT_AXIS_X) {
+            GuiNode *current_child = node->first_child;
+            size_t child_count = 0u;
+            while (current_child) {
+                parent_remaining_width -= (
+                        current_child->data.layout.bounds.width
+                        + current_child->data.layout.margins.w
+                        + current_child->data.layout.margins.y
+                );
+
+                ++child_count;
+
+                current_child = current_child->right_sibling;
+            }
+
+            float child_spacing = node->data.layout.child_spacing / (float) (child_count / 2);
+            parent_remaining_width -= child_spacing;
+
+            current_child = node->first_child;
+            while (current_child) {
+                if (current_child->data.layout.size_flags.x == SIZE_FLAGS_GROW) {
+                    current_child->data.layout.bounds.width += parent_remaining_width;
+                }
+
+                current_child = current_child->right_sibling;
+            }
+        } else {
+            //
+        }
     }
 
     void _update_text_wrapping() {}
@@ -543,7 +587,7 @@ protected:
                 break;
             case SIZE_FLAGS_SHRINK:
                 break;
-            case SIZE_FLAGS_EXPAND:
+            case SIZE_FLAGS_GROW:
                 break;
             default:
                 break;
@@ -666,7 +710,7 @@ protected:
 //
 //
 //template<SizeFlags size_flags>
-//typename std::enable_if<(size_flags == SIZE_FLAGS_EXPAND), Rectangle>::type
+//typename std::enable_if<(size_flags == SIZE_FLAGS_GROW), Rectangle>::type
 //get_vbox_child_bounds(const Layout& layout, const ChildLayout& child_layout) {
 //    std::ignore = child_layout.size_flags;
 //    return {
@@ -732,8 +776,8 @@ protected:
 //            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_CENTER>(layout, child_layout);
 //        case SIZE_FLAGS_SHRINK_END:
 //            return get_vbox_child_bounds<SIZE_FLAGS_SHRINK_END>(layout, child_layout);
-//        case SIZE_FLAGS_EXPAND:
-//            return get_vbox_child_bounds<SIZE_FLAGS_EXPAND>(layout, child_layout);
+//        case SIZE_FLAGS_GROW:
+//            return get_vbox_child_bounds<SIZE_FLAGS_GROW>(layout, child_layout);
 //        case SIZE_FLAGS_VERTICAL_SHRINK_BEGIN:
 //        case SIZE_FLAGS_VERTICAL_SHRINK_CENTER:
 //        case SIZE_FLAGS_VERTICAL_SHRINK_END:
