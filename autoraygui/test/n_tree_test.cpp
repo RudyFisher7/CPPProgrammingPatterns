@@ -77,6 +77,22 @@ public:
         _current_parent->data = value;
         return this;
     }
+
+    TThisNode* GetFirstLeaf(TThisNode* from) {
+        return _get_first_leaf(from);
+    }
+
+    TThisNode* GetLastSibling(TThisNode* from) {
+        return _get_last_sibling(from);
+    }
+
+    TThisNode* GetFirstRightLeaf(TThisNode* from_leaf) {
+        return _get_first_right_leaf(from_leaf);
+    }
+
+    TThisNode* GetLeftMostParent(TThisNode* from) {
+        return _get_left_most_parent(from);
+    }
 };
 
 
@@ -308,6 +324,88 @@ TEST_CASE("NTree 2-4 Children", "[NTree]") {
         CHECK(child2->data == v8);
         CHECK(child3->data == v9);
     }
+}
+
+
+TEST_CASE("NTree Traversal", "[NTree]") {
+    int v0 = 1;
+    int v1 = 2;
+    int v2 = 3;
+    int v3 = 4;
+    int v4 = 5;
+    int v5 = 6;
+    int v6 = 7;
+    int v7 = 8;
+    int v8 = 9;
+    int v9 = 10;
+
+    TestIntNTree tree;
+
+    /* Build the Tree */
+    {
+        tree.BeginRoot()->SetData(v0)
+            ->Begin()->SetData(v1)
+                ->Begin()->SetData(v2)
+                ->End()
+                ->Begin()->SetData(v3)
+                ->End()
+                ->Begin()->SetData(v4)
+                ->End()
+            ->End()
+            ->Begin()->SetData(v5)
+                ->Begin()
+                    ->Begin()
+                        ->Begin()
+                            ->Begin()
+                                ->Begin()->SetData(v6)
+                                ->End()
+                            ->End()
+                        ->End()
+                    ->End()
+                ->Begin()
+                    ->Begin()
+                        ->Begin()
+                            ->Begin()
+                                ->Begin()
+                                    ->Begin()->SetData(v7)
+                                    ->End()
+                                    ->Begin()
+                                    ->End()
+                                    ->Begin()
+                                    ->End()
+                                    ->Begin()->SetData(v8)
+                                        ->Begin()->SetData(v9)
+                                        ->End()
+                                    ->End()
+                                ->End()
+                            ->End()
+                        ->End()
+                    ->End()
+                ->End()
+            ->End()
+        ->EndRoot();
+    }
+
+    AutoRayGui::Node<int> *leaf0 = tree.GetFirstLeaf(tree.Root());
+    CHECK(leaf0->data == v2);
+
+    AutoRayGui::Node<int> *leaf1 = tree.GetLastSibling(leaf0);
+    CHECK(leaf1->data == v4);
+
+    AutoRayGui::Node<int> *leaf2 = tree.GetFirstRightLeaf(leaf1);
+    CHECK(leaf2->data == v6);
+
+    AutoRayGui::Node<int> *leaf3 = tree.GetFirstRightLeaf(leaf2);
+    CHECK(leaf3->data == v7);
+
+    AutoRayGui::Node<int> *leaf4 = tree.GetLastSibling(leaf3);
+    CHECK(leaf4->data == v8);
+
+    AutoRayGui::Node<int> *leaf5 = tree.GetFirstLeaf(leaf4);
+    CHECK(leaf5->data == v9);
+
+    AutoRayGui::Node<int> *leaf6 = tree.GetLeftMostParent(leaf5);
+    CHECK(leaf6->data == v7);
 }
 
 

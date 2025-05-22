@@ -47,7 +47,7 @@ protected:
     typedef NTree<TNodeData, size, indexing_mode> TThis;
     typedef Node<TNodeData> TThisNode;
 
-    std::array<TThisNode , size> _arena {};
+    std::array<TThisNode, size> _arena {};
 
     size_t _arena_size;
     size_t _current_index;
@@ -161,6 +161,60 @@ protected:
     inline typename std::enable_if<in_indexing_mode == INDEXING_MODE_UNCHECKED, TThisNode&>::type
     _get(size_t index) {
         return _arena[index];
+    }
+
+    virtual TThisNode* _get_first_leaf(TThisNode* from) {
+        TThisNode* current = from;
+        while (current->first_child) {
+            current = current->first_child;
+        }
+
+        return current;
+    }
+
+    virtual TThisNode* _get_last_sibling(TThisNode* from) {
+        if (from->parent) {
+            return from->parent->last_child;
+        }
+
+        return nullptr;
+    }
+
+    virtual TThisNode* _get_first_right_leaf(TThisNode* from_leaf) {
+        TThisNode* result = from_leaf;
+
+        if (from_leaf->right_sibling) {
+            result = from_leaf->right_sibling;
+            while (result->first_child) {
+                result = result->first_child;
+            }
+        } else {
+            TThisNode* parent_with_right_sibling = from_leaf->parent;
+            while (parent_with_right_sibling && !parent_with_right_sibling->right_sibling) {
+                parent_with_right_sibling = parent_with_right_sibling->parent;
+            }
+
+            if (parent_with_right_sibling) {
+                TThisNode* current = parent_with_right_sibling->right_sibling;
+                while (current->first_child) {
+                    current = current->first_child;
+                }
+
+                result = current;
+            }
+        }
+
+        return result;
+    }
+
+    virtual TThisNode* _get_left_most_parent(TThisNode* from) {
+        TThisNode* result = from->parent;
+
+        if (result && result->parent) {
+            result = result->parent->first_child;
+        }
+
+        return result;
     }
 };
 
