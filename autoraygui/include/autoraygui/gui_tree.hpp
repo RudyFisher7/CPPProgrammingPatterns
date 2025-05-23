@@ -347,8 +347,8 @@ protected:
             while (current_child) {
                 parent_remaining_width -= (
                         current_child->data.layout.bounds.width
-//                        + current_child->data.layout.margins.w
-//                        + current_child->data.layout.margins.y
+                        + current_child->data.layout.margins.w
+                        + current_child->data.layout.margins.y
                 );
 
                 ++child_count;
@@ -369,26 +369,19 @@ protected:
                 current_child = current_child->right_sibling;
             }
 
-            if (growable_child_count == 0u) {
-                return;
-            }
-
-            float previous_remaining_width = FLT_MAX;
-            while (parent_remaining_width > 0.0f && !FloatEquals(previous_remaining_width, parent_remaining_width)) {
-                previous_remaining_width = parent_remaining_width;
-
+            while (parent_remaining_width > 0.0f && growable_child_count > 0u) {
                 current_child = node->first_child;
-                float smallest_width = current_child->data.layout.bounds.width;
+                float smallest_width = FLT_MAX;
                 float second_smallest_width = FLT_MAX;
                 float width_to_add = parent_remaining_width;
                 while (current_child) {
                     if (current_child->data.layout.size_flags.x == SIZE_FLAGS_GROW) {
-                        if (current_child->data.layout.bounds.width < smallest_width) {
+                        if (current_child->data.layout.bounds.width < smallest_width && current_child->data.layout.bounds.width < current_child->data.layout.max_size.x) {
                             second_smallest_width = smallest_width;
                             smallest_width = current_child->data.layout.bounds.width;
                         }
 
-                        if (current_child->data.layout.bounds.width > smallest_width) {
+                        if (current_child->data.layout.bounds.width > smallest_width && current_child->data.layout.bounds.width < current_child->data.layout.max_size.x) {
                             second_smallest_width = fminf(second_smallest_width, current_child->data.layout.bounds.width);
                             width_to_add = second_smallest_width - smallest_width;
                         }
@@ -402,10 +395,14 @@ protected:
                 current_child = node->first_child;
                 while (current_child) {
                     if (current_child->data.layout.size_flags.x == SIZE_FLAGS_GROW) {
-                        if (FloatEquals(current_child->data.layout.bounds.width, smallest_width)) {
+                        if (FloatEquals(current_child->data.layout.bounds.width, smallest_width) && current_child->data.layout.bounds.width < current_child->data.layout.max_size.x) {
                             float clamped_width_to_add = fminf(width_to_add, current_child->data.layout.max_size.x - current_child->data.layout.bounds.width);
                             current_child->data.layout.bounds.width += clamped_width_to_add;
                             parent_remaining_width -= clamped_width_to_add;
+
+                            if (FloatEquals(current_child->data.layout.bounds.width, current_child->data.layout.max_size.x)) {
+                                --growable_child_count;
+                            }
                         }
                     }
 
