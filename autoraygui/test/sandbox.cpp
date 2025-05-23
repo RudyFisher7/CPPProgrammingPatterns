@@ -59,13 +59,13 @@ int main() {
 //    control.draw = build_raylib_draw_ellipse(&DrawEllipse, 1.0f, 1.0f, RAYWHITE);
 
     tree.BeginRoot()
-        ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
+        ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_BEGIN, AutoRayGui::CHILD_ALIGNMENT_CENTER})
         ->SetChildSpacing(32.0f);
         for (int i = 0; i < 2; ++i) {
             tree.Begin()
                 ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
                 ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_GROW, AutoRayGui::SIZE_FLAGS_GROW})
-//                ->SetMaxSize({500.0f, FLT_MAX})
+                ->SetMaxSize({280.0f, FLT_MAX})
                 ->SetDrawFunc(AutoRayGui::build_raylib_draw_ellipse(&DrawEllipse, 1.0, 1.0, SKYBLUE))
                 ->Begin()
                     ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
@@ -79,6 +79,22 @@ int main() {
                 ->End()
             ->End();
         }
+
+        tree.Begin()
+            ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
+            ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_GROW, AutoRayGui::SIZE_FLAGS_GROW})
+            ->SetDrawFunc(AutoRayGui::build_raylib_draw_ellipse(&DrawEllipse, 1.0, 1.0, SKYBLUE))
+            ->Begin()
+                ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
+                ->SetDimensions({100.0f, 20.0f})
+                ->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello!"))
+            ->End()
+            ->Begin()
+                ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
+                ->SetDimensions({120.0f, 30.0f})
+                ->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello Again!"))
+            ->End()
+        ->End();
     tree.EndRoot();
 
     while (!WindowShouldClose()) // Main loop
