@@ -37,8 +37,10 @@
 #include "std_extensions/extensions.hpp"
 
 #include <raylib.h>
+#include <raymath.h>
 
 #include <array>
+#include <cfloat>
 #include <cstdint>
 #include <cmath>
 #include <functional>
@@ -67,7 +69,7 @@ public:
                 {0.0f, 0.0f, 0.0f, 0.0f},
                 {0.0f, 0.0f, 0.0f, 0.0f},
                 {0.0f, 0.0f},
-                {0.0f, 0.0f},
+                {FLT_MAX, FLT_MAX},
                 0.0f,
                 {SIZE_FLAGS_FIT, SIZE_FLAGS_FIT},
                 {CHILD_ALIGNMENT_BEGIN, CHILD_ALIGNMENT_BEGIN},
@@ -345,8 +347,8 @@ protected:
             while (current_child) {
                 parent_remaining_width -= (
                         current_child->data.layout.bounds.width
-                        + current_child->data.layout.margins.w
-                        + current_child->data.layout.margins.y
+//                        + current_child->data.layout.margins.w
+//                        + current_child->data.layout.margins.y
                 );
 
                 ++child_count;
@@ -354,19 +356,81 @@ protected:
                 current_child = current_child->right_sibling;
             }
 
-            float child_spacing = node->data.layout.child_spacing / (float) (child_count / 2);
+            float child_spacing = node->data.layout.child_spacing / (float) (child_count / 2u);
             parent_remaining_width -= child_spacing;
 
+            size_t growable_child_count = 0u;
             current_child = node->first_child;
             while (current_child) {
                 if (current_child->data.layout.size_flags.x == SIZE_FLAGS_GROW) {
-                    current_child->data.layout.bounds.width += parent_remaining_width;
+                    ++growable_child_count;
                 }
 
                 current_child = current_child->right_sibling;
             }
+
+            if (growable_child_count == 0u) {
+                return;
+            }
+
+            float previous_remaining_width = FLT_MAX;
+            while (parent_remaining_width > 0.0f && !FloatEquals(previous_remaining_width, parent_remaining_width)) {
+                previous_remaining_width = parent_remaining_width;
+
+                current_child = node->first_child;
+                float smallest_width = current_child->data.layout.bounds.width;
+                float second_smallest_width = FLT_MAX;
+                float width_to_add = parent_remaining_width;
+                while (current_child) {
+                    if (current_child->data.layout.size_flags.x == SIZE_FLAGS_GROW) {
+                        if (current_child->data.layout.bounds.width < smallest_width) {
+                            second_smallest_width = smallest_width;
+                            smallest_width = current_child->data.layout.bounds.width;
+                        }
+
+                        if (current_child->data.layout.bounds.width > smallest_width) {
+                            second_smallest_width = fminf(second_smallest_width, current_child->data.layout.bounds.width);
+                            width_to_add = second_smallest_width - smallest_width;
+                        }
+                    }
+
+                    current_child = current_child->right_sibling;
+                }
+
+                width_to_add = fminf(width_to_add, parent_remaining_width / (float)growable_child_count);
+
+                current_child = node->first_child;
+                while (current_child) {
+                    if (current_child->data.layout.size_flags.x == SIZE_FLAGS_GROW) {
+                        if (FloatEquals(current_child->data.layout.bounds.width, smallest_width)) {
+                            float clamped_width_to_add = fminf(width_to_add, current_child->data.layout.max_size.x - current_child->data.layout.bounds.width);
+                            current_child->data.layout.bounds.width += clamped_width_to_add;
+                            parent_remaining_width -= clamped_width_to_add;
+                        }
+                    }
+
+                    current_child = current_child->right_sibling;
+                }
+            }
         } else {
-            //
+            GuiNode *current_child = node->first_child;
+            while (current_child) {
+                if (current_child->data.layout.size_flags.x == SIZE_FLAGS_GROW) {
+                    current_child->data.layout.bounds.width += (
+                            parent_remaining_width
+                            - current_child->data.layout.bounds.width
+                            - current_child->data.layout.margins.w
+                            - current_child->data.layout.margins.y
+                    );
+
+                    current_child->data.layout.bounds.width = fminf(
+                            current_child->data.layout.bounds.width,
+                            current_child->data.layout.max_size.x
+                    );
+                }
+
+                current_child = current_child->right_sibling;
+            }
         }
     }
 
@@ -567,7 +631,7 @@ protected:
             child_widths += (
                     current_child->data.layout.bounds.width
                     + current_child->data.layout.margins.y
-                    + current_child->data.layout.margins.z
+                    + current_child->data.layout.margins.w
             );
 
             ++child_count;
@@ -580,14 +644,12 @@ protected:
         float current_x = 0.0f;
         switch (current->data.layout.size_flags.x) {
             case SIZE_FLAGS_FIT:
+            case SIZE_FLAGS_SHRINK:
                 current_x = current->data.layout.bounds.x + current->data.layout.padding.w;
                 break;
-            case SIZE_FLAGS_FIXED:
-                current_x = current->data.layout.bounds.x + current->data.layout.padding.w + ((current->data.layout.bounds.width - child_widths) / 2.0f);
-                break;
-            case SIZE_FLAGS_SHRINK:
-                break;
             case SIZE_FLAGS_GROW:
+            case SIZE_FLAGS_FIXED:
+                current_x = current->data.layout.bounds.x + current->data.layout.padding.w + ((current->data.layout.bounds.width - child_widths - current->data.layout.child_spacing) / 2.0f);
                 break;
             default:
                 break;
