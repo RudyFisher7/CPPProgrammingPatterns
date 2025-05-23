@@ -322,8 +322,23 @@ TEST_CASE("RayLib Draw Func", "[RayLib]") {
     build_raylib_draw_circle(&DrawCircleV, 1.0f, RAYWHITE);
     build_raylib_draw_circle(&DrawCircleLines, 1.0f, RAYWHITE);
     build_raylib_draw_circle(&DrawCircleLinesV, 1.0f, RAYWHITE);
-    build_raylib_draw_ellipse(&DrawEllipse, 1.0f, 2.0f, RAYWHITE);
-    build_raylib_draw_ellipse(&DrawEllipseLines, 1.0f, 2.0f, RAYWHITE);
+    build_raylib_draw_ellipse(&DrawEllipse, 1.0f, 1.0f, RAYWHITE);
+    build_raylib_draw_ellipse(&DrawEllipseLines, 1.0f, 1.0f, RAYWHITE);
+    build_raylib_draw_ring(&DrawRing, 0.5f, 1.0f, 0.0f, 0.5f, 3, RAYWHITE);
+    build_raylib_draw_ring(&DrawRingLines, 0.5f, 1.0f, 0.0f, 0.5f, 3, RAYWHITE);
+    build_raylib_draw_rectangle(&DrawRectangleRec, RAYWHITE);
+    build_raylib_draw_rectangle(&DrawRectanglePro, {0.5f, 0.5f}, 0.5f, RAYWHITE);
+    build_raylib_draw_rectangle(&DrawRectangleGradientV, SKYBLUE, RAYWHITE);
+    build_raylib_draw_rectangle(&DrawRectangleGradientH, SKYBLUE, RAYWHITE);
+    build_raylib_draw_rectangle(&DrawRectangleGradientEx, RED, YELLOW, BLUE, RAYWHITE);
+    build_raylib_draw_rectangle(&DrawRectangleLines, RAYWHITE);
+    build_raylib_draw_rectangle(&DrawRectangleRounded, 10.0f, 3, RAYWHITE);
+    build_raylib_draw_rectangle(&DrawRectangleRounded, 10.0f, 3, RAYWHITE);
+    build_raylib_draw_rectangle(&DrawRectangleRoundedLinesEx, 10.0f, 3, 4.0f, RAYWHITE);
+    build_raylib_draw_texture(&DrawTextureEx, (Texture2D){}, 10.0f, RAYWHITE);//fixme:: use a real texture
+    build_raylib_draw_fps(&DrawFPS);
+    build_raylib_draw_text(&DrawText, "Hello Text!", GetFontDefault().baseSize, RAYWHITE);
+    build_raylib_draw_text(&DrawTextEx, GetFontDefault(),  "Hello Text!", (float)GetFontDefault().baseSize, 4.0f, RAYWHITE);
 
     CHECK(true);
 }

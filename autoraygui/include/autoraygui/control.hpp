@@ -143,21 +143,93 @@ std::function<void(Rectangle)> build_raylib_draw_circle(void(*func)(Vector2, flo
 template<typename ... TArgs>
 std::function<void(Rectangle)> build_raylib_draw_ellipse(void(*func)(int, int, float, float, TArgs...), float radius_h, float radius_v, TArgs ... args) {
     return [func, radius_h, radius_v, args...](Rectangle bounds) -> void {
-        float center_h = (bounds.width / 2.0f);
-        float center_v = (bounds.height / 2.0f);
+        float half_bounds_width = (bounds.width / 2.0f);
+        float half_bounds_height = (bounds.height / 2.0f);
         Vector2 center {
-                bounds.x + center_h,
-                bounds.y + center_v,
+                bounds.x + half_bounds_width,
+                bounds.y + half_bounds_height,
         };
 
-        float absolute_radius_h = radius_h * center_h;
-        float absolute_radius_v = radius_v * center_v;
+        float absolute_radius_h = radius_h * half_bounds_width;
+        float absolute_radius_v = radius_v * half_bounds_height;
 
         func(center.x, center.y, absolute_radius_h, absolute_radius_v, args ...);
     };
 }
 
-// ring drawing todo:: pickup here
+// ring drawing
+template<typename ... TArgs>
+std::function<void(Rectangle)> build_raylib_draw_ring(void(*func)(Vector2, float, float, float, float, int, TArgs...), float inner_radius, float outer_radius, float start_angle, float end_angle, int segments, TArgs ... args) {
+    return [func, inner_radius, outer_radius, start_angle, end_angle, segments, args...](Rectangle bounds) -> void {
+        Vector2 center {
+                bounds.x + (bounds.width / 2.0f),
+                bounds.y + (bounds.height / 2.0f),
+        };
+
+        float radius_multiplier = fminf(bounds.width, bounds.height) / 2.0f;
+        float absolute_inner_radius = inner_radius * radius_multiplier;
+        float absolute_outer_radius = outer_radius * radius_multiplier;
+
+        func(center, absolute_inner_radius, absolute_outer_radius, start_angle, end_angle, segments, args ...);
+    };
+}
+
+// rectangle drawing
+template<typename ... TArgs>
+std::function<void(Rectangle)> build_raylib_draw_rectangle(void(*func)(int, int, int, int, TArgs...), TArgs ... args) {
+    return [func, args...](Rectangle bounds) -> void {
+        func(bounds.x, bounds.y, bounds.width, bounds.height, args ...);
+    };
+}
+
+template<typename ... TArgs>
+std::function<void(Rectangle)> build_raylib_draw_rectangle(void(*func)(Rectangle, TArgs...), TArgs ... args) {
+    return [func, args...](Rectangle bounds) -> void {
+        func(bounds, args ...);
+    };
+}
+
+// triangle drawing todo::
+// polygon drawing todo::
+// spline drawing todo::
+
+// texture drawing todo:: test this and make the rest
+template<typename ... TArgs>
+std::function<void(Rectangle)> build_raylib_draw_texture(void(*func)(Texture2D, Vector2, float, float, TArgs...), Texture2D texture, float rotation, TArgs ... args) {
+    return [func, texture, rotation, args...](Rectangle bounds) -> void {
+        Vector2 position {
+                bounds.x,
+                bounds.y,
+        };
+
+
+        float scale_w = texture.width / fmaxf(bounds.width, 1.0f);
+        float scale_h = texture.height / fmaxf(bounds.height, 1.0f);
+        float scale = fminf(scale_w, scale_h);
+
+        func(texture, position, rotation, scale, args ...);
+    };
+}
+
+// text drawing
+std::function<void(Rectangle)> build_raylib_draw_fps(void(*func)(int, int)) {
+    return [func](Rectangle bounds) -> void {
+        func(bounds.x, bounds.y);
+    };
+}
+
+std::function<void(Rectangle)> build_raylib_draw_text(void(*func)(const char*, int, int, int, Color), const char* text, int font_size, Color color) {
+    return [func, text, font_size, color](Rectangle bounds) -> void {
+        func(text, bounds.x, bounds.y, font_size, color);
+    };
+}
+
+template<typename ... TArgs>
+std::function<void(Rectangle)> build_raylib_draw_text(void(*func)(Font, const char*, Vector2, TArgs...), Font font, const char* text, TArgs ... args) {
+    return [func, font, text, args...](Rectangle bounds) -> void {
+        func(font, text, (Vector2){bounds.x, bounds.y}, args ...);
+    };
+}
 
 }
 
