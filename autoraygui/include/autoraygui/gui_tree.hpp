@@ -277,7 +277,7 @@ protected:
 
             if (current->first_child) {
                 if (current->data.layout.size_flags.x != SIZE_FLAGS_FIXED) {
-                    _update_fit_width_containers(current);
+                    _update_fit_width_container(current);
                 }
             } else {
                 // leaf
@@ -287,11 +287,11 @@ protected:
         // set the root here because its index is 0u and this would cause bit overflow in the for loop above.
         GuiNode* root = this->Root();
         if (root->data.layout.size_flags.x != SIZE_FLAGS_FIXED) {
-            _update_fit_width_containers(root);
+            _update_fit_width_container(root);
         }
     }
 
-    void _update_fit_width_containers(GuiNode* node) {
+    void _update_fit_width_container(GuiNode* node) {
         float width = 0.0f;
         GuiNode* current = node->first_child;
         if (node->data.layout.child_layout_axis == CHILD_LAYOUT_AXIS_X) {
@@ -329,12 +329,12 @@ protected:
             GuiNode* current = this->_bfs_queue[i];
 
             if (current->first_child) {
-                _update_grow_width_containers(this->_bfs_queue[i]);
+                _update_grow_width_container(this->_bfs_queue[i]);
             }
         }
     }
 
-    void _update_grow_width_containers(GuiNode* node) {
+    void _update_grow_width_container(GuiNode* node) {
         float parent_remaining_width = (
                 node->data.layout.bounds.width
                 - node->data.layout.padding.w
@@ -441,7 +441,7 @@ protected:
 
             if (current->first_child) {
                 if (current->data.layout.size_flags.y != SIZE_FLAGS_FIXED) {
-                    _update_fit_height_containers(current);
+                    _update_fit_height_container(current);
                 }
             } else {
                 // leaf
@@ -451,11 +451,11 @@ protected:
         // set the root here because its index is 0u and this would cause bit overflow in the for loop above.
         GuiNode* root = this->Root();
         if (root->data.layout.size_flags.y != SIZE_FLAGS_FIXED) {
-            _update_fit_height_containers(root);
+            _update_fit_height_container(root);
         }
     }
 
-    void _update_fit_height_containers(GuiNode* node) {
+    void _update_fit_height_container(GuiNode* node) {
         float height = 0.0f;
         GuiNode* current = node->first_child;
         if (node->data.layout.child_layout_axis == CHILD_LAYOUT_AXIS_Y) {
@@ -488,7 +488,112 @@ protected:
         node->data.layout.bounds.height = height;
     }
 
-    void _update_grow_and_shrink_heights() {}
+    void _update_grow_and_shrink_heights() {
+        for (size_t i = 0u; i < this->_arena_size; ++i) {
+            GuiNode* current = this->_bfs_queue[i];
+
+            if (current->first_child) {
+                _update_grow_height_container(this->_bfs_queue[i]);
+            }
+        }
+    }
+
+    void _update_grow_height_container(GuiNode* node) {
+        float parent_remaining_height = (
+                node->data.layout.bounds.height
+                - node->data.layout.padding.x
+                - node->data.layout.padding.z
+        );
+
+        if (node->data.layout.child_layout_axis == CHILD_LAYOUT_AXIS_Y) {
+            GuiNode *current_child = node->first_child;
+            size_t child_count = 0u;
+            while (current_child) {
+                parent_remaining_height -= (
+                        current_child->data.layout.bounds.height
+                        + current_child->data.layout.margins.x
+                        + current_child->data.layout.margins.z
+                );
+
+                ++child_count;
+
+                current_child = current_child->right_sibling;
+            }
+
+            float child_spacing = node->data.layout.child_spacing * (float) (child_count - 1u);
+            parent_remaining_height -= child_spacing;
+
+            size_t growable_child_count = 0u;
+            current_child = node->first_child;
+            while (current_child) {
+                if (current_child->data.layout.size_flags.y == SIZE_FLAGS_GROW) {
+                    ++growable_child_count;
+                }
+
+                current_child = current_child->right_sibling;
+            }
+
+            while (parent_remaining_height > 0.0f && growable_child_count > 0u) {
+                current_child = node->first_child;
+                float smallest_height = FLT_MAX;
+                float second_smallest_height = FLT_MAX;
+                float height_to_add = parent_remaining_height;
+                while (current_child) {
+                    if (current_child->data.layout.size_flags.y == SIZE_FLAGS_GROW) {
+                        if (current_child->data.layout.bounds.height < smallest_height && current_child->data.layout.bounds.height < current_child->data.layout.max_size.y) {
+                            second_smallest_height = smallest_height;
+                            smallest_height = current_child->data.layout.bounds.height;
+                        }
+
+                        if (current_child->data.layout.bounds.height > smallest_height && current_child->data.layout.bounds.height < current_child->data.layout.max_size.y) {
+                            second_smallest_height = fminf(second_smallest_height, current_child->data.layout.bounds.height);
+                            height_to_add = second_smallest_height - smallest_height;
+                        }
+                    }
+
+                    current_child = current_child->right_sibling;
+                }
+
+                height_to_add = fminf(height_to_add, parent_remaining_height / (float)growable_child_count);
+
+                current_child = node->first_child;
+                while (current_child) {
+                    if (current_child->data.layout.size_flags.y == SIZE_FLAGS_GROW) {
+                        if (FloatEquals(current_child->data.layout.bounds.height, smallest_height) && current_child->data.layout.bounds.height < current_child->data.layout.max_size.y) {
+                            float clamped_width_to_add = fminf(height_to_add, current_child->data.layout.max_size.y - current_child->data.layout.bounds.height);
+                            current_child->data.layout.bounds.height += clamped_width_to_add;
+                            parent_remaining_height -= clamped_width_to_add;
+
+                            if (FloatEquals(current_child->data.layout.bounds.height, current_child->data.layout.max_size.y)) {
+                                --growable_child_count;
+                            }
+                        }
+                    }
+
+                    current_child = current_child->right_sibling;
+                }
+            }
+        } else {
+            GuiNode *current_child = node->first_child;
+            while (current_child) {
+                if (current_child->data.layout.size_flags.y == SIZE_FLAGS_GROW) {
+                    current_child->data.layout.bounds.height += (
+                            parent_remaining_height
+                            - current_child->data.layout.bounds.height
+                            - current_child->data.layout.margins.x
+                            - current_child->data.layout.margins.z
+                    );
+
+                    current_child->data.layout.bounds.height = fminf(
+                            current_child->data.layout.bounds.height,
+                            current_child->data.layout.max_size.y
+                    );
+                }
+
+                current_child = current_child->right_sibling;
+            }
+        }
+    }
 
     void _update_positions_and_alignment() {
         GuiNode* root = this->Root();
@@ -553,34 +658,6 @@ protected:
         }
     }
 
-    void _set_children_positions_along_y(GuiNode* current) {
-        switch (current->data.layout.child_alignment.x) {
-            case CHILD_ALIGNMENT_BEGIN:
-                break;
-            case CHILD_ALIGNMENT_CENTER:
-                break;
-            case CHILD_ALIGNMENT_END:
-                break;
-            case CHILD_ALIGNMENT_RADIAL:
-                break;
-            default:
-                break;
-        }
-
-        switch (current->data.layout.child_alignment.y) {
-            case CHILD_ALIGNMENT_BEGIN:
-                break;
-            case CHILD_ALIGNMENT_CENTER:
-                break;
-            case CHILD_ALIGNMENT_END:
-                break;
-            case CHILD_ALIGNMENT_RADIAL:
-                break;
-            default:
-                break;
-        }
-    }
-
     void _set_children_x_begin_along_x(GuiNode* current) {
         size_t child_count = 0u;
         GuiNode *current_child = current->first_child;
@@ -622,7 +699,7 @@ protected:
         size_t child_count = 0u;
         GuiNode *current_child = current->first_child;
 
-        child_widths += current->data.layout.padding.y + current->data.layout.padding.z;
+        child_widths += current->data.layout.padding.y + current->data.layout.padding.w;
         while (current_child) {
             child_widths += (
                     current_child->data.layout.bounds.width
@@ -655,7 +732,7 @@ protected:
         while (current_child) {
             float left_padding_adjustment_x = current_child->data.layout.margins.w;
             if (current_child->left_sibling) {
-                left_padding_adjustment_x += current_child->left_sibling->data.layout.margins.y + current->data.layout.child_spacing;
+                left_padding_adjustment_x += current->data.layout.child_spacing;
             }
 
             current_child->data.layout.bounds.x = current_x + left_padding_adjustment_x;
@@ -720,10 +797,179 @@ protected:
         }
     }
 
-    GuiNode* _get_next_parent(GuiNode* current) {
-        GuiNode* result = nullptr;
+    void _set_children_positions_along_y(GuiNode* current) {
+        switch (current->data.layout.child_alignment.x) {
+            case CHILD_ALIGNMENT_BEGIN:
+                _set_children_x_begin_along_y(current);
+                break;
+            case CHILD_ALIGNMENT_CENTER:
+                _set_children_x_center_along_y(current);
+                break;
+            case CHILD_ALIGNMENT_END:
+                _set_children_x_end_along_y(current);
+                break;
+            case CHILD_ALIGNMENT_RADIAL:
+                break;
+            default:
+                _set_children_x_begin_along_y(current);
+                break;
+        }
 
-        return result;
+        switch (current->data.layout.child_alignment.y) {
+            case CHILD_ALIGNMENT_BEGIN:
+                _set_children_y_begin_along_y(current);
+                break;
+            case CHILD_ALIGNMENT_CENTER:
+                _set_children_y_center_along_y(current);
+                break;
+            case CHILD_ALIGNMENT_END:
+                _set_children_y_end_along_y(current);
+                break;
+            case CHILD_ALIGNMENT_RADIAL:
+                break;
+            default:
+                _set_children_y_begin_along_y(current);
+                break;
+        }
+    }
+
+    void _set_children_y_begin_along_y(GuiNode* current) {
+        size_t child_count = 0u;
+        GuiNode *current_child = current->first_child;
+        while (current_child) {
+            ++child_count;
+
+            current_child = current_child->right_sibling;
+        }
+
+        float current_y = current->data.layout.bounds.y + current->data.layout.padding.x;
+
+        current_child = current->first_child;
+        while (current_child) {
+            float top_magin_adjustment = current_child->data.layout.margins.x;
+            if (current_child->left_sibling) {
+                top_magin_adjustment += current_child->left_sibling->data.layout.margins.y + current->data.layout.child_spacing;
+            }
+
+            current_child->data.layout.bounds.y = current_y + top_magin_adjustment;
+            current_y += current_child->data.layout.bounds.height + top_magin_adjustment;
+
+            current_child = current_child->right_sibling;
+        }
+    }
+
+    void _set_children_x_begin_along_y(GuiNode* current) {
+        float current_x = current->data.layout.bounds.x + current->data.layout.padding.w;
+        GuiNode *current_child = current->first_child;
+        while (current_child) {
+            float left_margin_adjustment = current_child->data.layout.margins.w;
+            current_child->data.layout.bounds.x = current_x + left_margin_adjustment;
+
+            current_child = current_child->right_sibling;
+        }
+    }
+
+    void _set_children_y_center_along_y(GuiNode* current) {
+        float child_heights = 0.0f;
+        size_t child_count = 0u;
+        GuiNode *current_child = current->first_child;
+
+        child_heights += current->data.layout.padding.x + current->data.layout.padding.z;
+        while (current_child) {
+            child_heights += (
+                    current_child->data.layout.bounds.height
+                    + current_child->data.layout.margins.x
+                    + current_child->data.layout.margins.z
+            );
+
+            ++child_count;
+
+            current_child = current_child->right_sibling;
+        }
+
+        float child_spacing = current->data.layout.child_spacing * (float) (child_count - 1u);
+
+        float current_y = 0.0f;
+        switch (current->data.layout.size_flags.y) {
+            case SIZE_FLAGS_FIT:
+            case SIZE_FLAGS_SHRINK:
+                current_y = current->data.layout.bounds.y + current->data.layout.padding.x;
+                break;
+            case SIZE_FLAGS_GROW:
+            case SIZE_FLAGS_FIXED:
+                current_y = current->data.layout.bounds.y + current->data.layout.padding.x + ((current->data.layout.bounds.height - child_heights - child_spacing) / 2.0f);
+                break;
+            default:
+                break;
+        }
+
+        current_child = current->first_child;
+        while (current_child) {
+            float top_margin_adjustment = current_child->data.layout.margins.x;
+            if (current_child->left_sibling) {
+                top_margin_adjustment += current->data.layout.child_spacing;
+            }
+
+            current_child->data.layout.bounds.y = current_y + top_margin_adjustment;
+            current_y += top_margin_adjustment + current_child->data.layout.bounds.height;
+
+            current_child = current_child->right_sibling;
+        }
+    }
+
+    void _set_children_x_center_along_y(GuiNode* current) {
+        float current_x_parent_part = 0.0f;
+
+        current_x_parent_part = current->data.layout.bounds.x + (current->data.layout.bounds.width / 2.0f);
+
+        GuiNode *current_child = current->first_child;
+        while (current_child) {
+            float current_x = (
+                    current_x_parent_part
+                    - (current_child->data.layout.bounds.width / 2.0f)
+            );
+
+            current_child->data.layout.bounds.x = current_x;
+
+            current_child = current_child->right_sibling;
+        }
+    }
+
+    void _set_children_y_end_along_y(GuiNode* current) {
+        size_t child_count = 0u;
+        GuiNode *current_child = current->first_child;
+        while (current_child) {
+            ++child_count;
+
+            current_child = current_child->right_sibling;
+        }
+
+        float current_y = current->data.layout.bounds.y + current->data.layout.bounds.height - current->data.layout.padding.z;
+
+        current_child = current->last_child;
+        while (current_child) {
+            float bottom_margin_adjustment = current_child->data.layout.margins.z;
+            if (current_child->right_sibling) {
+                bottom_margin_adjustment += current_child->right_sibling->data.layout.margins.x + current->data.layout.child_spacing;
+            }
+
+            current_y -= current_child->data.layout.bounds.width + bottom_margin_adjustment;
+            current_child->data.layout.bounds.y = current_y;
+
+            current_child = current_child->left_sibling;
+        }
+    }
+
+    void _set_children_x_end_along_y(GuiNode* current) {
+        float current_x_parent_part = current->data.layout.bounds.x + current->data.layout.bounds.width - current->data.layout.padding.y;
+
+        GuiNode *current_child = current->first_child;
+        while (current_child) {
+            float current_x = current_x_parent_part - current_child->data.layout.bounds.width - current_child->data.layout.margins.y;
+            current_child->data.layout.bounds.x = current_x;
+
+            current_child = current_child->right_sibling;
+        }
     }
 };
 

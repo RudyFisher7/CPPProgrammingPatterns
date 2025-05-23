@@ -60,12 +60,13 @@ int main() {
 
     tree.BeginRoot()
         ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
+        ->SetChildLayoutAxis(AutoRayGui::CHILD_LAYOUT_AXIS_Y)
         ->SetChildSpacing(32.0f);
         for (int i = 0; i < 2; ++i) {
             tree.Begin()
                 ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
                 ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_GROW, AutoRayGui::SIZE_FLAGS_GROW})
-                ->SetMaxSize({280.0f, FLT_MAX})
+                ->SetMaxSize({FLT_MAX, 60.0f})
                 ->SetDrawFunc(AutoRayGui::build_raylib_draw_ellipse(&DrawEllipse, 1.0, 1.0, SKYBLUE))
                 ->Begin()
                     ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
