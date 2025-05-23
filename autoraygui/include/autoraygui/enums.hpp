@@ -33,18 +33,21 @@
 namespace AutoRayGui {
 
 enum SizeFlags : uint8_t {
-    SIZE_FLAGS_FIT = 0x01 << 0,
-    SIZE_FLAGS_FIXED = 0x01 << 1,
-    SIZE_FLAGS_SHRINK = 0x01 << 2,
-    SIZE_FLAGS_GROW = 0x01 << 3,
+    SIZE_FLAGS_MIN = 0,
+    SIZE_FLAGS_FIT = SIZE_FLAGS_MIN,
+    SIZE_FLAGS_FIXED ,
+    SIZE_FLAGS_GROW,
+    SIZE_FLAGS_SIZE,
 };
 
 
 enum ChildAlignment : uint8_t {
-    CHILD_ALIGNMENT_BEGIN = 0x01 << 0,
-    CHILD_ALIGNMENT_CENTER = 0x01 << 1,
-    CHILD_ALIGNMENT_END = 0x01 << 2,
-    CHILD_ALIGNMENT_RADIAL = 0x01 << 3,
+    CHILD_ALIGNMENT_MIN = 0,
+    CHILD_ALIGNMENT_BEGIN = CHILD_ALIGNMENT_MIN,
+    CHILD_ALIGNMENT_CENTER,
+    CHILD_ALIGNMENT_END,
+    CHILD_ALIGNMENT_RADIAL,
+    CHILD_ALIGNMENT_SIZE,
 };
 
 typedef struct vector2_uint8_t {

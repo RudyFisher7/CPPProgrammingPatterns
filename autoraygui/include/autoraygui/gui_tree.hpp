@@ -245,17 +245,16 @@ public:
 
         // note:: update fixed widths would go here, but is unnecessary since the bounds' widths are just the values set at design time
         _update_fit_widths();
-        _update_grow_and_shrink_widths();
+        _update_grow_widths();
         // note:: update fixed heights would go here, but is unnecessary since the bounds' heights are just the values set at design time
         _update_text_wrapping();
         _update_fit_heights();
-        _update_grow_and_shrink_heights();
+        _update_grow_heights();
         _update_positions_and_alignment();
     }
 
     void Draw() {
-        GuiNode* root = this->Root();
-        _draw(root);
+        _draw(this->Root());
     }
 
 protected:
@@ -276,7 +275,7 @@ protected:
             GuiNode* current = &this->_get(i);
 
             if (current->first_child) {
-                if (current->data.layout.size_flags.x != SIZE_FLAGS_FIXED) {
+                if (current->data.layout.size_flags.x == SIZE_FLAGS_FIT) {
                     _update_fit_width_container(current);
                 }
             } else {
@@ -286,7 +285,7 @@ protected:
 
         // set the root here because its index is 0u and this would cause bit overflow in the for loop above.
         GuiNode* root = this->Root();
-        if (root->data.layout.size_flags.x != SIZE_FLAGS_FIXED) {
+        if (root->data.layout.size_flags.x == SIZE_FLAGS_FIT) {
             _update_fit_width_container(root);
         }
     }
@@ -321,10 +320,11 @@ protected:
         width += node->data.layout.padding.y + node->data.layout.padding.w;
 
         // set the parent's width to the calculated width
-        node->data.layout.bounds.width = width;
+//        node->data.layout.bounds.width = width;
+        node->data.layout.bounds.width = fmaxf(width, node->data.layout.min_size.x);
     }
 
-    void _update_grow_and_shrink_widths() {
+    void _update_grow_widths() {
         for (size_t i = 0u; i < this->_arena_size; ++i) {
             GuiNode* current = this->_bfs_queue[i];
 
@@ -369,7 +369,7 @@ protected:
                 current_child = current_child->right_sibling;
             }
 
-            while (parent_remaining_width > 0.0f && growable_child_count > 0u) {
+            while (parent_remaining_width > FLT_EPSILON && growable_child_count > 0u) {
                 current_child = node->first_child;
                 float smallest_width = FLT_MAX;
                 float second_smallest_width = FLT_MAX;
@@ -440,7 +440,7 @@ protected:
             GuiNode* current = &this->_get(i);
 
             if (current->first_child) {
-                if (current->data.layout.size_flags.y != SIZE_FLAGS_FIXED) {
+                if (current->data.layout.size_flags.y == SIZE_FLAGS_FIT) {
                     _update_fit_height_container(current);
                 }
             } else {
@@ -450,7 +450,7 @@ protected:
 
         // set the root here because its index is 0u and this would cause bit overflow in the for loop above.
         GuiNode* root = this->Root();
-        if (root->data.layout.size_flags.y != SIZE_FLAGS_FIXED) {
+        if (root->data.layout.size_flags.y == SIZE_FLAGS_FIT) {
             _update_fit_height_container(root);
         }
     }
@@ -473,7 +473,7 @@ protected:
             height += node->data.layout.child_spacing * (float)(child_count - 1u);
 
         } else {
-            // get the max width out of each child, including their padding on both sides
+            // get the max height out of each child, including their padding on both top and bottom
             while (current) {
                 Layout* layout = &current->data.layout;
                 height = fmaxf(layout->bounds.height + layout->margins.x + layout->margins.z, height);
@@ -484,11 +484,12 @@ protected:
 
         height += node->data.layout.padding.x + node->data.layout.padding.z;
 
-        // set the parent's width to the calculated width
-        node->data.layout.bounds.height = height;
+        // set the parent's height to the calculated height
+//        node->data.layout.bounds.width = height;
+        node->data.layout.bounds.height = fmaxf(height, node->data.layout.min_size.y);
     }
 
-    void _update_grow_and_shrink_heights() {
+    void _update_grow_heights() {
         for (size_t i = 0u; i < this->_arena_size; ++i) {
             GuiNode* current = this->_bfs_queue[i];
 
@@ -533,7 +534,7 @@ protected:
                 current_child = current_child->right_sibling;
             }
 
-            while (parent_remaining_height > 0.0f && growable_child_count > 0u) {
+            while (parent_remaining_height > FLT_EPSILON && growable_child_count > 0u) {
                 current_child = node->first_child;
                 float smallest_height = FLT_MAX;
                 float second_smallest_height = FLT_MAX;
@@ -717,7 +718,6 @@ protected:
         float current_x = 0.0f;
         switch (current->data.layout.size_flags.x) {
             case SIZE_FLAGS_FIT:
-            case SIZE_FLAGS_SHRINK:
                 current_x = current->data.layout.bounds.x + current->data.layout.padding.w;
                 break;
             case SIZE_FLAGS_GROW:
@@ -892,7 +892,6 @@ protected:
         float current_y = 0.0f;
         switch (current->data.layout.size_flags.y) {
             case SIZE_FLAGS_FIT:
-            case SIZE_FLAGS_SHRINK:
                 current_y = current->data.layout.bounds.y + current->data.layout.padding.x;
                 break;
             case SIZE_FLAGS_GROW:

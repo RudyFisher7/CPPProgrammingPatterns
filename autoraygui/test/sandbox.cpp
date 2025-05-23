@@ -60,7 +60,7 @@ int main() {
 
     tree.BeginRoot()
         ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
-        ->SetChildLayoutAxis(AutoRayGui::CHILD_LAYOUT_AXIS_Y)
+        ->SetChildLayoutAxis(AutoRayGui::CHILD_LAYOUT_AXIS_X)
         ->SetChildSpacing(32.0f);
         for (int i = 0; i < 2; ++i) {
             tree.Begin()
