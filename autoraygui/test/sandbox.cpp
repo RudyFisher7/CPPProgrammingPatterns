@@ -59,7 +59,7 @@ int main() {
 //    control.draw = build_raylib_draw_ellipse(&DrawEllipse, 1.0f, 1.0f, RAYWHITE);
 
     tree.BeginRoot()
-        ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_BEGIN, AutoRayGui::CHILD_ALIGNMENT_CENTER})
+        ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
         ->SetChildSpacing(32.0f);
         for (int i = 0; i < 2; ++i) {
             tree.Begin()

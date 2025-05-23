@@ -356,7 +356,7 @@ protected:
                 current_child = current_child->right_sibling;
             }
 
-            float child_spacing = node->data.layout.child_spacing / (float) (child_count / 2u);
+            float child_spacing = node->data.layout.child_spacing * (float) (child_count - 1u);
             parent_remaining_width -= child_spacing;
 
             size_t growable_child_count = 0u;
@@ -590,14 +590,13 @@ protected:
             current_child = current_child->right_sibling;
         }
 
-        float child_spacing = current->data.layout.child_spacing * (float) (child_count - 1u);
         float current_x = current->data.layout.bounds.x + current->data.layout.padding.w;
 
         current_child = current->first_child;
         while (current_child) {
             float left_padding_adjustment_x = current_child->data.layout.margins.w;
             if (current_child->left_sibling) {
-                left_padding_adjustment_x += current_child->left_sibling->data.layout.margins.y + child_spacing;
+                left_padding_adjustment_x += current_child->left_sibling->data.layout.margins.y + current->data.layout.child_spacing;
             }
 
             current_child->data.layout.bounds.x = current_x + left_padding_adjustment_x;
@@ -646,7 +645,7 @@ protected:
                 break;
             case SIZE_FLAGS_GROW:
             case SIZE_FLAGS_FIXED:
-                current_x = current->data.layout.bounds.x + current->data.layout.padding.w + ((current->data.layout.bounds.width - child_widths - current->data.layout.child_spacing) / 2.0f);
+                current_x = current->data.layout.bounds.x + current->data.layout.padding.w + ((current->data.layout.bounds.width - child_widths - child_spacing) / 2.0f);
                 break;
             default:
                 break;
@@ -656,7 +655,7 @@ protected:
         while (current_child) {
             float left_padding_adjustment_x = current_child->data.layout.margins.w;
             if (current_child->left_sibling) {
-                left_padding_adjustment_x += current_child->left_sibling->data.layout.margins.y + child_spacing;
+                left_padding_adjustment_x += current_child->left_sibling->data.layout.margins.y + current->data.layout.child_spacing;
             }
 
             current_child->data.layout.bounds.x = current_x + left_padding_adjustment_x;
@@ -693,14 +692,13 @@ protected:
             current_child = current_child->right_sibling;
         }
 
-        float child_spacing = current->data.layout.child_spacing * (float) (child_count - 1u);
         float current_x = current->data.layout.bounds.x + current->data.layout.bounds.width - current->data.layout.padding.y;
 
         current_child = current->last_child;
         while (current_child) {
             float right_padding_adjustment_x = current_child->data.layout.margins.y;
             if (current_child->right_sibling) {
-                right_padding_adjustment_x += current_child->right_sibling->data.layout.margins.w + child_spacing;
+                right_padding_adjustment_x += current_child->right_sibling->data.layout.margins.w + current->data.layout.child_spacing;
             }
 
             current_x -= current_child->data.layout.bounds.width + right_padding_adjustment_x;
