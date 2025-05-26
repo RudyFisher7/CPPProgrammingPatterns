@@ -40,6 +40,7 @@
 #include <raymath.h>
 
 #include <array>
+#include <cctype>
 #include <cfloat>
 #include <cstdint>
 #include <cmath>
@@ -78,6 +79,7 @@ public:
                 {CHILD_ALIGNMENT_BEGIN, CHILD_ALIGNMENT_BEGIN},
                 CHILD_LAYOUT_AXIS_X,
                 nullptr,
+                0u,
         },
         {&draw_passthrough},
     } {};
@@ -255,10 +257,11 @@ public:
         return this;
     }
 
-    TGuiThis* SetText(const char* value, float font_size, float line_spacing) {
+    TGuiThis* SetText(const char* value, size_t text_length, float font_size, float line_spacing) {
         this->_current_parent->data.layout.text = value;
         this->_current_parent->data.layout.font_size = font_size;
         this->_current_parent->data.layout.line_spacing = line_spacing;
+        this->_current_parent->data.layout.text_length = text_length;
         return this;
     }
 
@@ -479,11 +482,26 @@ protected:
         float font_width = node->data.layout.font_size;
 
         //font width * char count = width
-        int char_count_per_line = (int)(node->data.layout.min_size.x / font_width);
+        int line_count = 1;
+        int char_count_per_line = (int)(node->data.layout.bounds.width / font_width);
         int i = char_count_per_line - 1;
-        while (node->data.layout.text[i]) {
-            //todo:: pickup here
+        int previous_i = -1;
+        while (i > previous_i && i < node->data.layout.text_length) {
+            while (i > previous_i && !isspace(node->data.layout.text[i])) {
+                --i;
+            }
+
+            if (i > previous_i) {
+                ++line_count;
+                previous_i = i;
+                i += char_count_per_line;
+            }
         }
+
+        node->data.layout.wrapped_text_size_v = (float)(
+                (node->data.layout.font_size * line_count)
+                + (node->data.layout.line_spacing * (line_count - 1))
+        );
     }
 
     void _update_fit_heights() {

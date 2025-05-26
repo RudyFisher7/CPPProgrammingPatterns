@@ -48,6 +48,7 @@ typedef struct layout_t {
     Vector2UInt8 child_alignment;
     ChildLayoutAxis child_layout_axis;
     const char* text;
+    size_t text_length;
 } Layout;
 
 }

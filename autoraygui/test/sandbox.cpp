@@ -68,7 +68,7 @@ int main() {
             ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
             ->SetSize({100.0f, 100.0f})
             ->SetMaxSizeX(MeasureText("texty-text", GetFontDefault().baseSize))
-            ->SetText(text_to_wrap, GetFontDefault().baseSize, GetFontDefault().baseSize)
+            ->SetText(text_to_wrap, strlen(text_to_wrap), GetFontDefault().baseSize, GetFontDefault().baseSize)
             ->SetDrawFunc(AutoRayGui::build_raylib_draw_text(&DrawText, text_to_wrap, GetFontDefault().baseSize, RAYWHITE))
         ->End();
 
