@@ -58,41 +58,51 @@ int main() {
     control.draw = build_ray_gui(pressed, &GuiButton, "Hello!");
 //    control.draw = build_raylib_draw_ellipse(&DrawEllipse, 1.0f, 1.0f, RAYWHITE);
 
+    const char* text_to_wrap = "Hello Text! This is some texty-text for texting the text.";
+
     tree.BeginRoot()
         ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
         ->SetChildLayoutAxis(AutoRayGui::CHILD_LAYOUT_AXIS_X)
-        ->SetChildSpacing(32.0f);
+        ->SetChildSpacing(32.0f)
+        ->Begin()
+            ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
+            ->SetSize({100.0f, 100.0f})
+            ->SetMaxSizeX(MeasureText("texty-text", GetFontDefault().baseSize))
+            ->SetText(text_to_wrap, GetFontDefault().baseSize, GetFontDefault().baseSize)
+            ->SetDrawFunc(AutoRayGui::build_raylib_draw_text(&DrawText, text_to_wrap, GetFontDefault().baseSize, RAYWHITE))
+        ->End();
+
         for (int i = 0; i < 2; ++i) {
             tree.Begin()
-                ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
-                ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_GROW, AutoRayGui::SIZE_FLAGS_GROW})
-                ->SetMaxSize({FLT_MAX, 60.0f})
-                ->SetDrawFunc(AutoRayGui::build_raylib_draw_ellipse(&DrawEllipse, 1.0, 1.0, SKYBLUE))
-                ->Begin()
+                    ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
+                    ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_GROW, AutoRayGui::SIZE_FLAGS_GROW})
+                    ->SetMaxSize({FLT_MAX, 60.0f})
+                    ->SetDrawFunc(AutoRayGui::build_raylib_draw_ellipse(&DrawEllipse, 1.0, 1.0, SKYBLUE))
+                    ->Begin()
                     ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
-                    ->SetDimensions({100.0f, 20.0f})
+                    ->SetSize({100.0f, 20.0f})
                     ->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello!"))
-                ->End()
-                ->Begin()
+                    ->End()
+                    ->Begin()
                     ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
-                    ->SetDimensions({120.0f, 30.0f})
+                    ->SetSize({120.0f, 30.0f})
                     ->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello Again!"))
                 ->End()
             ->End();
         }
 
-        tree.Begin()
+    tree.Begin()
             ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
             ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_GROW, AutoRayGui::SIZE_FLAGS_GROW})
             ->SetDrawFunc(AutoRayGui::build_raylib_draw_ellipse(&DrawEllipse, 1.0, 1.0, SKYBLUE))
             ->Begin()
-                ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
-                ->SetDimensions({100.0f, 20.0f})
-                ->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello!"))
+            ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
+            ->SetSize({100.0f, 20.0f})
+            ->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello!"))
             ->End()
             ->Begin()
-                ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
-                ->SetDimensions({120.0f, 30.0f})
+            ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
+            ->SetSize({120.0f, 30.0f})
                 ->SetDrawFunc(AutoRayGui::build_ray_gui(pressed, &GuiButton, "Hello Again!"))
             ->End()
         ->End();

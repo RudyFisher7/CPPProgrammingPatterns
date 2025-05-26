@@ -71,9 +71,13 @@ public:
                 {0.0f, 0.0f},
                 {FLT_MAX, FLT_MAX},
                 0.0f,
+                0.0f,
+                0.0f,
+                0.0f,
                 {SIZE_FLAGS_FIT, SIZE_FLAGS_FIT},
                 {CHILD_ALIGNMENT_BEGIN, CHILD_ALIGNMENT_BEGIN},
                 CHILD_LAYOUT_AXIS_X,
+                nullptr,
         },
         {&draw_passthrough},
     } {};
@@ -136,7 +140,7 @@ public:
         return this;
     }
 
-    TGuiThis* SetDimensions(const Vector2& value) {
+    TGuiThis* SetSize(const Vector2& value) {
         this->_current_parent->data.layout.bounds.width = value.x;
         this->_current_parent->data.layout.bounds.height = value.y;
         return this;
@@ -191,8 +195,28 @@ public:
         return this;
     }
 
+    TGuiThis* SetMinSizeX(float value) {
+        this->_current_parent->data.layout.min_size.x = value;
+        return this;
+    }
+
+    TGuiThis* SetMinSizeY(float value) {
+        this->_current_parent->data.layout.min_size.y = value;
+        return this;
+    }
+
     TGuiThis* SetMaxSize(const Vector2& value) {
         this->_current_parent->data.layout.max_size = value;
+        return this;
+    }
+
+    TGuiThis* SetMaxSizeX(float value) {
+        this->_current_parent->data.layout.max_size.x = value;
+        return this;
+    }
+
+    TGuiThis* SetMaxSizeY(float value) {
+        this->_current_parent->data.layout.max_size.y = value;
         return this;
     }
 
@@ -228,6 +252,13 @@ public:
 
     TGuiThis* SetChildLayoutAxis(ChildLayoutAxis value) {
         this->_current_parent->data.layout.child_layout_axis = value;
+        return this;
+    }
+
+    TGuiThis* SetText(const char* value, float font_size, float line_spacing) {
+        this->_current_parent->data.layout.text = value;
+        this->_current_parent->data.layout.font_size = font_size;
+        this->_current_parent->data.layout.line_spacing = line_spacing;
         return this;
     }
 
@@ -329,7 +360,7 @@ protected:
             GuiNode* current = this->_bfs_queue[i];
 
             if (current->first_child) {
-                _update_grow_width_container(this->_bfs_queue[i]);
+                _update_grow_width_container(current);
             }
         }
     }
@@ -431,7 +462,29 @@ protected:
         }
     }
 
-    void _update_text_wrapping() {}
+    void _update_text_wrapping() {
+        for (size_t i = 0u; i < this->_arena_size; ++i) {
+            GuiNode* current = this->_bfs_queue[i];
+
+            if (current->data.layout.text) {
+                _update_text_wrapping(current);
+            }
+        }
+    }
+
+    void _update_text_wrapping(GuiNode* node) {
+        //use font size for the width for now.
+        // usually you would find the width of each codepoint
+        // but that might cause a cache miss due to accessing heap memory
+        float font_width = node->data.layout.font_size;
+
+        //font width * char count = width
+        int char_count_per_line = (int)(node->data.layout.min_size.x / font_width);
+        int i = char_count_per_line - 1;
+        while (node->data.layout.text[i]) {
+            //todo:: pickup here
+        }
+    }
 
     void _update_fit_heights() {
         size_t last_index = this->_arena_size - 1u;
