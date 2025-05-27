@@ -326,13 +326,17 @@ protected:
 
     void _update_fit_width_container(GuiNode* node) {
         float width = 0.0f;
+        node->data.layout.min_size.x = 0.0f;
         GuiNode* current = node->first_child;
         if (node->data.layout.child_layout_axis == CHILD_LAYOUT_AXIS_X) {
-            // add up all the siblings' widths, including their padding on both sides
+            // add up all the siblings' widths, including their margins on both sides
             size_t child_count = 0u;
             while (current) {
                 Layout* layout = &current->data.layout;
                 width += layout->bounds.width + layout->margins.y + layout->margins.w;
+
+                // propogate min widths up the tree
+                node->data.layout.min_size.x += layout->min_size.x + layout->margins.y + layout->margins.w;
                 ++child_count;
 
                 current = current->right_sibling;
@@ -476,6 +480,7 @@ protected:
     }
 
     void _update_text_wrapping(GuiNode* node) {
+        // fixme:: this algorithm only works when all codepoints are 1 byte/char. utf-8 uses variable length codepoints
         //use font size for the width for now.
         // usually you would find the width of each codepoint
         // but that might cause a cache miss due to accessing heap memory
@@ -498,9 +503,12 @@ protected:
             }
         }
 
-        node->data.layout.wrapped_text_size_v = (float)(
-                (node->data.layout.font_size * line_count)
-                + (node->data.layout.line_spacing * (line_count - 1))
+        node->data.layout.bounds.height = fminf(
+                (float)(
+                        (node->data.layout.font_size * line_count)
+                        + (node->data.layout.line_spacing * (line_count - 1))
+                ),
+                node->data.layout.max_size.y
         );
     }
 
@@ -528,13 +536,17 @@ protected:
 
     void _update_fit_height_container(GuiNode* node) {
         float height = 0.0f;
+        node->data.layout.min_size.y = 0.0f;
         GuiNode* current = node->first_child;
         if (node->data.layout.child_layout_axis == CHILD_LAYOUT_AXIS_Y) {
-            // add up all the siblings' heights, including their padding on both top and bottom
+            // add up all the siblings' heights, including their margins on both top and bottom
             size_t child_count = 0u;
             while (current) {
                 Layout* layout = &current->data.layout;
                 height += layout->bounds.height + layout->margins.x + layout->margins.z;
+
+                // propogate min heights up the tree
+                node->data.layout.min_size.y += layout->min_size.x + layout->margins.x + layout->margins.y;
                 ++child_count;
 
                 current = current->right_sibling;

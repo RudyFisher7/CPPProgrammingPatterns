@@ -31,6 +31,7 @@
 
 #include <raylib.h>
 
+#include <cctype>
 #include <cstdint>
 #include <cmath>
 #include <functional>
@@ -228,6 +229,32 @@ template<typename ... TArgs>
 std::function<void(Rectangle)> build_raylib_draw_text(void(*func)(Font, const char*, Vector2, TArgs...), Font font, const char* text, TArgs ... args) {
     return [func, font, text, args...](Rectangle bounds) -> void {
         func(font, text, (Vector2){bounds.x, bounds.y}, args ...);
+    };
+}
+
+std::function<void(Rectangle)> build_raylib_draw_wrapped_text(Font font, const char* text, int text_length, int line_spacing, Color tint) {
+    return [font, text, text_length, line_spacing, tint](Rectangle bounds) -> void {
+        // fixme:: this algorithm only works when all codepoints are 1 byte/char. utf-8 uses variable length codepoints
+        const char* current_text = text;
+        float font_width = font.baseSize;
+        int codepoint_count_per_line = (int)(bounds.width / font_width);
+        Vector2 current_position = {bounds.x, bounds.y};
+        int i = 0;
+        while (i < text_length) {
+            int current_codepoint_length = 0;
+            int codepoint = GetCodepointNext(current_text, &current_codepoint_length);
+            DrawTextCodepoint(font, codepoint, current_position, font.baseSize, tint);
+
+            current_position.x += font_width;
+            i += current_codepoint_length;
+
+            if (i % codepoint_count_per_line == 0) {
+                current_position.y += font.baseSize + line_spacing;
+                current_position.x = bounds.x;
+            }
+
+            current_text += current_codepoint_length;
+        }
     };
 }
 
