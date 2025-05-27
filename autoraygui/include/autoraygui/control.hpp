@@ -236,11 +236,15 @@ std::function<void(Rectangle)> build_raylib_draw_wrapped_text(Font font, const c
     return [font, text, text_length, line_spacing, tint](Rectangle bounds) -> void {
         // fixme:: this algorithm only works when all codepoints are 1 byte/char. utf-8 uses variable length codepoints
         const char* current_text = text;
+        int i = 0;
         float font_width = font.baseSize;
         int codepoint_count_per_line = (int)(bounds.width / font_width);
         Vector2 current_position = {bounds.x, bounds.y};
-        int i = 0;
+        int last_white_space_i = 0;
+        const char* last_white_space = nullptr;
         while (i < text_length) {
+            while ()
+
             int current_codepoint_length = 0;
             int codepoint = GetCodepointNext(current_text, &current_codepoint_length);
             int glyph_index = GetGlyphIndex(font, codepoint);

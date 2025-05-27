@@ -470,7 +470,6 @@ protected:
     }
 
     void _update_text_wrapping() {
-        return;
         for (size_t i = 0u; i < this->_arena_size; ++i) {
             GuiNode* current = this->_bfs_queue[i];
 
