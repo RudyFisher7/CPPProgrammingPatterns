@@ -243,9 +243,11 @@ std::function<void(Rectangle)> build_raylib_draw_wrapped_text(Font font, const c
         while (i < text_length) {
             int current_codepoint_length = 0;
             int codepoint = GetCodepointNext(current_text, &current_codepoint_length);
+            int glyph_index = GetGlyphIndex(font, codepoint);
+            float glyph_width = font.recs[glyph_index].width;
             DrawTextCodepoint(font, codepoint, current_position, font.baseSize, tint);
 
-            current_position.x += font_width;
+            current_position.x += glyph_width + 2.0f;
             i += current_codepoint_length;
 
             if (i % codepoint_count_per_line == 0) {

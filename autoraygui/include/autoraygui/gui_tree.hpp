@@ -309,7 +309,7 @@ protected:
             GuiNode* current = &this->_get(i);
 
             if (current->first_child) {
-                if (current->data.layout.size_flags.x == SIZE_FLAGS_FIT) {
+                if (current->data.layout.size_flags.x != SIZE_FLAGS_FIXED) {
                     _update_fit_width_container(current);
                 }
             } else {
@@ -319,7 +319,7 @@ protected:
 
         // set the root here because its index is 0u and this would cause bit overflow in the for loop above.
         GuiNode* root = this->Root();
-        if (root->data.layout.size_flags.x == SIZE_FLAGS_FIT) {
+        if (root->data.layout.size_flags.x != SIZE_FLAGS_FIXED) {
             _update_fit_width_container(root);
         }
     }
@@ -394,7 +394,7 @@ protected:
                 current_child = current_child->right_sibling;
             }
 
-            float child_spacing = node->data.layout.child_spacing * (float) (child_count - 1u);
+            float child_spacing = node->data.layout.child_spacing * (float)(child_count - 1u);
             parent_remaining_width -= child_spacing;
 
             size_t growable_child_count = 0u;
@@ -470,6 +470,7 @@ protected:
     }
 
     void _update_text_wrapping() {
+        return;
         for (size_t i = 0u; i < this->_arena_size; ++i) {
             GuiNode* current = this->_bfs_queue[i];
 
