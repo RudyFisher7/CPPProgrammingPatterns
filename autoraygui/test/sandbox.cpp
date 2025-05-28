@@ -50,7 +50,7 @@ int main() {
     };
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(800, 600, "Raylib + RayGUI Example");
+    InitWindow(800, 600, "Raylib + RayGui Example");
 
     Control control;
 
@@ -60,19 +60,22 @@ int main() {
 
     const char* text_to_wrap = "Hello Text! This is some texty-text for texting the text.";
 
+    int codepoint_count = 0;
+    const int* codepoints = LoadCodepoints(text_to_wrap, &codepoint_count);
+
     tree.BeginRoot()
         ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
         ->SetChildLayoutAxis(AutoRayGui::CHILD_LAYOUT_AXIS_X)
-        ->SetChildSpacing(32.0f)
-        ->Begin()
-            ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
-            ->SetSize({100.0f, 100.0f})
-            ->SetMaxSizeX(MeasureText("texty-text", GetFontDefault().baseSize))
-            ->SetText(text_to_wrap, strlen(text_to_wrap), GetFontDefault().baseSize, GetFontDefault().baseSize)
-            ->SetDrawFunc(AutoRayGui::build_raylib_draw_wrapped_text(GetFontDefault(), text_to_wrap, strlen(text_to_wrap), GetFontDefault().baseSize, RAYWHITE))
-        ->End();
+        ->SetChildSpacing(32.0f);
+//        ->Begin()
+//            ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_FIXED, AutoRayGui::SIZE_FLAGS_FIXED})
+//            ->SetSize({100.0f, 100.0f})
+//            ->SetMinSizeX(MeasureText("texty-text", GetFontDefault().baseSize))
+//            ->SetText(text_to_wrap, strlen(text_to_wrap), GetFontDefault().baseSize, GetFontDefault().baseSize)
+//            ->SetDrawFunc(AutoRayGui::build_raylib_draw_wrapped_text(GetFontDefault(), codepoints, codepoint_count, GetFontDefault().baseSize, RAYWHITE))
+//        ->End();
 
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < 3; ++i) {
             tree.Begin()
                 ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
                 ->SetSizeFlags({AutoRayGui::SIZE_FLAGS_GROW, AutoRayGui::SIZE_FLAGS_GROW})

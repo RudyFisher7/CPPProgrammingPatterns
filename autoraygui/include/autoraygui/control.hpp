@@ -232,34 +232,44 @@ std::function<void(Rectangle)> build_raylib_draw_text(void(*func)(Font, const ch
     };
 }
 
-std::function<void(Rectangle)> build_raylib_draw_wrapped_text(Font font, const char* text, int text_length, int line_spacing, Color tint) {
-    return [font, text, text_length, line_spacing, tint](Rectangle bounds) -> void {
+std::function<void(Rectangle)> build_raylib_draw_wrapped_text(Font font, const int* codepoints, int codepoint_count, int line_spacing, Color tint) {
+    return [font, codepoints, codepoint_count, line_spacing, tint](Rectangle bounds) -> void {
         // fixme:: this algorithm only works when all codepoints are 1 byte/char. utf-8 uses variable length codepoints
-        const char* current_text = text;
+        const int* current_codepoints = codepoints;
         int i = 0;
-        float font_width = font.baseSize;
-        int codepoint_count_per_line = (int)(bounds.width / font_width);
         Vector2 current_position = {bounds.x, bounds.y};
-        int last_white_space_i = 0;
-        const char* last_white_space = nullptr;
-        while (i < text_length) {
-            while ()
+        int last_white_space_i = codepoint_count;
+        float width_up_to_last_white_space = 0.0f;
+        float current_width = 0.0f;
+        while (i < codepoint_count) {
+            // find the last white space codepoint within the bounds' width
+            while (i < codepoint_count && current_width < bounds.width) {
+                int codepoint = codepoints[i];
+                int glyph_index = GetGlyphIndex(font, codepoint);
+                float glyph_width = font.recs[glyph_index].width;
+                if (
+                        codepoint == 0x0020
+                        || codepoint == 0x0009
+                        || codepoint == 0x000A
+                        || codepoint == 0x000D
+                        || codepoint == 0x00A0
+                ) {
+                    last_white_space_i = i;
+                    width_up_to_last_white_space = current_width;
+                }
 
-            int current_codepoint_length = 0;
-            int codepoint = GetCodepointNext(current_text, &current_codepoint_length);
-            int glyph_index = GetGlyphIndex(font, codepoint);
-            float glyph_width = font.recs[glyph_index].width;
-            DrawTextCodepoint(font, codepoint, current_position, font.baseSize, tint);
-
-            current_position.x += glyph_width + 2.0f;
-            i += current_codepoint_length;
-
-            if (i % codepoint_count_per_line == 0) {
-                current_position.y += font.baseSize + line_spacing;
-                current_position.x = bounds.x;
+                current_width += glyph_width;
+                ++i;
             }
 
-            current_text += current_codepoint_length;
+            DrawTextCodepoints(font, current_codepoints, i - last_white_space_i, current_position, font.baseSize, 0.0f, tint);
+
+            current_position.y += font.baseSize + line_spacing;
+
+            current_codepoints = codepoints + (last_white_space_i + 1);
+            i = last_white_space_i + 1;
+            last_white_space_i = codepoint_count;
+            current_width = 0.0f;
         }
     };
 }
