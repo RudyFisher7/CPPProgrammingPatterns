@@ -22,17 +22,33 @@
 
 
 cmake_minimum_required(VERSION 3.26)
-project(AutoRayGuiExample)
+project(AutoRayGuiExamples)
 
 
-set(COMPLETE_EXAMPLE AutoRayGuiCompleteExample)
-
-add_executable(${COMPLETE_EXAMPLE}
-        complete_example.cpp
+set(LIBS
+    AutoRayGui
+    raylib
+    raygui
 )
 
-target_link_libraries(${COMPLETE_EXAMPLE} PUBLIC
-        AutoRayGui
-        raylib
-        raygui
+
+set(CENTERED_MENU_BUTTONS_EXAMPLE AutoRayGuiCompleteExample)
+
+add_executable(${CENTERED_MENU_BUTTONS_EXAMPLE}
+        centered_menu_buttons_example.cpp
+)
+
+target_link_libraries(${CENTERED_MENU_BUTTONS_EXAMPLE} PUBLIC
+        ${LIBS}
+)
+
+
+set(APPLICATION_GUI_EXAMPLE AutoRayGuiApplicationGuiExample)
+
+add_executable(${APPLICATION_GUI_EXAMPLE}
+        application_gui_example.cpp
+)
+
+target_link_libraries(${APPLICATION_GUI_EXAMPLE} PUBLIC
+        ${LIBS}
 )

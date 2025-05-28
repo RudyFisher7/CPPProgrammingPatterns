@@ -24,6 +24,8 @@
 
 
 #include "autoraygui/gui_tree.hpp"
+#include "autoraygui/control.hpp"
+#include "autoraygui/enums.hpp"
 
 
 #include <raylib.h>
@@ -37,43 +39,40 @@
 
 
 int main() {
+    char format_string_buffer[48];
 
-    AutoRayGui::GuiTree<128u, AutoRayGui::INDEXING_MODE_SAFE>& gui = AutoRayGui::GuiTree<128u, AutoRayGui::INDEXING_MODE_SAFE>::get_singleton();
+    AutoRayGui::GuiTree<128u, AutoRayGui::INDEXING_MODE_SAFE> gui;
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(800, 600, "Raylib + RayGUI Example");
 
-    float width = 100;
-    float height = 40;
+    gui.BeginRoot()
+        ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
+        ->BeginVBox()
+            ->SetPaddingAll(8.0f)
+            ->SetDrawFunc(AutoRayGui::build_raylib_draw_rectangle(&DrawRectangleLines, RAYWHITE));
+            const int vbox_children0 = 8;
+            int labels0[vbox_children0] = {};
+            int buttons0[vbox_children0] = {};
+            for (int i = 0; i < vbox_children0; ++i) {
+                gui.BeginHBox()
+                    ->SetPaddingAll(4.0f)
+                    ->SetDrawFunc(AutoRayGui::build_raylib_draw_rectangle(&DrawRectangle, SKYBLUE))
+                    ->BeginChild({120.0f, 16.0f}, AutoRayGui::build_ray_gui(labels0[i], &GuiLabel, "This is Label"))
+                    ->End()
+                    ->BeginChild({120.0f, 16.0f}, AutoRayGui::build_ray_gui(buttons0[i], &GuiButton, "This is a button"))
+                    ->End()
+                ->End();
+            }
+        gui.End()
+    ->EndRoot();
 
-    bool is_checked = false;
 
-    AutoRayGui::Layout* parent = gui.BeginRoot();
-
-    int ret = 0;
-    std::function<void()> draw_command = gui.DrawCommand(&ret, &GuiButton, (Rectangle){0.0f, 0.0f, 100.0f, 40.0f}, "Hello Draw Command!");
-//
-//        Vector2 m = MeasureTextEx(GuiGetFont(), "Hello Free Child!", GetFontDefault().baseSize, 2.0f);
-//        int current_child_id = gui.Begin<AutoRayGui::CONTAINER_TYPE_CENTER>(current_id, m.x, m.y);
-//        std::pair<int, int> result {current_child_id, 0};
-//        result = gui.Child<AutoRayGui::CONTAINER_TYPE_CENTER>(result.first, current_id, &GuiButton, "Hello Btn  Child!");
-//        result = gui.Child<AutoRayGui::CONTAINER_TYPE_CENTER>(result.first, current_id, &GuiLabel, "Hello Free Child!");
-//        current_child_id = result.first;
-//        gui.End(current_id);
-//        current_id = current_child_id;
-
-    gui.EndRoot();
     while (!WindowShouldClose()) // Main loop
     {
         gui.UpdateLayout();
+
         BeginDrawing();
         ClearBackground(BLACK);
-        draw_command();
-        GuiButton((Rectangle){120.0f, 0.0f, 100.0f, 40.0f}, "Hello Draw Command!");
-//        gui.Call(ret, &GuiButton, (Rectangle){240.0f, 0.0f, 100.0f, 40.0f}, "Hello Draw Command!");
-
-        if (ret)
-            std::cout << "ret: " << ret << std::endl;
-
         gui.Draw();
         EndDrawing();
     }

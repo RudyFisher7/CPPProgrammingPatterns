@@ -121,6 +121,102 @@ public:
         return this;
     }
 
+    TGuiThis* BeginChild(Vector2 in_size, const DrawFunction& in_draw) {
+        this->_get(this->_current_index) = {
+                {
+                        {
+                                {0.0f, 0.0f, in_size.x, in_size.y},
+                                {0.0f, 0.0f, 0.0f, 0.0f},
+                                {0.0f, 0.0f, 0.0f, 0.0f},
+                                {0.0f, 0.0f},
+                                {FLT_MAX, FLT_MAX},
+                                0.0f,
+                                0.0f,
+                                0.0f,
+                                0.0f,
+                                {SIZE_FLAGS_FIXED, SIZE_FLAGS_FIXED},
+                                {CHILD_ALIGNMENT_BEGIN, CHILD_ALIGNMENT_BEGIN},
+                                CHILD_LAYOUT_AXIS_X,
+                                nullptr,
+                                0u,
+                        },
+                        {in_draw}
+                },
+                this->_current_parent,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+        };
+
+        this->_begin();
+        return this;
+    }
+
+    TGuiThis* BeginHBox() {
+        this->_get(this->_current_index) = {
+                {
+                        {
+                                {0.0f, 0.0f, 0.0f, 0.0f},
+                                {0.0f, 0.0f, 0.0f, 0.0f},
+                                {0.0f, 0.0f, 0.0f, 0.0f},
+                                {0.0f, 0.0f},
+                                {FLT_MAX, FLT_MAX},
+                                0.0f,
+                                0.0f,
+                                0.0f,
+                                0.0f,
+                                {SIZE_FLAGS_FIT, SIZE_FLAGS_FIT},
+                                {CHILD_ALIGNMENT_BEGIN, CHILD_ALIGNMENT_BEGIN},
+                                CHILD_LAYOUT_AXIS_X,
+                                nullptr,
+                                0u,
+                        },
+                        {&draw_passthrough}
+                },
+                this->_current_parent,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+        };
+
+        this->_begin();
+        return this;
+    }
+
+    TGuiThis* BeginVBox() {
+        this->_get(this->_current_index) = {
+            {
+                {
+                    {0.0f, 0.0f, 0.0f, 0.0f},
+                    {0.0f, 0.0f, 0.0f, 0.0f},
+                    {0.0f, 0.0f, 0.0f, 0.0f},
+                    {0.0f, 0.0f},
+                    {FLT_MAX, FLT_MAX},
+                    0.0f,
+                    0.0f,
+                    0.0f,
+                    0.0f,
+                    {SIZE_FLAGS_FIT, SIZE_FLAGS_FIT},
+                    {CHILD_ALIGNMENT_BEGIN, CHILD_ALIGNMENT_BEGIN},
+                    CHILD_LAYOUT_AXIS_Y,
+                    nullptr,
+                    0u,
+                },
+                {&draw_passthrough}
+            },
+            this->_current_parent,
+            nullptr,
+            nullptr,
+            nullptr,
+            nullptr,
+        };
+
+        this->_begin();
+        return this;
+    }
+
     TGuiThis* End() override {
         this->_end();
         return this;
@@ -519,7 +615,7 @@ protected:
             GuiNode* current = &this->_get(i);
 
             if (current->first_child) {
-                if (current->data.layout.size_flags.y == SIZE_FLAGS_FIT) {
+                if (current->data.layout.size_flags.y != SIZE_FLAGS_FIXED) {
                     _update_fit_height_container(current);
                 }
             } else {
@@ -529,7 +625,7 @@ protected:
 
         // set the root here because its index is 0u and this would cause bit overflow in the for loop above.
         GuiNode* root = this->Root();
-        if (root->data.layout.size_flags.y == SIZE_FLAGS_FIT) {
+        if (root->data.layout.size_flags.y != SIZE_FLAGS_FIXED) {
             _update_fit_height_container(root);
         }
     }
