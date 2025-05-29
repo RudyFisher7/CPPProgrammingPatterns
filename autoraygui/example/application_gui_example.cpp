@@ -91,11 +91,25 @@ int main() {
                     }
                 gui.End();
 
+                //fixme:: figure out scroll panels
                 int button1 = 0;
+                Vector2 scroll {};
+                Rectangle scroll_view {};
+                Rectangle scroll_content {400.0f, 400.0f};
                 gui.Begin()
                     ->SetSizeFlags(AutoRayGui::SIZE_FLAGS_GROW)
                     ->SetChildAlignment({AutoRayGui::CHILD_ALIGNMENT_CENTER, AutoRayGui::CHILD_ALIGNMENT_CENTER})
-                    ->BeginChild({120.0f, 16.0f}, AutoRayGui::build_ray_gui(button1, &GuiButton, "This is a button"))
+                    ->BeginVBox()
+                        ->SetPaddingAll(16.0f)
+                        ->SetDrawFunc(AutoRayGui::build_ray_gui(button1, &GuiGroupBox, "This is a group"))
+                        ->BeginVBox()
+                            ->SetPaddingAll(16.0f)
+                            ->SetDrawFunc(AutoRayGui::build_ray_gui(button1, &GuiScrollPanel, "This is a scroll container", scroll_content, &scroll, &scroll_view))
+                            ->BeginChild({120.0f, 16.0f}, AutoRayGui::build_ray_gui(button1, &GuiButton, "This is a button"))
+                            ->End()
+                            ->BeginChild({120.0f, 16.0f}, AutoRayGui::build_ray_gui(button1, &GuiButton, "This is a button"))
+                            ->End()
+                        ->End()
                     ->End()
                 ->End()
             ->End()
