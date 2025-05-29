@@ -23,11 +23,53 @@
  */
 
 
-#include <catch2/catch_session.hpp>
-#include <catch2/catch_test_macros.hpp>
+#ifndef AUTO_RAY_GUI_ENUMS_HPP
+#define AUTO_RAY_GUI_ENUMS_HPP
 
 
-TEST_CASE("REPLACE", "[REPLACE]") {
-    bool is_replaced = false;
-    CHECK(is_replaced);
+#include <cstdint>
+
+
+namespace AutoRayGui {
+
+enum SizeFlags : uint8_t {
+    SIZE_FLAGS_MIN = 0,
+    SIZE_FLAGS_FIT = SIZE_FLAGS_MIN,
+    SIZE_FLAGS_FIXED ,
+    SIZE_FLAGS_GROW,
+    SIZE_FLAGS_SIZE,
+};
+
+
+enum ChildAlignment : uint8_t {
+    CHILD_ALIGNMENT_MIN = 0,
+    CHILD_ALIGNMENT_BEGIN = CHILD_ALIGNMENT_MIN,
+    CHILD_ALIGNMENT_CENTER,
+    CHILD_ALIGNMENT_END,
+    CHILD_ALIGNMENT_RADIAL,
+    CHILD_ALIGNMENT_SIZE,
+};
+
+typedef struct vector2_uint8_t {
+    uint8_t x;
+    uint8_t y;
+} Vector2UInt8;
+
+
+enum ChildLayoutAxis : uint8_t {
+    CHILD_LAYOUT_AXIS_MIN = 0,
+    CHILD_LAYOUT_AXIS_X = CHILD_LAYOUT_AXIS_MIN,
+    CHILD_LAYOUT_AXIS_Y,
+    CHILD_LAYOUT_AXIS_SIZE,
+};
+
+
+enum IndexingMode : uint8_t {
+    INDEXING_MODE_SAFE = 0,
+    INDEXING_MODE_UNCHECKED,
+};
+
 }
+
+
+#endif //AUTO_RAY_GUI_ENUMS_HPP

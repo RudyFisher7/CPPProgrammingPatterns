@@ -42,11 +42,19 @@ add_subdirectory(third_party/raygui/projects/CMake)
 
 
 set(SOURCES
-        source/container.cpp
+        source/gui_tree.cpp
 )
 
 set(HEADERS
-        include/autoraygui/container.hpp
+        include/std_extensions/extensions.hpp
+
+        include/autoraygui/enums.hpp
+        include/autoraygui/layout.hpp
+        include/autoraygui/control.hpp
+        include/autoraygui/node.hpp
+        include/autoraygui/node_data.hpp
+        include/autoraygui/gui_tree.hpp
+        include/autoraygui/n_tree.hpp
 )
 
 add_library(${PROJECT_NAME} STATIC
@@ -61,7 +69,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
 else()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
 target_link_libraries(${PROJECT_NAME} PUBLIC

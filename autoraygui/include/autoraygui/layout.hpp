@@ -23,17 +23,35 @@
  */
 
 
-#include "koi_object/variant_reference.hpp"
+#ifndef AUTO_RAY_GUI_LAYOUT_HPP
+#define AUTO_RAY_GUI_LAYOUT_HPP
 
 
-namespace Koi {
+#include "autoraygui/enums.hpp"
 
-VarRef::VarRef() : _type(typeid(nullptr)), _pointer(nullptr) {
+#include <raylib.h>
+
+
+namespace AutoRayGui {
+
+typedef struct layout_t {
+    Rectangle bounds;
+    Vector4 margins; // padding is in css's order, so {x=top, y=right, z=bottom, w=left}. Vector4 is used for convenience.
+    Vector4 padding; // margin is in css's order, so {x=top, y=right, z=bottom, w=left}. Vector4 is used for convenience.
+    Vector2 min_size;
+    Vector2 max_size;
+    float child_spacing;
+    float font_size;
+    float line_spacing;
+    float wrapped_text_size_v;
+    Vector2UInt8 size_flags;
+    Vector2UInt8 child_alignment;
+    ChildLayoutAxis child_layout_axis;
+    const char* text;
+    size_t text_length;
+} Layout;
 
 }
 
-const std::type_info& VarRef::get_type() const {
-    return _type;
-}
 
-} // Koi
+#endif //AUTO_RAY_GUI_LAYOUT_HPP

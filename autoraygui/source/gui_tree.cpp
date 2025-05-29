@@ -23,7 +23,7 @@
  */
 
 
-#include "autoraygui/container.hpp"
+#include "autoraygui/gui_tree.hpp"
 
 namespace AutoRayGui {
 } // AutoRayGui

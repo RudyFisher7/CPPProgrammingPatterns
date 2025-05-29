@@ -23,17 +23,22 @@
  */
 
 
-#include "koi_object/variant_reference.hpp"
+#ifndef AUTO_RAY_GUI_NODE_DATA_HPP
+#define AUTO_RAY_GUI_NODE_DATA_HPP
 
 
-namespace Koi {
+#include "autoraygui/control.hpp"
+#include "autoraygui/layout.hpp"
 
-VarRef::VarRef() : _type(typeid(nullptr)), _pointer(nullptr) {
+
+namespace AutoRayGui {
+
+typedef struct node_data_t {
+    Layout layout;
+    Control control;
+} NodeData;
 
 }
 
-const std::type_info& VarRef::get_type() const {
-    return _type;
-}
 
-} // Koi
+#endif //AUTO_RAY_GUI_NODE_DATA_HPP
