@@ -33,13 +33,10 @@ jobs:
         exclude:
           - os: ubuntu-latest
             c_compiler: cl
-            cpp_compiler: cl
           - os: macos-latest
             c_compiler: cl
-            cpp_compiler: cl
           - os: macos-latest
             c_compiler: gcc
-            cpp_compiler: g++
 
     steps:
       - uses: actions/checkout@v4
