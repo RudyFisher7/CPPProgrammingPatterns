@@ -27,7 +27,7 @@ project(LibNameTest)
 
 Include(FetchContent)
 
-if(NOT catch2_POPULATED)#fixme:: still fetches in each sibling test project
+if(NOT catch2_POPULATED)
     message(STATUS "${PROJECT_NAME}: fetch Catch2.")
     FetchContent_Declare(
             Catch2

@@ -34,6 +34,7 @@ if(ENABLE_TESTS)
 endif()
 
 
+add_subdirectory(ci_cd_test)
 add_subdirectory(pub_sub)
 add_subdirectory(reflection)
 #add_subdirectory(autoraygui)
