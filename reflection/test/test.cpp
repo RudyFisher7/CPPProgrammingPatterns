@@ -298,7 +298,7 @@ int main(int argc, char* argv[]) {
 
     MockObject mockObject;
     mockObject.pint = 90;
-    std::cout << mockObject.to_json_string() << std::endl;
+//    std::cout << mockObject.to_json_string() << std::endl;
 
     int result = Catch::Session().run(argc, argv);
 

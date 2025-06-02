@@ -59,5 +59,4 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 include(CTest)
 include(Catch)
 catch_discover_tests(${PROJECT_NAME})
-
 add_test(NAME ${PROJECT_NAME} COMMAND $<TARGET_FILE:${PROJECT_NAME}>)

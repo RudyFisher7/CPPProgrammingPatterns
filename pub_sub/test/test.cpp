@@ -102,7 +102,7 @@ TEST_CASE("Server", "[Server]") {
 
 int main(int argc, char* argv[]) {
     // Just check the endianness of the system and display it.
-    std::cout << "This system is little endian: " << (KoiPubSub::Serialization::is_little_endian() ? "true" : "false") << std::endl;
+//    std::cout << "This system is little endian: " << (KoiPubSub::Serialization::is_little_endian() ? "true" : "false") << std::endl;
     // your setup ...
 
     int result = Catch::Session().run(argc, argv);

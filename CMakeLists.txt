@@ -24,8 +24,17 @@
 cmake_minimum_required(VERSION 3.26)
 project(CPPProgrammingPatterns)
 
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+option(ENABLE_TESTS "Enable unit tests" ON)
+
+if(ENABLE_TESTS)
+    include(CTest)
+    enable_testing()
+endif()
+
 
 add_subdirectory(pub_sub)
 add_subdirectory(reflection)
-add_subdirectory(autoraygui)
+#add_subdirectory(autoraygui)
 add_subdirectory(static_allocators)
