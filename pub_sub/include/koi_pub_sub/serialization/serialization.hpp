@@ -42,14 +42,12 @@ namespace KoiPubSub {
          * @return True if the system is little endian, else false.
          */
         constexpr bool is_little_endian() {
-            union Word {
-                const uint16_t WORD {0x01};
-                uint8_t BYTES[2u];
-            };
-
-            const Word word {};
-
-            return word.BYTES[0] == 0x01;
+#if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+            return true;
+#elif defined(_WIN32)
+            return true;
+#endif
+            return false;
         }
 
 
