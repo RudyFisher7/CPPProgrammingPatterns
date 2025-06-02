@@ -27,7 +27,7 @@ project(KoiPubSubTest)
 
 Include(FetchContent)
 
-if(NOT catch2_POPULATED)#fixme:: still fetches in each sibling test project
+if(NOT catch2_POPULATED)
     message(STATUS "${PROJECT_NAME}: fetch Catch2.")
     FetchContent_Declare(
             Catch2
@@ -40,7 +40,6 @@ if(NOT catch2_POPULATED)#fixme:: still fetches in each sibling test project
     FetchContent_MakeAvailable(Catch2)
 
     FetchContent_GetProperties(Catch2)
-#    FetchContent_Populate(Catch2)
     list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
     message(STATUS "${CMAKE_MODULE_PATH}")
 else()
@@ -48,7 +47,6 @@ else()
 endif()
 
 if(catch2_POPULATED)
-    set(catch2_POPULATED TRUE PARENT_SCOPE)
     message(STATUS "Catch2 populated: ${catch2_POPULATED}")
 endif()
 

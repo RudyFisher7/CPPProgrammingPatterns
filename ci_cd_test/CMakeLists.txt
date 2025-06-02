@@ -22,7 +22,7 @@
 
 
 cmake_minimum_required(VERSION 3.26)
-project(AutoRayGuiTest)
+project(CICDTest)
 
 
 Include(FetchContent)
@@ -38,6 +38,7 @@ if(NOT catch2_POPULATED)
     )
 
     FetchContent_MakeAvailable(Catch2)
+
     FetchContent_GetProperties(Catch2)
     list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
     message(STATUS "${CMAKE_MODULE_PATH}")
@@ -45,52 +46,20 @@ else()
     message(STATUS "${PROJECT_NAME}: Catch2 already available.")
 endif()
 
+if(catch2_POPULATED)
+    message(STATUS "Catch2 populated: ${catch2_POPULATED}")
+endif()
+
+
+add_executable(${PROJECT_NAME}
+        test.cpp
+)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC
+        Catch2::Catch2
+)
 
 include(CTest)
 include(Catch)
-
-# UNIT TESTS
-add_executable(AutoRayGuiControlTest
-        control_test.cpp
-)
-
-target_link_libraries(AutoRayGuiControlTest PUBLIC
-        AutoRayGui
-        raygui
-        Catch2::Catch2
-)
-
-catch_discover_tests(AutoRayGuiControlTest)
-
-
-add_executable(AutoRayGuiNTreeTest
-        n_tree_test.cpp
-)
-
-target_link_libraries(AutoRayGuiNTreeTest PUBLIC
-        AutoRayGui
-        Catch2::Catch2
-)
-
-catch_discover_tests(AutoRayGuiNTreeTest)
-
-
-# SANDBOXES
-add_executable(AutoRayGuiControlSandbox
-        control_sandbox.cpp
-)
-
-target_link_libraries(AutoRayGuiControlSandbox PUBLIC
-        AutoRayGui
-        raygui
-)
-
-
-add_executable(AutoRayGuiSandbox
-        sandbox.cpp
-)
-
-target_link_libraries(AutoRayGuiSandbox PUBLIC
-        AutoRayGui
-        raygui
-)
+catch_discover_tests(${PROJECT_NAME})
+add_test(NAME ${PROJECT_NAME} COMMAND $<TARGET_FILE:${PROJECT_NAME}>)
