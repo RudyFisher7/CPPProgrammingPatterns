@@ -1,0 +1,29 @@
+name: Test on multiple platforms
+
+on:
+  push:
+    branches: [ "master", "ci-cd" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build_and_test_multiplatform:
+    name: Build and test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        build_type: [Release]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure CMake Release Preset
+        run: cmake --preset release_preset
+
+      - name: Build Release Preset
+        run: cmake --build --preset release_preset_build
+
+      - name: Test
+        run: ctest --preset run_tests_release
