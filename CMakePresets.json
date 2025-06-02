@@ -10,7 +10,7 @@
         "CMAKE_CXX_STANDARD": "11",
         "CMAKE_C_STANDARD": "99",
         "CMAKE_BUILD_TYPE": "Release",
-        "ENABLE_TESTS": "OFF"
+        "ENABLE_TESTS": "ON"
       }
     },
     {
@@ -30,18 +30,26 @@
     {
       "name": "release_preset_build",
       "configurePreset": "release_preset",
+      "configuration": "Release",
       "jobs": 12
     },
     {
       "name": "debug_preset_build",
       "configurePreset": "debug_preset",
+      "configuration": "Debug",
       "jobs": 12
     }
   ],
   "testPresets": [
     {
-      "name": "run_tests",
-      "configurePreset": "debug_preset"
+      "name": "run_tests_debug",
+      "configurePreset": "debug_preset",
+      "configuration": "Debug"
+    },
+    {
+      "name": "run_tests_release",
+      "configurePreset": "release_preset",
+      "configuration": "Release"
     }
   ]
 }

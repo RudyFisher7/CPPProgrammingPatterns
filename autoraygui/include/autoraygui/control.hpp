@@ -215,13 +215,13 @@ std::function<void(Rectangle)> build_raylib_draw_texture(void(*func)(Texture2D, 
 // text drawing
 std::function<void(Rectangle)> build_raylib_draw_fps(void(*func)(int, int)) {
     return [func](Rectangle bounds) -> void {
-        func(bounds.x, bounds.y);
+        func((int)bounds.x, (int)bounds.y);
     };
 }
 
 std::function<void(Rectangle)> build_raylib_draw_text(void(*func)(const char*, int, int, int, Color), const char* text, int font_size, Color color) {
     return [func, text, font_size, color](Rectangle bounds) -> void {
-        func(text, bounds.x, bounds.y, font_size, color);
+        func(text, (int)bounds.x, (int)bounds.y, font_size, color);
     };
 }
 
@@ -262,7 +262,7 @@ std::function<void(Rectangle)> build_raylib_draw_wrapped_text(Font font, const i
                 ++i;
             }
 
-            DrawTextCodepoints(font, current_codepoints, i - last_white_space_i, current_position, font.baseSize, 0.0f, tint);
+            DrawTextCodepoints(font, current_codepoints, i - last_white_space_i, current_position, (float)font.baseSize, 0.0f, tint);
 
             current_position.y += font.baseSize + line_spacing;
 
